@@ -107,7 +107,7 @@ export const SiteSettings: GlobalConfig = {
             { name: 'primaryLabel', type: 'text', defaultValue: 'Join GDG Nairobi' },
             { name: 'primaryURL', type: 'text', defaultValue: 'https://gdg.community.dev/gdg-nairobi/' },
             { name: 'secondaryLabel', type: 'text', defaultValue: 'Meet the organizers' },
-            { name: 'secondaryURL', type: 'text', defaultValue: '/team' },
+            { name: 'secondaryURL', type: 'text', defaultValue: '/about#organizers' },
           ],
         },
       ],

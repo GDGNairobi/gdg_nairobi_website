@@ -94,7 +94,7 @@ export const defaultSiteChromeContent: SiteChromeContent = {
     { label: 'Community', url: '/#community' },
     { label: 'Events', url: '/events' },
     { label: 'DevFest', url: '/devfest' },
-    { label: 'Organizers', url: '/team' },
+    { label: 'Organizers', url: '/about#organizers' },
   ],
   headerCTA: { label: 'Join GDG Nairobi', url: 'https://gdg.community.dev/gdg-nairobi/' },
   socialLinks: [
@@ -122,8 +122,8 @@ export const defaultSiteChromeContent: SiteChromeContent = {
     {
       heading: 'Information',
       links: [
-        { label: 'Organizers', url: '/team' },
-        { label: 'Partners', url: '/partners' },
+        { label: 'Organizers', url: '/about#organizers' },
+        { label: 'DevFest partners', url: '/devfest#partners' },
         { label: 'Code of conduct', url: '/code-of-conduct' },
       ],
     },
@@ -171,7 +171,7 @@ export const defaultCommunityHomeContent: CommunityHomeContent = {
     heading: 'Join GDG Nairobi.',
     accentLine: 'Start with the next event.',
     primaryCTA: { label: 'Join GDG Nairobi', url: 'https://gdg.community.dev/gdg-nairobi/' },
-    secondaryCTA: { label: 'Meet the organizers', url: '/team' },
+    secondaryCTA: { label: 'Meet the organizers', url: '/about#organizers' },
   },
 }
 
