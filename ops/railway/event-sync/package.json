@@ -1,0 +1,8 @@
+{
+  "name": "devfest-nairobi-event-sync",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node index.mjs"
+  }
+}

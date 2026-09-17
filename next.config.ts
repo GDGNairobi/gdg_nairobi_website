@@ -7,6 +7,7 @@ const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   images: {
     localPatterns: [
       {
@@ -19,10 +20,6 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         hostname: 'res.cloudinary.com',
-        protocol: 'https',
-      },
-      {
-        hostname: '*.public.blob.vercel-storage.com',
         protocol: 'https',
       },
     ],

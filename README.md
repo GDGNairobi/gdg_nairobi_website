@@ -8,7 +8,7 @@ An animated editorial site for GDG Nairobi's DevFest, shaped around the **Nairob
 - Dedicated pages for events, speakers, schedule, venue, partners, team, and code of conduct
 - Payload CMS collections for editions, speakers, sessions, announcements, partners, team members, media, and community events
 - Admin/editor roles, drafts, version history, and scheduled publishing
-- A daily Vercel cron that safely imports event facts from the public GDG Nairobi chapter page
+- A daily Railway cron service that safely imports event facts from the public GDG Nairobi chapter page
 - Editorial controls that keep imported source data separate from site-specific labels, ordering, and visibility
 - SEO metadata, sitemap, robots rules, reduced-motion support, and responsive navigation
 
@@ -34,7 +34,7 @@ To use Payload at [http://localhost:3000/admin](http://localhost:3000/admin), th
 
 Use `pnpm db:down` to stop the container without deleting its named data volume. The local credentials in `.env.example` are intended only for development.
 
-Vercel Blob is optional locally. Set `BLOB_READ_WRITE_TOKEN` for persisted media uploads.
+Railway object storage is optional locally. Set the documented `AWS_*` variables for persisted media uploads.
 
 ## Content model
 
@@ -53,7 +53,7 @@ Homepage sections have individual visibility switches. Empty fields and arrays f
 
 `GET` or `POST /api/internal/events/sync` refreshes events from the public chapter page at `https://gdg.community.dev/gdg-nairobi/`. The route accepts either:
 
-- Vercel Cron authorization using `CRON_SECRET`, or
+- Railway cron authorization using `CRON_SECRET`, or
 - an authenticated Payload admin session.
 
 The importer parses the chapter page's public pre-rendered event data, validates URLs, upserts idempotently, preserves editorial overrides, and marks disappeared entries as stale without deleting them.
@@ -71,4 +71,22 @@ Database integration tests are opt-in with `RUN_DATABASE_TESTS=true`. Parser tes
 
 ## Production
 
-The repository is configured for Vercel, Vercel Postgres, and Vercel Blob. Add the environment variables from `.env.example`, set `NEXT_PUBLIC_SITE_URL` to the production origin, and deploy. The included `vercel.json` schedules the event refresh daily at 03:15 Africa/Nairobi time (00:15 UTC).
+The repository is configured for Railway with:
+
+- a containerized Next.js/Payload web service
+- PostgreSQL connected through `DATABASE_URL`
+- a private Railway Storage Bucket connected through the `AWS_*` variables
+- a health check at `/api/health`
+- Payload migrations run as a pre-deploy command
+- an `event-sync` Railway service scheduled daily at 03:15 Africa/Nairobi time (00:15 UTC)
+
+`railway.json` documents the single-service build and deploy contract requested for compatibility. Railway no longer lets new services opt into that legacy format, so `.railway/railway.ts` is the project-level provisioning source used by the current CLI. It creates and configures the web service, scheduled sync service, PostgreSQL database, volume, and media bucket without storing secret values in Git.
+
+Preview and apply infrastructure changes with:
+
+```bash
+railway config plan
+railway config apply
+```
+
+Railway stops reading legacy `railway.json` files on December 1, 2026; `.railway/railway.ts` is already in place for that transition.
