@@ -1,13 +1,16 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 
 import { EditorialPage } from '@/components/EditorialPage'
-import { getTeamMembers } from '@/lib/cms-content'
+import { getPartners, getTeamMembers } from '@/lib/cms-content'
 import { getHomeContent } from '@/lib/site-content'
 
 export const metadata: Metadata = { title: 'About GDG Nairobi' }
 
 export default async function AboutPage() {
-  const [{ community }, team] = await Promise.all([getHomeContent(), getTeamMembers()])
+  const [{ community }, team, chapterPartners] = await Promise.all([getHomeContent(), getTeamMembers(), getPartners('chapter')])
+  const localSponsors = chapterPartners.filter((partner) => partner.tier === 'host')
+  const communityPartners = chapterPartners.filter((partner) => partner.tier !== 'host')
 
   return (
     <EditorialPage eyebrow={community.about.kicker} title="About GDG Nairobi." intro={community.about.description} accent="green">
@@ -41,6 +44,14 @@ export default async function AboutPage() {
           {team.map((member, index) => <article key={member.id}><span>{String(index + 1).padStart(2, '0')}</span><div className="person-signal" aria-hidden="true">{member.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</div><h2>{member.name}</h2><p>{member.role}</p></article>)}
         </div>
       </section>
+
+      {chapterPartners.length > 0 && <section className="about-partners" id="partners">
+        <header><p className="section-kicker">Sponsors & partners</p><h2>Organisations listed by the chapter.</h2><p>This directory reflects the official GDG Nairobi chapter page and does not imply support for every current event.</p></header>
+        <div className="chapter-sponsor-grid">
+          {localSponsors.map((partner) => <a href={partner.url || '#'} key={partner.id} rel={partner.url ? 'noreferrer' : undefined} target={partner.url ? '_blank' : undefined}>{partner.sourceLogoURL && <Image alt="" height={72} src={partner.sourceLogoURL} unoptimized width={150} />}<strong>{partner.name}</strong><span>Local sponsor</span></a>)}
+        </div>
+        {communityPartners.length > 0 && <details className="partner-directory"><summary>View {communityPartners.length} chapter partners <span>＋</span></summary><div>{communityPartners.map((partner) => <a href={partner.url || '#'} key={partner.id} rel={partner.url ? 'noreferrer' : undefined} target={partner.url ? '_blank' : undefined}>{partner.sourceLogoURL && <Image alt="" height={56} src={partner.sourceLogoURL} unoptimized width={120} />}<strong>{partner.name}</strong></a>)}</div></details>}
+      </section>}
 
       <a className="wide-cta" data-analytics="join_about" href={community.hero.primaryCTA.url} rel="noreferrer" target="_blank"><span>COME AS YOU ARE</span><strong>Join GDG Nairobi</strong><i>↗</i></a>
     </EditorialPage>

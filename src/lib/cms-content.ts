@@ -11,10 +11,10 @@ export const defaultTeamMembers: TeamMember[] = [
   { id: -3, name: 'Brian Ouma', role: 'Software Engineer · GDG Organizer & Logistics', order: 3, updatedAt: '', createdAt: '', _status: 'published' },
   { id: -4, name: 'Wayne Gakuo', role: 'Unstacked Labs · GDG Co-organizer & Crew', order: 4, updatedAt: '', createdAt: '', _status: 'published' },
   { id: -5, name: 'Rachael Kimberly Msabeni', role: 'WTM Ambassador · Software Developer, UX Designer', order: 5, updatedAt: '', createdAt: '', _status: 'published' },
-  { id: -6, name: 'Sabina Benedette', role: 'PULA · QA Engineer', order: 6, updatedAt: '', createdAt: '', _status: 'published' },
+  { id: -6, name: 'Sabina Benerdette', role: 'QA Engineer · PULA', order: 6, updatedAt: '', createdAt: '', _status: 'published' },
   { id: -7, name: 'Ngesa Marvin', role: 'Safaricom PLC · Strategic Partnerships, Content & ML', order: 7, updatedAt: '', createdAt: '', _status: 'published' },
   { id: -8, name: 'Mambo Bryan', role: 'BiziLabs · Strategy and Partnerships', order: 8, updatedAt: '', createdAt: '', _status: 'published' },
-  { id: -9, name: 'Maina Wycliffe', role: 'Unstacked Labs', order: 9, updatedAt: '', createdAt: '', _status: 'published' },
+  { id: -9, name: 'Maina Wycliffe', role: 'Typescript Aficionado and Google Developer Expert · Unstacked Labs', order: 9, updatedAt: '', createdAt: '', _status: 'published' },
 ]
 
 async function payloadClient() {
@@ -42,11 +42,18 @@ export async function getSessions(): Promise<Session[]> {
   } catch { return [] }
 }
 
-export async function getPartners(): Promise<Partner[]> {
+export async function getPartners(scope: 'chapter' | 'devfest' = 'devfest'): Promise<Partner[]> {
   const payload = await payloadClient()
   if (!payload) return []
   try {
-    return (await payload.find({ collection: 'partners', depth: 1, limit: 100, overrideAccess: false, sort: ['tier', 'order'] })).docs
+    return (await payload.find({
+      collection: 'partners',
+      depth: 1,
+      limit: 100,
+      overrideAccess: false,
+      sort: ['tier', 'order'],
+      where: { scope: { equals: scope } },
+    })).docs
   } catch { return [] }
 }
 

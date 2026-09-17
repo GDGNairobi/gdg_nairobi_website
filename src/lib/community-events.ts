@@ -10,6 +10,12 @@ export type CommunityEventCard = {
 
 export const fallbackCommunityEvents: CommunityEventCard[] = [
   {
+    date: '17 OCT 2026',
+    title: 'Build with Google AI: Nairobi Pre-DevFest Hands-On Workshop',
+    type: 'External registration',
+    href: 'https://gdg.community.dev/events/details/google-gdg-nairobi-presents-build-with-google-ai-nairobi-pre-devfest-hands-on-workshop/',
+  },
+  {
     date: '20 JUN 2026',
     title: 'Google I/O Extended Nairobi 2026',
     type: 'Community day',
@@ -20,6 +26,18 @@ export const fallbackCommunityEvents: CommunityEventCard[] = [
     title: 'Build with AI Nairobi — Agentathon',
     type: 'Hands-on buildathon',
     href: 'https://gdg.community.dev/events/details/google-gdg-nairobi-presents-build-with-ai-nairobi-agentathon/',
+  },
+  {
+    date: '14 MAR 2026',
+    title: 'Build with AI Nairobi 2026',
+    type: 'Free registration',
+    href: 'https://gdg.community.dev/events/details/google-gdg-nairobi-presents-build-with-ai-nairobi-2026/',
+  },
+  {
+    date: '13 MAR 2026',
+    title: 'Building Secure Multi-Agent Systems on Cloud Run using Vertex AI on Gemini 3.0 (Part 2)',
+    type: 'Free registration',
+    href: 'https://gdg.community.dev/events/details/google-gdg-pwani-presents-building-secure-multi-agent-systems-on-cloud-run-using-vertex-ai-on-gemini-30-part-2/',
   },
 ]
 

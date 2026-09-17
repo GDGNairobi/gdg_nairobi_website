@@ -452,8 +452,13 @@ export interface Session {
 export interface Partner {
   id: number;
   name: string;
-  logo: number | Media;
+  logo?: (number | null) | Media;
+  /**
+   * Logo URL from the official GDG Nairobi chapter page when no local media asset has been uploaded.
+   */
+  sourceLogoURL?: string | null;
   url?: string | null;
+  scope: 'chapter' | 'devfest';
   tier: 'host' | 'platinum' | 'gold' | 'silver' | 'community';
   order: number;
   updatedAt: string;
@@ -960,7 +965,9 @@ export interface SessionsSelect<T extends boolean = true> {
 export interface PartnersSelect<T extends boolean = true> {
   name?: T;
   logo?: T;
+  sourceLogoURL?: T;
   url?: T;
+  scope?: T;
   tier?: T;
   order?: T;
   updatedAt?: T;

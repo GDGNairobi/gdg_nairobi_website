@@ -32,7 +32,7 @@ export default buildConfig({
   admin: {
     user: Users.slug,
     meta: {
-      titleSuffix: ' — DevFest Nairobi',
+      titleSuffix: ' — GDG Nairobi',
     },
     importMap: {
       baseDir: path.resolve(dirname),
