@@ -1,43 +1,24 @@
-version: '3'
+name: gdg-nairobi
 
 services:
-  payload:
-    image: node:20-alpine
+  postgres:
+    image: postgres:16-alpine
+    container_name: gdg-nairobi-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: devfest_nairobi_cms
+      POSTGRES_USER: devfest
+      POSTGRES_PASSWORD: devfest_local
     ports:
-      - '3000:3000'
+      - '127.0.0.1:5433:5432'
     volumes:
-      - .:/home/node/app
-      - node_modules:/home/node/app/node_modules
-    working_dir: /home/node/app/
-    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm dev"
-    depends_on:
-      - mongo
-      # - postgres
-    env_file:
-      - .env
-
-  # Ensure your DATABASE_URL uses 'mongo' as the hostname ie. mongodb://mongo/my-db-name
-  mongo:
-    image: mongo:latest
-    ports:
-      - '27017:27017'
-    command:
-      - --storageEngine=wiredTiger
-    volumes:
-      - data:/data/db
-    logging:
-      driver: none
-
-  # Uncomment the following to use postgres
-  # postgres:
-  #   restart: always
-  #   image: postgres:latest
-  #   volumes:
-  #     - pgdata:/var/lib/postgresql/data
-  #   ports:
-  #     - "5432:5432"
+      - gdg_nairobi_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U devfest -d devfest_nairobi_cms']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
 
 volumes:
-  data:
-  # pgdata:
-  node_modules:
+  gdg_nairobi_postgres_data:
