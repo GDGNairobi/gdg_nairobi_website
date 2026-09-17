@@ -1,67 +1,74 @@
-# Payload Blank Template
+# DevFest Nairobi — The Future Grows Here
 
-This template comes configured with the bare minimum to get started on anything you need.
+An animated editorial site for GDG Nairobi's DevFest, shaped around the **Nairobi Urban Biome** concept: a city where ideas, people, and technology grow together.
 
-## Quick start
+## What is included
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+- A responsive, motion-rich public site with a custom Nairobi-inspired visual system
+- Dedicated pages for events, speakers, schedule, venue, partners, team, and code of conduct
+- Payload CMS collections for editions, speakers, sessions, announcements, partners, team members, media, and community events
+- Admin/editor roles, drafts, version history, and scheduled publishing
+- A daily Vercel cron that safely imports event facts from the public GDG Nairobi chapter page
+- Editorial controls that keep imported source data separate from site-specific labels, ordering, and visibility
+- SEO metadata, sitemap, robots rules, reduced-motion support, and responsive navigation
 
-## Quick Start - local setup
+## Local development
 
-To spin up this template locally, follow these steps:
+Requirements: Node.js 20.9+ and pnpm 9+.
 
-### Clone
+```bash
+cp .env.example .env
+pnpm install
+pnpm db:up
+pnpm dev
+```
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+Open [http://localhost:3000](http://localhost:3000). The visual site works with `ENABLE_CMS=false`, so a database is not required for the design preview.
 
-### Development
+To use Payload at [http://localhost:3000/admin](http://localhost:3000/admin), the included Docker Compose service provides PostgreSQL on port `5433`:
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URL` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
+1. Run `pnpm db:up` and wait for the database to become healthy.
+2. Set secure, unique values for `PAYLOAD_SECRET` and `CRON_SECRET`.
+3. Run `pnpm dev`.
+4. Create the first admin user through Payload's setup screen.
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+Use `pnpm db:down` to stop the container without deleting its named data volume. The local credentials in `.env.example` are intended only for development.
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+Vercel Blob is optional locally. Set `BLOB_READ_WRITE_TOKEN` for persisted media uploads.
 
-#### Docker (Optional)
+## Content model
 
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
+- **DevFest Editions** — lifecycle state, hero copy and artwork, event details, calls to action, ticker, story, tracks, experience format, CFP, community-events intro, closing section, and stats
+- **Speakers** — bios, portraits, social links, and edition relationships
+- **Sessions** — track, room, level, time, speakers, and recording/slides links
+- **Announcements** — timed notices and calls to action
+- **Partners** — tier, logo, URL, and display order
+- **Team Members** — profiles, roles, and social links
+- **Community Events** — read-only imported facts plus editor-controlled visibility, labels, and ordering
+- **Site Settings** — current edition, brand labels, navigation, header CTA, social links, footer groups, and SEO defaults
 
-To do so, follow these steps:
+Homepage sections have individual visibility switches. Empty fields and arrays fall back to the designed Nairobi defaults, so editors can publish incrementally without leaving broken gaps on the public site. Imported community-event facts stay source-controlled; editors can change their site visibility, display labels, and order without overwriting the next sync.
 
-- Modify the `MONGODB_URL` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URL` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
+## Event synchronization
 
-## How it works
+`GET` or `POST /api/internal/events/sync` refreshes events from the public chapter page at `https://gdg.community.dev/gdg-nairobi/`. The route accepts either:
 
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
+- Vercel Cron authorization using `CRON_SECRET`, or
+- an authenticated Payload admin session.
 
-### Collections
+The importer parses the chapter page's public pre-rendered event data, validates URLs, upserts idempotently, preserves editorial overrides, and marks disappeared entries as stale without deleting them.
 
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
+## Validation
 
-- #### Users (Authentication)
+```bash
+pnpm generate:types
+pnpm exec tsc --noEmit
+pnpm test:int
+pnpm build
+```
 
-  Users are auth-enabled collections that have access to the admin panel.
+Database integration tests are opt-in with `RUN_DATABASE_TESTS=true`. Parser tests run without external services.
 
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/3.x/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
+## Production
 
-- #### Media
-
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
-
-### Docker
-
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
-
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
-
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
-
-## Questions
-
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+The repository is configured for Vercel, Vercel Postgres, and Vercel Blob. Add the environment variables from `.env.example`, set `NEXT_PUBLIC_SITE_URL` to the production origin, and deploy. The included `vercel.json` schedules the event refresh daily at 03:15 Africa/Nairobi time (00:15 UTC).
