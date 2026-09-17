@@ -33,8 +33,8 @@ export async function EditorialPage({ eyebrow, title, intro, accent = 'green', c
       </header>
       <div className="inner-content">{children}</div>
       <footer className="inner-footer">
-        <Link href="/">← Back to the future</Link>
-        <span>{chrome.siteName} · {chrome.editionLabel}</span>
+        <Link href="/">← Back to GDG Nairobi</Link>
+        <span>{chrome.siteName}</span>
       </footer>
     </main>
   )

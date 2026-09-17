@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 
-const routes = ['', '/events', '/speakers', '/schedule', '/venue', '/partners', '/team', '/code-of-conduct']
+const routes = ['', '/about', '/events', '/devfest', '/code-of-conduct']
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'

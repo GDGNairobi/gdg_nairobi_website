@@ -6,10 +6,11 @@ import { useState } from 'react'
 type HeaderLink = { href: string; label: string }
 
 const defaultLinks: HeaderLink[] = [
+  { href: '/about', label: 'About' },
+  { href: '/#community', label: 'Community' },
   { href: '/events', label: 'Events' },
-  { href: '/speakers', label: 'Speakers' },
-  { href: '/schedule', label: 'Schedule' },
-  { href: '/venue', label: 'Nairobi' },
+  { href: '/devfest', label: 'DevFest' },
+  { href: '/about#organizers', label: 'Organizers' },
 ]
 
 type Props = {
@@ -23,9 +24,9 @@ type Props = {
 const isInternal = (url: string) => url.startsWith('/') || url.startsWith('#')
 
 export function SiteHeader({
-  brandLabel = 'DevFest',
-  editionLabel = 'Nairobi 2026',
-  siteName = 'DevFest Nairobi',
+  brandLabel = 'GDG',
+  editionLabel = 'Nairobi',
+  siteName = 'GDG Nairobi',
   links = defaultLinks,
   cta = { href: 'https://gdg.community.dev/gdg-nairobi/', label: 'Join GDG Nairobi' },
 }: Props = {}) {

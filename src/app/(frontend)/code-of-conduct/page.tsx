@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: 'Code of conduct' }
 
 export default function CodeOfConductPage() {
   return (
-    <EditorialPage eyebrow="THERE IS A SEAT FOR YOU HERE" title="Build with respect." intro="DevFest Nairobi is committed to a welcoming, inclusive and harassment-free experience for everyone." accent="blue">
+    <EditorialPage eyebrow="THERE IS A SEAT FOR YOU HERE" title="Build with respect." intro="GDG Nairobi is committed to a welcoming, inclusive and harassment-free community for everyone—online and in person." accent="blue">
       <div className="conduct-grid">
         <article><span>01</span><h2>Be generous</h2><p>Share knowledge without gatekeeping. Make space for people with different backgrounds and levels of experience.</p></article>
         <article><span>02</span><h2>Be respectful</h2><p>Harassment, intimidation, discrimination and harmful conduct have no place in this community.</p></article>
