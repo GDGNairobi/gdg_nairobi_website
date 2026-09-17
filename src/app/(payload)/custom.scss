@@ -1,0 +1,17 @@
+// DevFest Nairobi editorial workspace
+:root {
+  --theme-success-500: #34a853;
+  --theme-warning-500: #fbbc04;
+  --theme-error-500: #ea4335;
+}
+
+.template-default__wrap::before {
+  content: 'DevFest Nairobi · The future grows here';
+  display: block;
+  margin-bottom: 1rem;
+  color: #34a853;
+  font-family: monospace;
+  font-size: .75rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}

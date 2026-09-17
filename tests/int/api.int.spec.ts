@@ -5,7 +5,7 @@ import { describe, it, beforeAll, expect } from 'vitest'
 
 let payload: Payload
 
-describe('API', () => {
+describe.skipIf(process.env.RUN_DATABASE_TESTS !== 'true')('Payload API', () => {
   beforeAll(async () => {
     const payloadConfig = await config
     payload = await getPayload({ config: payloadConfig })

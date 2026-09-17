@@ -69,7 +69,15 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    'devfest-editions': DevfestEdition;
+    speakers: Speaker;
+    sessions: Session;
+    partners: Partner;
+    'team-members': TeamMember;
+    announcements: Announcement;
+    'community-events': CommunityEvent;
     'payload-kv': PayloadKv;
+    'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -78,24 +86,42 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'devfest-editions': DevfestEditionsSelect<false> | DevfestEditionsSelect<true>;
+    speakers: SpeakersSelect<false> | SpeakersSelect<true>;
+    sessions: SessionsSelect<false> | SessionsSelect<true>;
+    partners: PartnersSelect<false> | PartnersSelect<true>;
+    'team-members': TeamMembersSelect<false> | TeamMembersSelect<true>;
+    announcements: AnnouncementsSelect<false> | AnnouncementsSelect<true>;
+    'community-events': CommunityEventsSelect<false> | CommunityEventsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'site-settings': SiteSetting;
+  };
+  globalsSelect: {
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
   };
   user: User;
   jobs: {
-    tasks: unknown;
+    tasks: {
+      schedulePublish: TaskSchedulePublish;
+      inline: {
+        input: unknown;
+        output: unknown;
+      };
+    };
     workflows: unknown;
   };
 }
@@ -122,7 +148,9 @@ export interface UserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
+  name: string;
+  role: 'admin' | 'editor';
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -147,8 +175,13 @@ export interface User {
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
   alt: string;
+  caption?: string | null;
+  /**
+   * Photographer, illustrator, or source credit when required.
+   */
+  credit?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -160,13 +193,318 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+  sizes?: {
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    portrait?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "devfest-editions".
+ */
+export interface DevfestEdition {
+  id: number;
+  title: string;
+  year: number;
+  slug: string;
+  status: 'announcement' | 'cfp-open' | 'registration-open' | 'live' | 'ended';
+  hero: {
+    eyebrow?: string | null;
+    headline: string;
+    accentLine: string;
+    description: string;
+    artwork?: (number | null) | Media;
+    signals?:
+      | {
+          label: string;
+          id?: string | null;
+        }[]
+      | null;
+    scrollLabel?: string | null;
+  };
+  eventDetails?: {
+    startsAt?: string | null;
+    endsAt?: string | null;
+    venueName?: string | null;
+    address?: string | null;
+    mapURL?: string | null;
+    locationLabel?: string | null;
+  };
+  callsToAction?:
+    | {
+        label: string;
+        url: string;
+        style?: ('primary' | 'secondary' | 'text') | null;
+        id?: string | null;
+      }[]
+    | null;
+  ticker?: {
+    enabled?: boolean | null;
+    items?:
+      | {
+          label: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  storySection?: {
+    enabled?: boolean | null;
+    kicker?: string | null;
+    heading?: string | null;
+    paragraphs?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    quote?: string | null;
+  };
+  tracksSection?: {
+    enabled?: boolean | null;
+    kicker?: string | null;
+    heading?: string | null;
+    intro?: string | null;
+  };
+  tracks?:
+    | {
+        title: string;
+        description: string;
+        accent: 'blue' | 'red' | 'yellow' | 'green';
+        topics?: string[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  experienceSection?: {
+    enabled?: boolean | null;
+    kicker?: string | null;
+    heading?: string | null;
+    marker?: string | null;
+    markerLabel?: string | null;
+    items?:
+      | {
+          eyebrow: string;
+          title: string;
+          description: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  cfpSection?: {
+    enabled?: boolean | null;
+    badge?: string | null;
+    kicker?: string | null;
+    heading?: string | null;
+    description?: string | null;
+    ctaLabel?: string | null;
+    ctaURL?: string | null;
+    artLabelTop?: string | null;
+    artLabelBottom?: string | null;
+  };
+  eventsSection?: {
+    enabled?: boolean | null;
+    kicker?: string | null;
+    heading?: string | null;
+    allEventsLabel?: string | null;
+    allEventsURL?: string | null;
+    syncNote?: string | null;
+  };
+  closingSection?: {
+    enabled?: boolean | null;
+    kicker?: string | null;
+    heading?: string | null;
+    accentLine?: string | null;
+    primaryLabel?: string | null;
+    primaryURL?: string | null;
+    secondaryLabel?: string | null;
+    secondaryURL?: string | null;
+  };
+  statistics?:
+    | {
+        value: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  featuredCommunityEvent?: (number | null) | CommunityEvent;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Source facts are synchronized from GDG Nairobi. Editors control how an event appears on this site.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-events".
+ */
+export interface CommunityEvent {
+  id: number;
+  source: 'bevy';
+  upstreamURL: string;
+  sourceTitle: string;
+  sourceStartDate: string;
+  sourceType?: string | null;
+  registrationURL?: string | null;
+  imageURL?: string | null;
+  excerpt?: string | null;
+  upstreamStatus: 'live' | 'completed' | 'stale';
+  lastSyncedAt: string;
+  showOnSite?: boolean | null;
+  featured?: boolean | null;
+  /**
+   * Optional short label such as “Workshop” or “Community day”.
+   */
+  localLabel?: string | null;
+  displayOrder?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "speakers".
+ */
+export interface Speaker {
+  id: number;
+  name: string;
+  slug: string;
+  portrait?: (number | null) | Media;
+  jobTitle?: string | null;
+  company?: string | null;
+  bio?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  topics?: string[] | null;
+  featured?: boolean | null;
+  links?:
+    | {
+        label: string;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sessions".
+ */
+export interface Session {
+  id: number;
+  title: string;
+  slug: string;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  speakers?: (number | Speaker)[] | null;
+  startsAt: string;
+  endsAt: string;
+  room: string;
+  track: 'ai' | 'web-mobile' | 'cloud' | 'open';
+  format: 'talk' | 'workshop' | 'keynote' | 'panel' | 'break';
+  level?: ('all' | 'beginner' | 'intermediate' | 'advanced') | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partners".
+ */
+export interface Partner {
+  id: number;
+  name: string;
+  logo: number | Media;
+  url?: string | null;
+  tier: 'host' | 'platinum' | 'gold' | 'silver' | 'community';
+  order: number;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-members".
+ */
+export interface TeamMember {
+  id: number;
+  name: string;
+  role: string;
+  photo?: (number | null) | Media;
+  bio?: string | null;
+  order: number;
+  links?:
+    | {
+        label: string;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "announcements".
+ */
+export interface Announcement {
+  id: number;
+  title: string;
+  message: string;
+  kind?: ('info' | 'cfp' | 'tickets' | 'urgent') | null;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  linkLabel?: string | null;
+  linkURL?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -180,23 +518,143 @@ export interface PayloadKv {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs".
+ */
+export interface PayloadJob {
+  id: number;
+  /**
+   * Input data provided to the job
+   */
+  input?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  taskStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  completedAt?: string | null;
+  totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
+  hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
+  error?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Task execution log
+   */
+  log?:
+    | {
+        executedAt: string;
+        completedAt: string;
+        taskSlug: 'inline' | 'schedulePublish';
+        taskID: string;
+        input?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        output?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        state: 'failed' | 'succeeded';
+        error?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  taskSlug?: ('inline' | 'schedulePublish') | null;
+  queue?: string | null;
+  waitUntil?: string | null;
+  processing?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'devfest-editions';
+        value: number | DevfestEdition;
+      } | null)
+    | ({
+        relationTo: 'speakers';
+        value: number | Speaker;
+      } | null)
+    | ({
+        relationTo: 'sessions';
+        value: number | Session;
+      } | null)
+    | ({
+        relationTo: 'partners';
+        value: number | Partner;
+      } | null)
+    | ({
+        relationTo: 'team-members';
+        value: number | TeamMember;
+      } | null)
+    | ({
+        relationTo: 'announcements';
+        value: number | Announcement;
+      } | null)
+    | ({
+        relationTo: 'community-events';
+        value: number | CommunityEvent;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -206,10 +664,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -229,7 +687,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -240,6 +698,8 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -263,6 +723,8 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  caption?: T;
+  credit?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -274,6 +736,295 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+  sizes?:
+    | T
+    | {
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        portrait?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "devfest-editions_select".
+ */
+export interface DevfestEditionsSelect<T extends boolean = true> {
+  title?: T;
+  year?: T;
+  slug?: T;
+  status?: T;
+  hero?:
+    | T
+    | {
+        eyebrow?: T;
+        headline?: T;
+        accentLine?: T;
+        description?: T;
+        artwork?: T;
+        signals?:
+          | T
+          | {
+              label?: T;
+              id?: T;
+            };
+        scrollLabel?: T;
+      };
+  eventDetails?:
+    | T
+    | {
+        startsAt?: T;
+        endsAt?: T;
+        venueName?: T;
+        address?: T;
+        mapURL?: T;
+        locationLabel?: T;
+      };
+  callsToAction?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        style?: T;
+        id?: T;
+      };
+  ticker?:
+    | T
+    | {
+        enabled?: T;
+        items?:
+          | T
+          | {
+              label?: T;
+              id?: T;
+            };
+      };
+  storySection?:
+    | T
+    | {
+        enabled?: T;
+        kicker?: T;
+        heading?: T;
+        paragraphs?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        quote?: T;
+      };
+  tracksSection?:
+    | T
+    | {
+        enabled?: T;
+        kicker?: T;
+        heading?: T;
+        intro?: T;
+      };
+  tracks?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        accent?: T;
+        topics?: T;
+        id?: T;
+      };
+  experienceSection?:
+    | T
+    | {
+        enabled?: T;
+        kicker?: T;
+        heading?: T;
+        marker?: T;
+        markerLabel?: T;
+        items?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+      };
+  cfpSection?:
+    | T
+    | {
+        enabled?: T;
+        badge?: T;
+        kicker?: T;
+        heading?: T;
+        description?: T;
+        ctaLabel?: T;
+        ctaURL?: T;
+        artLabelTop?: T;
+        artLabelBottom?: T;
+      };
+  eventsSection?:
+    | T
+    | {
+        enabled?: T;
+        kicker?: T;
+        heading?: T;
+        allEventsLabel?: T;
+        allEventsURL?: T;
+        syncNote?: T;
+      };
+  closingSection?:
+    | T
+    | {
+        enabled?: T;
+        kicker?: T;
+        heading?: T;
+        accentLine?: T;
+        primaryLabel?: T;
+        primaryURL?: T;
+        secondaryLabel?: T;
+        secondaryURL?: T;
+      };
+  statistics?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        id?: T;
+      };
+  featuredCommunityEvent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "speakers_select".
+ */
+export interface SpeakersSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  portrait?: T;
+  jobTitle?: T;
+  company?: T;
+  bio?: T;
+  topics?: T;
+  featured?: T;
+  links?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sessions_select".
+ */
+export interface SessionsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  description?: T;
+  speakers?: T;
+  startsAt?: T;
+  endsAt?: T;
+  room?: T;
+  track?: T;
+  format?: T;
+  level?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partners_select".
+ */
+export interface PartnersSelect<T extends boolean = true> {
+  name?: T;
+  logo?: T;
+  url?: T;
+  tier?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-members_select".
+ */
+export interface TeamMembersSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
+  photo?: T;
+  bio?: T;
+  order?: T;
+  links?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "announcements_select".
+ */
+export interface AnnouncementsSelect<T extends boolean = true> {
+  title?: T;
+  message?: T;
+  kind?: T;
+  startsAt?: T;
+  endsAt?: T;
+  linkLabel?: T;
+  linkURL?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-events_select".
+ */
+export interface CommunityEventsSelect<T extends boolean = true> {
+  source?: T;
+  upstreamURL?: T;
+  sourceTitle?: T;
+  sourceStartDate?: T;
+  sourceType?: T;
+  registrationURL?: T;
+  imageURL?: T;
+  excerpt?: T;
+  upstreamStatus?: T;
+  lastSyncedAt?: T;
+  showOnSite?: T;
+  featured?: T;
+  localLabel?: T;
+  displayOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -282,6 +1033,37 @@ export interface MediaSelect<T extends boolean = true> {
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs_select".
+ */
+export interface PayloadJobsSelect<T extends boolean = true> {
+  input?: T;
+  taskStatus?: T;
+  completedAt?: T;
+  totalTried?: T;
+  hasError?: T;
+  error?: T;
+  log?:
+    | T
+    | {
+        executedAt?: T;
+        completedAt?: T;
+        taskSlug?: T;
+        taskID?: T;
+        input?: T;
+        output?: T;
+        state?: T;
+        error?: T;
+        id?: T;
+      };
+  taskSlug?: T;
+  queue?: T;
+  waitUntil?: T;
+  processing?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -317,6 +1099,118 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  siteName: string;
+  brandLabel: string;
+  editionLabel: string;
+  currentEdition?: (number | null) | DevfestEdition;
+  navigation?:
+    | {
+        label: string;
+        url: string;
+        enabled?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  headerCTA: {
+    label: string;
+    url: string;
+  };
+  socialLinks?:
+    | {
+        label: string;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  footer?: {
+    groups?:
+      | {
+          heading: string;
+          links?:
+            | {
+                label: string;
+                url: string;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+    note?: string | null;
+  };
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  siteName?: T;
+  brandLabel?: T;
+  editionLabel?: T;
+  currentEdition?: T;
+  navigation?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        enabled?: T;
+        id?: T;
+      };
+  headerCTA?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+      };
+  socialLinks?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        id?: T;
+      };
+  footer?:
+    | T
+    | {
+        groups?:
+          | T
+          | {
+              heading?: T;
+              links?:
+                | T
+                | {
+                    label?: T;
+                    url?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+        note?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -324,6 +1218,44 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSchedulePublish".
+ */
+export interface TaskSchedulePublish {
+  input: {
+    type?: ('publish' | 'unpublish') | null;
+    locale?: string | null;
+    doc?:
+      | ({
+          relationTo: 'devfest-editions';
+          value: number | DevfestEdition;
+        } | null)
+      | ({
+          relationTo: 'speakers';
+          value: number | Speaker;
+        } | null)
+      | ({
+          relationTo: 'sessions';
+          value: number | Session;
+        } | null)
+      | ({
+          relationTo: 'partners';
+          value: number | Partner;
+        } | null)
+      | ({
+          relationTo: 'team-members';
+          value: number | TeamMember;
+        } | null)
+      | ({
+          relationTo: 'announcements';
+          value: number | Announcement;
+        } | null);
+    global?: 'site-settings' | null;
+    user?: (number | null) | User;
+  };
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
