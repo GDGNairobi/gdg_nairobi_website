@@ -1119,6 +1119,58 @@ export interface SiteSetting {
     label: string;
     url: string;
   };
+  communityHomepage?: {
+    hero?: {
+      eyebrow?: string | null;
+      headline?: string | null;
+      accentLine?: string | null;
+      description?: string | null;
+      primaryLabel?: string | null;
+      primaryURL?: string | null;
+      secondaryLabel?: string | null;
+      secondaryURL?: string | null;
+    };
+    statistics?:
+      | {
+          value: string;
+          label: string;
+          id?: string | null;
+        }[]
+      | null;
+    about?: {
+      kicker?: string | null;
+      heading?: string | null;
+      description?: string | null;
+    };
+    pillars?:
+      | {
+          title: string;
+          description: string;
+          accent: 'blue' | 'red' | 'yellow' | 'green';
+          id?: string | null;
+        }[]
+      | null;
+    ecosystem?: {
+      kicker?: string | null;
+      heading?: string | null;
+      description?: string | null;
+      items?:
+        | {
+            label: string;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    closing?: {
+      kicker?: string | null;
+      heading?: string | null;
+      accentLine?: string | null;
+      primaryLabel?: string | null;
+      primaryURL?: string | null;
+      secondaryLabel?: string | null;
+      secondaryURL?: string | null;
+    };
+  };
   socialLinks?:
     | {
         label: string;
@@ -1172,6 +1224,68 @@ export interface SiteSettingsSelect<T extends boolean = true> {
     | {
         label?: T;
         url?: T;
+      };
+  communityHomepage?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              eyebrow?: T;
+              headline?: T;
+              accentLine?: T;
+              description?: T;
+              primaryLabel?: T;
+              primaryURL?: T;
+              secondaryLabel?: T;
+              secondaryURL?: T;
+            };
+        statistics?:
+          | T
+          | {
+              value?: T;
+              label?: T;
+              id?: T;
+            };
+        about?:
+          | T
+          | {
+              kicker?: T;
+              heading?: T;
+              description?: T;
+            };
+        pillars?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              accent?: T;
+              id?: T;
+            };
+        ecosystem?:
+          | T
+          | {
+              kicker?: T;
+              heading?: T;
+              description?: T;
+              items?:
+                | T
+                | {
+                    label?: T;
+                    id?: T;
+                  };
+            };
+        closing?:
+          | T
+          | {
+              kicker?: T;
+              heading?: T;
+              accentLine?: T;
+              primaryLabel?: T;
+              primaryURL?: T;
+              secondaryLabel?: T;
+              secondaryURL?: T;
+            };
       };
   socialLinks?:
     | T
