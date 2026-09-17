@@ -12,6 +12,19 @@ const nextConfig: NextConfig = {
       {
         pathname: '/api/media/file/**',
       },
+      {
+        pathname: '/images/**',
+      },
+    ],
+    remotePatterns: [
+      {
+        hostname: 'res.cloudinary.com',
+        protocol: 'https',
+      },
+      {
+        hostname: '*.public.blob.vercel-storage.com',
+        protocol: 'https',
+      },
     ],
   },
   webpack: (webpackConfig) => {
