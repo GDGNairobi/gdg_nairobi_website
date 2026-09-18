@@ -4,6 +4,8 @@ The public website and editorial platform for GDG Nairobi. The visual direction 
 
 **Repository:** [github.com/GDGNairobi/gdg_nairobi_website](https://github.com/GDGNairobi/gdg_nairobi_website)
 
+**Store:** [shop.gdgnairobi.com](https://shop.gdgnairobi.com/)
+
 ## What is included
 
 - A responsive Next.js 16 website for GDG Nairobi and DevFest Nairobi
