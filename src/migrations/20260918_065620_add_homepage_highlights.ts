@@ -2,7 +2,8 @@ import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
-   CREATE TABLE "highlight_photos" (
+   ALTER TABLE "community_events" ALTER COLUMN "source" SET DEFAULT 'manual';
+  CREATE TABLE "highlight_photos" (
   	"_order" integer NOT NULL,
   	"_parent_id" integer NOT NULL,
   	"id" varchar PRIMARY KEY NOT NULL,
@@ -66,7 +67,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
 
 export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
   await db.execute(sql`
-   DROP TABLE "highlight_photos" CASCADE;
+   ALTER TABLE "community_events" ALTER COLUMN "source" SET DEFAULT 'bevy';
+  DROP TABLE "highlight_photos" CASCADE;
   DROP TABLE "highlight_videos" CASCADE;
   DROP TABLE "_highlight_photos_v" CASCADE;
   DROP TABLE "_highlight_videos_v" CASCADE;

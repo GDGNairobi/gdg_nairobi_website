@@ -3,7 +3,6 @@ import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
    ALTER TYPE "public"."enum_community_events_source" ADD VALUE 'manual' BEFORE 'bevy';
-  ALTER TABLE "community_events" ALTER COLUMN "source" SET DEFAULT 'manual';
   ALTER TABLE "community_events" ALTER COLUMN "source_title" DROP NOT NULL;
   ALTER TABLE "community_events" ALTER COLUMN "source_start_date" DROP NOT NULL;
   ALTER TABLE "community_events" ALTER COLUMN "upstream_status" DROP NOT NULL;
