@@ -4,7 +4,7 @@ The public website and editorial platform for GDG Nairobi. The visual direction 
 
 ## What is included
 
-- A responsive Next.js 16 website for GDG Nairobi and DevFest Nairobi
+- A responsive Next.js 16 website for GDG Nairobi and DevFest Nairobi 2026
 - The established Nairobi skyline, sunrise, and Big Five hero artwork
 - Public pages for the community, events, DevFest, organizers, partners, and code of conduct
 - Payload CMS 3 with editor/admin roles, drafts, version history, and scheduled publishing

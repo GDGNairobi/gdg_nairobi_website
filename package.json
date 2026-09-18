@@ -1,7 +1,7 @@
 {
   "name": "devfest-nairobi",
   "version": "1.0.0",
-  "description": "The DevFest Nairobi website and Payload editorial platform.",
+  "description": "The GDG Nairobi and DevFest Nairobi 2026 website with its Payload editorial platform.",
   "license": "MIT",
   "type": "module",
   "packageManager": "pnpm@12.4.2",
