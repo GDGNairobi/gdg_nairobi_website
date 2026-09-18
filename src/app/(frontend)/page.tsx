@@ -3,6 +3,7 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 
 import { MotionLayer } from '@/components/MotionLayer'
+import { GdgLogo } from '@/components/GdgLogo'
 import { SiteHeader } from '@/components/SiteHeader'
 import { getCommunityEventCards } from '@/lib/community-events'
 import { getHomeContent } from '@/lib/site-content'
@@ -24,9 +25,7 @@ export default async function HomePage() {
   return (
     <main className="site-shell community-site">
       <SiteHeader
-        brandLabel={home.chrome.brandLabel}
         cta={{ href: home.chrome.headerCTA.url, label: home.chrome.headerCTA.label }}
-        editionLabel={home.chrome.editionLabel}
         links={home.chrome.navigation.map(({ label, url }) => ({ href: url, label }))}
         siteName={home.chrome.siteName}
       />
@@ -123,7 +122,7 @@ export default async function HomePage() {
       </section>
 
       <footer className="footer">
-        <div className="footer-brand"><span className="brand-mark" aria-hidden="true"><i /><i /><i /><i /></span><strong>{home.chrome.brandLabel}<br />{home.chrome.editionLabel}</strong></div>
+        <div className="footer-brand"><GdgLogo /></div>
         {home.chrome.footerGroups.map((group) => (
           <div key={group.heading}><span>{group.heading}</span>{group.links.map((link) => <SmartLink key={`${group.heading}-${link.url}`} url={link.url}>{link.label}</SmartLink>)}</div>
         ))}

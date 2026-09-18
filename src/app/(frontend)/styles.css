@@ -48,15 +48,10 @@ button { font: inherit; }
   backdrop-filter: blur(18px);
 }
 .site-brand { display: flex; align-items: center; gap: 12px; min-width: max-content; }
-.site-brand > span:last-child { display: flex; align-items: baseline; gap: 7px; }
-.site-brand strong { font-size: 1.04rem; letter-spacing: -0.035em; }
-.site-brand small { color: rgba(32, 33, 36, 0.62); font: 500 0.68rem/1 var(--mono); letter-spacing: 0.04em; text-transform: uppercase; }
-.brand-mark { position: relative; display: inline-grid; grid-template-columns: repeat(2, 12px); gap: 3px; transform: rotate(-7deg); }
-.brand-mark i { display: block; width: 12px; height: 5px; border-radius: 5px; }
-.brand-mark i:nth-child(1) { background: var(--blue); }
-.brand-mark i:nth-child(2) { background: var(--red); }
-.brand-mark i:nth-child(3) { background: var(--green); }
-.brand-mark i:nth-child(4) { background: var(--yellow); }
+.gdg-logo { display: inline-flex; align-items: center; gap: 10px; color: #202124; white-space: nowrap; }
+.gdg-logo svg { display: block; width: 32px; height: 17px; flex: 0 0 auto; }
+.gdg-logo > span { font: 500 1rem/1 var(--sans); letter-spacing: -.035em; }
+.gdg-logo-compact > span { display: none; }
 .site-header nav { display: flex; align-items: center; gap: 5px; }
 .site-header nav > a { padding: 12px 15px; border-radius: 999px; font-size: 0.86rem; font-weight: 700; transition: background .25s ease, transform .25s ease; }
 .site-header nav > a:hover { background: rgba(66, 133, 244, 0.11); transform: translateY(-1px); }
@@ -207,8 +202,7 @@ button { font: inherit; }
 .closing-actions > a:last-child { padding-bottom: 5px; border-bottom: 1px solid white; font-size: .84rem; font-weight: 800; }
 
 .footer { display: grid; grid-template-columns: 1.6fr repeat(3, 1fr); gap: 50px; padding: 70px max(5vw, 28px) 35px; color: white; background: var(--ink); }
-.footer-brand { display: flex; align-items: flex-start; gap: 16px; }
-.footer-brand strong { font-size: 1.45rem; line-height: 1; letter-spacing: -.05em; }
+.footer-brand { display: flex; align-items: flex-start; }
 .footer > div:not(.footer-brand) { display: flex; flex-direction: column; gap: 10px; }
 .footer > div > span { margin-bottom: 7px; color: #8ab4f8; font: .65rem/1 var(--mono); text-transform: uppercase; }
 .footer > div > a { width: max-content; color: rgba(255,255,255,.65); font-size: .84rem; }
@@ -425,7 +419,6 @@ button { font: inherit; }
 
 @media (max-width: 900px) {
   .site-header { top: 10px; width: calc(100% - 20px); height: 60px; padding-left: 14px; }
-  .site-brand small { display: none; }
   .menu-toggle { display: grid; width: 45px; height: 45px; padding: 13px; place-content: center; gap: 5px; border: 0; border-radius: 50%; color: white; background: var(--blue); }
   .menu-toggle > span:not(.sr-only) { display: block; width: 18px; height: 1.5px; background: currentColor; transition: transform .25s ease; }
   .menu-open .menu-toggle > span:first-child { transform: translateY(3.25px) rotate(45deg); }

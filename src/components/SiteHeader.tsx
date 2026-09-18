@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { useState } from 'react'
 
+import { GdgLogo } from './GdgLogo'
+
 type HeaderLink = { href: string; label: string }
 
 const defaultLinks: HeaderLink[] = [
@@ -14,8 +16,6 @@ const defaultLinks: HeaderLink[] = [
 ]
 
 type Props = {
-  brandLabel?: string
-  editionLabel?: string
   siteName?: string
   links?: HeaderLink[]
   cta?: HeaderLink
@@ -24,8 +24,6 @@ type Props = {
 const isInternal = (url: string) => url.startsWith('/') || url.startsWith('#')
 
 export function SiteHeader({
-  brandLabel = 'GDG',
-  editionLabel = 'Nairobi',
   siteName = 'GDG Nairobi',
   links = defaultLinks,
   cta = { href: 'https://gdg.community.dev/gdg-nairobi/', label: 'Join GDG Nairobi' },
@@ -35,8 +33,7 @@ export function SiteHeader({
   return (
     <header className={`site-header ${open ? 'menu-open' : ''}`}>
       <Link className="site-brand" href="/" aria-label={`${siteName} home`}>
-        <span className="brand-mark" aria-hidden="true"><i /><i /><i /><i /></span>
-        <span><strong>{brandLabel}</strong><small>{editionLabel}</small></span>
+        <GdgLogo />
       </Link>
       <button className="menu-toggle" type="button" aria-expanded={open} aria-controls="site-navigation" onClick={() => setOpen(!open)}>
         <span /><span /><span className="sr-only">Toggle menu</span>

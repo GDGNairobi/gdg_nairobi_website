@@ -4,6 +4,7 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 
 import { MotionLayer } from '@/components/MotionLayer'
+import { GdgLogo } from '@/components/GdgLogo'
 import { SiteHeader } from '@/components/SiteHeader'
 import { getPartners, getSessions, getSpeakers } from '@/lib/cms-content'
 import { getHomeContent } from '@/lib/site-content'
@@ -24,7 +25,7 @@ export default async function DevFestPage() {
 
   return (
     <main className="site-shell devfest-page">
-      <SiteHeader brandLabel={home.chrome.brandLabel} cta={{ href: home.chrome.headerCTA.url, label: home.chrome.headerCTA.label }} editionLabel={home.chrome.editionLabel} links={home.chrome.navigation.map(({ label, url }) => ({ href: url, label }))} siteName={home.chrome.siteName} />
+      <SiteHeader cta={{ href: home.chrome.headerCTA.url, label: home.chrome.headerCTA.label }} links={home.chrome.navigation.map(({ label, url }) => ({ href: url, label }))} siteName={home.chrome.siteName} />
 
       <section className="hero devfest-page-hero">
         <MotionLayer />
@@ -84,7 +85,7 @@ export default async function DevFestPage() {
       </div>
 
       <footer className="footer">
-        <div className="footer-brand"><span className="brand-mark" aria-hidden="true"><i /><i /><i /><i /></span><strong>{home.chrome.brandLabel}<br />{home.chrome.editionLabel}</strong></div>
+        <div className="footer-brand"><GdgLogo /></div>
         {home.chrome.footerGroups.map((group) => <div key={group.heading}><span>{group.heading}</span>{group.links.map((link) => <SmartLink key={`${group.heading}-${link.url}`} url={link.url}>{link.label}</SmartLink>)}</div>)}
         <p className="footer-note">{home.chrome.footerNote}</p>
       </footer>

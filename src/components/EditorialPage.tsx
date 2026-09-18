@@ -19,9 +19,7 @@ export async function EditorialPage({ eyebrow, title, intro, accent = 'green', c
   return (
     <main className={`inner-page inner-${accent}`}>
       <SiteHeader
-        brandLabel={chrome.brandLabel}
         cta={{ href: chrome.headerCTA.url, label: chrome.headerCTA.label }}
-        editionLabel={chrome.editionLabel}
         links={chrome.navigation.map(({ label, url }) => ({ href: url, label }))}
         siteName={chrome.siteName}
       />
