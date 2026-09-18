@@ -1,8 +1,14 @@
 import type { Metadata } from 'next'
 
 import { EditorialPage } from '@/components/EditorialPage'
+import { buildPageMetadata } from '@/lib/metadata'
 
-export const metadata: Metadata = { title: 'Code of conduct' }
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Community code of conduct',
+  description: 'The standards that help keep GDG Nairobi events and online spaces welcoming, inclusive and respectful.',
+  path: '/code-of-conduct',
+  keywords: ['GDG Nairobi code of conduct', 'community guidelines'],
+})
 
 export default function CodeOfConductPage() {
   return (

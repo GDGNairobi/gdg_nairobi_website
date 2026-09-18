@@ -1,14 +1,27 @@
 import type { Metadata } from 'next'
 
 import { EditorialPage } from '@/components/EditorialPage'
+import { JsonLd } from '@/components/JsonLd'
 import { getCommunityEventCards } from '@/lib/community-events'
+import { buildPageMetadata } from '@/lib/metadata'
 
-export const metadata: Metadata = { title: 'Community events' }
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Developer events in Nairobi',
+  description: 'Browse upcoming GDG Nairobi meetups, workshops, codelabs and community events, with registration on the official chapter page.',
+  path: '/events',
+  keywords: ['developer events Nairobi', 'tech meetups Nairobi', 'GDG Nairobi events', 'coding workshops Nairobi'],
+})
 
 export default async function EventsPage() {
   const events = await getCommunityEventCards(8)
   return (
     <EditorialPage eyebrow="THE ROOT SYSTEM" title="Nairobi keeps building." intro="DevFest is one moment in a year-round rhythm of workshops, codelabs, meetups and conversations led by the GDG Nairobi community." accent="green">
+      <JsonLd data={{
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        name: 'GDG Nairobi community events',
+        itemListElement: events.map((event, index) => ({ '@type': 'ListItem', position: index + 1, name: event.title, url: event.href })),
+      }} />
       <div className="editorial-list">
         {events.map((event, index) => (
           <a href={event.href} target="_blank" rel="noreferrer" key={event.href}>

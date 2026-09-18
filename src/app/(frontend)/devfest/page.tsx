@@ -4,11 +4,21 @@ import type { ReactNode } from 'react'
 
 import { MotionLayer } from '@/components/MotionLayer'
 import { GdgLogo } from '@/components/GdgLogo'
+import { JsonLd } from '@/components/JsonLd'
 import { SiteHeader } from '@/components/SiteHeader'
 import { getPartners, getSessions, getSpeakers } from '@/lib/cms-content'
+import { absoluteSiteURL, buildPageMetadata } from '@/lib/metadata'
 import { getHomeContent } from '@/lib/site-content'
 
-export const metadata: Metadata = { title: 'DevFest Nairobi' }
+export async function generateMetadata(): Promise<Metadata> {
+  const home = await getHomeContent()
+  return buildPageMetadata({
+    title: `DevFest Nairobi ${home.year}`,
+    description: `${home.hero.description} Find confirmed programme, speaker, venue and partner information for DevFest Nairobi ${home.year}.`,
+    path: '/devfest',
+    keywords: ['DevFest Nairobi', `DevFest Nairobi ${home.year}`, 'Google developer conference Nairobi'],
+  })
+}
 
 const time = (date: string) => new Intl.DateTimeFormat('en-KE', { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Nairobi' }).format(new Date(date))
 const isInternal = (url: string) => url.startsWith('/') || url.startsWith('#')
@@ -21,9 +31,27 @@ function SmartLink({ children, className, url }: { children: ReactNode; classNam
 export default async function DevFestPage() {
   const [home, speakers, sessions, partners] = await Promise.all([getHomeContent(), getSpeakers(), getSessions(), getPartners()])
   const venue = home.eventDetails
+  const eventStructuredData = venue.startsAt ? {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: `DevFest Nairobi ${home.year}`,
+    description: home.hero.description,
+    startDate: venue.startsAt,
+    endDate: venue.endsAt,
+    eventStatus: 'https://schema.org/EventScheduled',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    url: absoluteSiteURL('/devfest'),
+    organizer: { '@id': `${absoluteSiteURL('/')}#organization` },
+    location: venue.venueName ? {
+      '@type': 'Place',
+      name: venue.venueName,
+      address: venue.address ? { '@type': 'PostalAddress', streetAddress: venue.address, addressLocality: 'Nairobi', addressCountry: 'KE' } : undefined,
+    } : undefined,
+  } : null
 
   return (
-    <main className="site-shell devfest-page">
+    <main className="site-shell devfest-page" id="main-content" tabIndex={-1}>
+      {eventStructuredData && <JsonLd data={eventStructuredData} />}
       <SiteHeader cta={{ href: home.chrome.headerCTA.url, label: home.chrome.headerCTA.label }} links={home.chrome.navigation.map(({ label, url }) => ({ href: url, label }))} siteName={home.chrome.siteName} />
 
       <header className="devfest-editorial-hero">

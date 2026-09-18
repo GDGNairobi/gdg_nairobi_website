@@ -3,9 +3,15 @@ import Image from 'next/image'
 
 import { EditorialPage } from '@/components/EditorialPage'
 import { getPartners, getTeamMembers } from '@/lib/cms-content'
+import { buildPageMetadata } from '@/lib/metadata'
 import { getHomeContent } from '@/lib/site-content'
 
-export const metadata: Metadata = { title: 'About GDG Nairobi' }
+export const metadata: Metadata = buildPageMetadata({
+  title: 'About GDG Nairobi',
+  description: 'Meet the volunteer-led GDG Nairobi community, its organizers, programmes, sponsors and chapter partners.',
+  path: '/about',
+  keywords: ['GDG Nairobi organizers', 'Nairobi developer community', 'Google Developer Groups Nairobi'],
+})
 
 export default async function AboutPage() {
   const [{ community }, team, chapterPartners] = await Promise.all([getHomeContent(), getTeamMembers(), getPartners('chapter')])

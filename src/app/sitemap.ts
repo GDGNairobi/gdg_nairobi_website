@@ -1,13 +1,19 @@
 import type { MetadataRoute } from 'next'
 
-const routes = ['', '/about', '/events', '/devfest', '/code-of-conduct']
+import { absoluteSiteURL } from '@/lib/metadata'
+
+const routes = [
+  { path: '', changeFrequency: 'weekly', priority: 1 },
+  { path: '/events', changeFrequency: 'daily', priority: .9 },
+  { path: '/devfest', changeFrequency: 'weekly', priority: .9 },
+  { path: '/about', changeFrequency: 'monthly', priority: .7 },
+  { path: '/code-of-conduct', changeFrequency: 'yearly', priority: .4 },
+] as const
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-  return routes.map((route) => ({
-    url: `${base}${route}`,
-    lastModified: new Date(),
-    changeFrequency: route === '' ? 'weekly' : 'monthly',
-    priority: route === '' ? 1 : 0.7,
+  return routes.map(({ path, changeFrequency, priority }) => ({
+    url: absoluteSiteURL(path || '/'),
+    changeFrequency,
+    priority,
   }))
 }
