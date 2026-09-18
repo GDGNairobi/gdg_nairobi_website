@@ -20,7 +20,9 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
         WHERE existing."_parent_id" = footer_group."id"
           AND existing."url" = ${repositoryURL}
       );
+  `)
 
+  await db.execute(sql`
     INSERT INTO "site_settings_navigation" ("_order", "_parent_id", "id", "label", "url", "enabled")
     SELECT
       COALESCE((SELECT MAX(existing."_order") FROM "site_settings_navigation" existing WHERE existing."_parent_id" = settings."id"), -1) + 1,
@@ -44,7 +46,9 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
     DELETE FROM "site_settings_footer_groups_links"
     WHERE "id" LIKE 'official-%'
       AND "url" = ${repositoryURL};
+  `)
 
+  await db.execute(sql`
     DELETE FROM "site_settings_navigation"
     WHERE "id" LIKE 'official-shop-%'
       AND "url" = ${storeURL};
