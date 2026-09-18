@@ -34,11 +34,18 @@ export async function getSpeakers(): Promise<Speaker[]> {
   } catch { return [] }
 }
 
-export async function getSessions(): Promise<Session[]> {
+export async function getSessions(eventID?: number): Promise<Session[]> {
   const payload = await payloadClient()
   if (!payload) return []
   try {
-    return (await payload.find({ collection: 'sessions', depth: 2, limit: 200, overrideAccess: false, sort: 'startsAt' })).docs
+    return (await payload.find({
+      collection: 'sessions',
+      depth: 2,
+      limit: 200,
+      overrideAccess: false,
+      sort: 'startsAt',
+      where: eventID ? { event: { equals: eventID } } : undefined,
+    })).docs
   } catch { return [] }
 }
 

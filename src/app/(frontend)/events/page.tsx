@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 
 import { EditorialPage } from '@/components/EditorialPage'
 import { JsonLd } from '@/components/JsonLd'
@@ -23,13 +24,17 @@ export default async function EventsPage() {
         itemListElement: events.map((event, index) => ({ '@type': 'ListItem', position: index + 1, name: event.title, url: event.href })),
       }} />
       <div className="editorial-list">
-        {events.map((event, index) => (
+        {events.map((event, index) => event.external ? (
           <a href={event.href} target="_blank" rel="noreferrer" key={event.href}>
-            <span>0{index + 1}</span><time>{event.date}</time><div><h2>{event.title}</h2><p>{event.type}</p></div><i>↗</i>
+            <span>{String(index + 1).padStart(2, '0')}</span><time>{event.date}</time><div><h2>{event.title}</h2><p>{event.type}</p></div><i>↗</i>
           </a>
+        ) : (
+          <Link href={event.href} key={event.href}>
+            <span>{String(index + 1).padStart(2, '0')}</span><time>{event.date}</time><div><h2>{event.title}</h2><p>{event.type}</p></div><i>→</i>
+          </Link>
         ))}
       </div>
-      <div className="info-callout"><span>LIVE SOURCE</span><p>Event details are refreshed from the official chapter page and registration always stays with GDG Nairobi.</p><a href="https://gdg.community.dev/gdg-nairobi/">Visit the official chapter ↗</a></div>
+      <div className="info-callout"><span>ONE EVENT SOURCE</span><p>Event facts stay synchronized with the official chapter. Selected events add their schedule here; older events continue to their Community page.</p><a href="https://gdg.community.dev/gdg-nairobi/">Visit the official chapter ↗</a></div>
     </EditorialPage>
   )
 }

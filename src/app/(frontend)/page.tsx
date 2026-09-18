@@ -12,6 +12,23 @@ import './styles.css'
 
 const isInternal = (url: string) => url.startsWith('/') || url.startsWith('#')
 
+function youtubeEmbedURL(value: string) {
+  try {
+    const url = new URL(value)
+    const host = url.hostname.replace(/^www\./, '')
+    let videoID = ''
+    if (host === 'youtu.be') videoID = url.pathname.split('/').filter(Boolean)[0] || ''
+    if (host === 'youtube.com' || host === 'm.youtube.com') {
+      videoID = url.pathname === '/watch'
+        ? url.searchParams.get('v') || ''
+        : url.pathname.match(/^\/(?:shorts|embed)\/([^/]+)/)?.[1] || ''
+    }
+    return /^[A-Za-z0-9_-]{11}$/.test(videoID) ? `https://www.youtube-nocookie.com/embed/${videoID}` : null
+  } catch {
+    return null
+  }
+}
+
 function SmartLink({ children, className, eventName, url }: { children: ReactNode; className?: string; eventName?: string; url: string }) {
   const analytics = eventName ? { 'data-analytics': eventName } : undefined
   if (isInternal(url)) return <Link className={className} href={url} {...analytics}>{children}</Link>
@@ -23,6 +40,10 @@ export default async function HomePage() {
   const community = home.community
   const nextEvent = communityEvents[0]
   const tickerItems = Array.from({ length: 4 }, () => home.ticker.items).flat()
+  const featuredVideos = home.highlights.videos.flatMap((video) => {
+    const embedURL = youtubeEmbedURL(video.url)
+    return embedURL ? [{ ...video, embedURL }] : []
+  })
 
   return (
     <main className="site-shell community-site" id="main-content" tabIndex={-1}>
@@ -82,15 +103,38 @@ export default async function HomePage() {
         </div>
         <div className="event-list">
           {communityEvents.map((event, index) => (
-            <a className="event-card" data-analytics="event_open" href={event.href} key={event.href} target="_blank" rel="noreferrer">
+            <SmartLink className="event-card" eventName="event_open" url={event.href} key={event.href}>
               <span className="event-index">{String(index + 1).padStart(2, '0')}</span>
               <span className="event-date">{event.date}</span>
               <div><h3>{event.title}</h3><p>{event.type}</p></div>
-              <span className="event-arrow" aria-hidden="true">↗</span>
-            </a>
+              <span className="event-arrow" aria-hidden="true">{event.external ? '↗' : '→'}</span>
+            </SmartLink>
           ))}
         </div>
         <p className="sync-note"><span /> {home.eventsSection.syncNote}</p>
+      </section>}
+
+      {home.highlights.enabled && (home.highlights.photos.length > 0 || featuredVideos.length > 0) && <section className="community-highlights" id="highlights">
+        <div className="section-heading">
+          <div><p className="section-kicker">{home.highlights.kicker}</p><h2>{home.highlights.heading}</h2></div>
+          <p className="section-intro">{home.highlights.intro}</p>
+        </div>
+        {home.highlights.photos.length > 0 && <div className="memory-grid">
+          {home.highlights.photos.map((photo, index) => <figure key={`${photo.src}-${index}`}>
+            <Image alt={photo.alt} fill sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 33vw" src={photo.src} />
+            {photo.caption && <figcaption>{photo.caption}</figcaption>}
+          </figure>)}
+        </div>}
+        {featuredVideos.length > 0 && <div className={`featured-videos featured-videos-${featuredVideos.length}`}>
+          {featuredVideos.map((video, index) => <article key={`${video.url}-${index}`}>
+            <div className="video-embed">
+              <iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen loading="lazy" src={video.embedURL} title={video.title} />
+            </div>
+            <small>{String(index + 1).padStart(2, '0')} / FEATURED VIDEO</small>
+            <h3>{video.title}</h3>
+            <a href={video.url} rel="noreferrer" target="_blank">{video.label} ↗</a>
+          </article>)}
+        </div>}
       </section>}
 
       <section className="devfest-feature" id="devfest-feature" aria-labelledby="devfest-title">
@@ -125,12 +169,12 @@ export default async function HomePage() {
           </div>
         </div>
         {nextEvent ? (
-          <a className="closing-event" data-analytics="next_event_closing" href={nextEvent.href} rel="noreferrer" target="_blank">
+          <SmartLink className="closing-event" eventName="next_event_closing" url={nextEvent.href}>
             <div className="closing-event-top"><span>NEXT EVENT / 01</span><time>{nextEvent.date}</time></div>
             <div><p>{nextEvent.type}</p><h3>{nextEvent.title}</h3></div>
             <div className="closing-event-bottom"><span>View event</span><i aria-hidden="true">↗</i></div>
             <div className="closing-event-rail" aria-hidden="true"><i /><i /><i /><i /></div>
-          </a>
+          </SmartLink>
         ) : (
           <div className="closing-event closing-event-empty">
             <div className="closing-event-top"><span>NEXT EVENT</span><span>DATES SOON</span></div>

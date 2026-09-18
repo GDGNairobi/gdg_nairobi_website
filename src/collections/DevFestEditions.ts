@@ -4,6 +4,7 @@ import { isAdmin, isEditor, publishedOrEditor } from '@/access'
 
 export const DevFestEditions: CollectionConfig = {
   slug: 'devfest-editions',
+  labels: { singular: 'DevFest page', plural: 'DevFest pages' },
   access: {
     create: isEditor,
     delete: isAdmin,
@@ -11,10 +12,18 @@ export const DevFestEditions: CollectionConfig = {
     update: isEditor,
   },
   admin: {
-    defaultColumns: ['title', 'year', 'status', '_status', 'updatedAt'],
+    defaultColumns: ['title', 'event', 'year', 'status', '_status', 'updatedAt'],
+    description: 'Optional campaign presentation for a canonical event. Dates, venue, sessions and live operations belong to the linked event.',
     useAsTitle: 'title',
   },
   fields: [
+    {
+      name: 'event',
+      type: 'relationship',
+      relationTo: 'community-events',
+      filterOptions: { eventKind: { equals: 'devfest' } },
+      admin: { description: 'The single canonical DevFest event record used across the website.' },
+    },
     { name: 'title', type: 'text', required: true },
     { name: 'year', type: 'number', required: true, unique: true },
     { name: 'slug', type: 'text', required: true, unique: true, index: true },
@@ -176,6 +185,41 @@ export const DevFestEditions: CollectionConfig = {
         { name: 'allEventsLabel', type: 'text', defaultValue: 'All GDG Nairobi events' },
         { name: 'allEventsURL', type: 'text', defaultValue: 'https://gdg.community.dev/gdg-nairobi/' },
         { name: 'syncNote', type: 'text' },
+      ],
+    },
+    {
+      name: 'highlightsSection',
+      label: 'Past event gallery & videos',
+      type: 'group',
+      admin: { description: 'Curate the homepage photo wall and up to three featured videos.' },
+      fields: [
+        { name: 'enabled', type: 'checkbox', defaultValue: true },
+        { name: 'kicker', type: 'text', defaultValue: 'Previously, in Nairobi' },
+        { name: 'heading', type: 'text', defaultValue: 'Made by the community.' },
+        { name: 'intro', type: 'textarea', defaultValue: 'A few moments, talks and builds from previous GDG Nairobi events.' },
+        {
+          name: 'photos',
+          type: 'array',
+          dbName: 'highlight_photos',
+          maxRows: 9,
+          admin: { description: 'Use 4–9 strong images. The first and fourth images receive more space in the grid.' },
+          fields: [
+            { name: 'image', type: 'upload', relationTo: 'media', required: true },
+            { name: 'caption', type: 'text' },
+          ],
+        },
+        {
+          name: 'videos',
+          type: 'array',
+          dbName: 'highlight_videos',
+          maxRows: 3,
+          admin: { description: 'Displayed in this order and numbered automatically as 01, 02 and 03.' },
+          fields: [
+            { name: 'title', type: 'text', required: true },
+            { name: 'url', type: 'text', required: true, admin: { description: 'YouTube watch, youtu.be, Shorts, or embed URL.' } },
+            { name: 'label', type: 'text', defaultValue: 'Watch video' },
+          ],
+        },
       ],
     },
     {

@@ -141,7 +141,7 @@ export async function syncChapterEvents(payload: Payload): Promise<SyncResult> {
       } else {
         await payload.create({
           collection: 'community-events',
-          data: { ...data, showOnSite: true, featured: false, displayOrder: 0 },
+          data: { ...data, eventDestination: 'community', eventKind: 'community', showOnSite: true, featured: false, displayOrder: 0 },
           overrideAccess: true,
         })
         imported += 1
@@ -156,7 +156,7 @@ export async function syncChapterEvents(payload: Payload): Promise<SyncResult> {
     })
 
     for (const event of stored.docs) {
-      if (!seen.has(event.upstreamURL) && event.upstreamStatus !== 'stale') {
+      if (event.upstreamURL && !seen.has(event.upstreamURL) && event.upstreamStatus !== 'stale') {
         await payload.update({
           collection: 'community-events',
           id: event.id,

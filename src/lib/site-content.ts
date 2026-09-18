@@ -39,6 +39,7 @@ export type HomeContent = {
   chrome: SiteChromeContent
   community: CommunityHomeContent
   year: string
+  eventID?: number
   status: string
   locationLabel: string
   eventDetails: {
@@ -81,6 +82,11 @@ export type HomeContent = {
     artLabelBottom: string
   }
   eventsSection: SectionState & { allEvents: SiteLink; syncNote: string }
+  highlights: SectionState & {
+    intro: string
+    photos: Array<{ src: string; alt: string; caption: string }>
+    videos: Array<{ title: string; url: string; label: string }>
+  }
   closing: SectionState & { accentLine: string; primaryCTA: SiteLink; secondaryCTA: SiteLink }
   memberStat: { value: string; label: string }
 }
@@ -248,6 +254,14 @@ export const defaultHomeContent: HomeContent = {
     allEvents: { label: 'All GDG Nairobi events', url: 'https://gdg.community.dev/gdg-nairobi/' },
     syncNote: 'Events are refreshed from the official GDG Nairobi chapter page.',
   },
+  highlights: {
+    enabled: true,
+    kicker: 'Previously, in Nairobi',
+    heading: 'Made by the community.',
+    intro: 'A few moments, talks and builds from previous GDG Nairobi events.',
+    photos: [],
+    videos: [],
+  },
   closing: {
     enabled: true,
     kicker: 'Nairobi / 2026',
@@ -410,8 +424,14 @@ function mapArtwork(artwork: number | Media | null | undefined) {
   return defaultHomeContent.hero.artwork
 }
 
+function mapMedia(media: number | Media | null | undefined) {
+  if (typeof media !== 'object' || !media?.url) return null
+  return { src: media.url, alt: media.alt || '' }
+}
+
 function mapEdition(edition: DevfestEdition, chrome: SiteChromeContent): HomeContent {
   const year = String(edition.year)
+  const event = typeof edition.event === 'object' ? edition.event : null
   const editionChrome = labelDevFestEdition(chrome, year)
   const cmsTracks = edition.tracks?.map((track, index) => ({
     code: String(index + 1).padStart(2, '0'),
@@ -431,13 +451,14 @@ function mapEdition(edition: DevfestEdition, chrome: SiteChromeContent): HomeCon
     ...defaultHomeContent,
     chrome: editionChrome,
     year,
+    eventID: event?.id,
     status: statusLabels[edition.status] || defaultHomeContent.status,
     locationLabel: withFallback(edition.eventDetails?.locationLabel, defaultHomeContent.locationLabel),
     eventDetails: {
-      startsAt: edition.eventDetails?.startsAt || undefined,
+      startsAt: event?.localStartDate || event?.sourceStartDate || edition.eventDetails?.startsAt || undefined,
       endsAt: edition.eventDetails?.endsAt || undefined,
-      venueName: edition.eventDetails?.venueName || undefined,
-      address: edition.eventDetails?.address || undefined,
+      venueName: event?.venueName || edition.eventDetails?.venueName || undefined,
+      address: event?.venueAddress || edition.eventDetails?.address || undefined,
       mapURL: edition.eventDetails?.mapURL || undefined,
     },
     hero: {
@@ -500,6 +521,21 @@ function mapEdition(edition: DevfestEdition, chrome: SiteChromeContent): HomeCon
         url: withFallback(edition.eventsSection?.allEventsURL, defaultHomeContent.eventsSection.allEvents.url),
       },
       syncNote: withFallback(edition.eventsSection?.syncNote, defaultHomeContent.eventsSection.syncNote),
+    },
+    highlights: {
+      enabled: edition.highlightsSection?.enabled ?? defaultHomeContent.highlights.enabled,
+      kicker: withFallback(edition.highlightsSection?.kicker, defaultHomeContent.highlights.kicker),
+      heading: withFallback(edition.highlightsSection?.heading, defaultHomeContent.highlights.heading),
+      intro: withFallback(edition.highlightsSection?.intro, defaultHomeContent.highlights.intro),
+      photos: edition.highlightsSection?.photos?.flatMap((photo) => {
+        const image = mapMedia(photo.image)
+        return image ? [{ ...image, caption: photo.caption || '' }] : []
+      }) || [],
+      videos: edition.highlightsSection?.videos?.map((video) => ({
+        title: video.title,
+        url: video.url,
+        label: video.label || 'Watch on YouTube',
+      })) || [],
     },
     closing: {
       enabled: edition.closingSection?.enabled ?? defaultHomeContent.closing.enabled,

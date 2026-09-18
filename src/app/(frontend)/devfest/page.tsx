@@ -29,7 +29,8 @@ function SmartLink({ children, className, url }: { children: ReactNode; classNam
 }
 
 export default async function DevFestPage() {
-  const [home, speakers, sessions, partners] = await Promise.all([getHomeContent(), getSpeakers(), getSessions(), getPartners()])
+  const home = await getHomeContent()
+  const [speakers, sessions, partners] = await Promise.all([getSpeakers(), getSessions(home.eventID), getPartners()])
   const venue = home.eventDetails
   const eventStructuredData = venue.startsAt ? {
     '@context': 'https://schema.org',
