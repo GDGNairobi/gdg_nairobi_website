@@ -10,6 +10,8 @@ test.describe('Frontend', () => {
 
     await expect(heading).toContainText('A developer community')
     await expect(page.getByRole('link', { name: /Join GDG Nairobi/i }).first()).toBeVisible()
+    await expect(page.getByRole('link', { name: 'GitHub', exact: true })).toHaveAttribute('href', 'https://github.com/GDGNairobi/gdg_nairobi_website')
+    await expect(page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('link', { name: 'Shop', exact: true })).toHaveAttribute('href', 'https://shop.gdgnairobi.com/')
   })
 
   test('publishes complete search and sharing metadata', async ({ page }) => {

@@ -95,6 +95,7 @@ export const defaultSiteChromeContent: SiteChromeContent = {
     { label: 'Events', url: '/events' },
     { label: 'DevFest', url: '/devfest' },
     { label: 'Organizers', url: '/about#organizers' },
+    { label: 'Shop', url: 'https://shop.gdgnairobi.com/' },
   ],
   headerCTA: { label: 'Join GDG Nairobi', url: 'https://gdg.community.dev/gdg-nairobi/' },
   socialLinks: [
@@ -117,6 +118,7 @@ export const defaultSiteChromeContent: SiteChromeContent = {
         { label: 'GDG Nairobi', url: 'https://gdg.community.dev/gdg-nairobi/' },
         { label: 'Instagram', url: 'https://www.instagram.com/gdg_nairobi' },
         { label: 'X / Twitter', url: 'https://www.twitter.com/GDG_Nairobi' },
+        { label: 'GitHub', url: 'https://github.com/GDGNairobi/gdg_nairobi_website' },
       ],
     },
     {
@@ -269,6 +271,24 @@ const cmsEnabled = () => process.env.ENABLE_CMS === 'true' || process.env.VERCEL
 
 const withFallback = (value: string | null | undefined, fallback: string) => value?.trim() || fallback
 
+const shopLink: SiteLink = { label: 'Shop', url: 'https://shop.gdgnairobi.com/' }
+const repositoryLink: SiteLink = { label: 'GitHub', url: 'https://github.com/GDGNairobi/gdg_nairobi_website' }
+
+function appendUniqueLink(links: SiteLink[], link: SiteLink) {
+  return links.some(({ url }) => url === link.url) ? links : [...links, link]
+}
+
+function includeRepositoryLink(groups: SiteChromeContent['footerGroups']) {
+  if (groups.some((group) => group.links.some(({ url }) => url === repositoryLink.url))) return groups
+
+  const hasConnectGroup = groups.some(({ heading }) => heading.trim().toLowerCase() === 'connect')
+  if (!hasConnectGroup) return [...groups, { heading: 'Connect', links: [repositoryLink] }]
+
+  return groups.map((group) => group.heading.trim().toLowerCase() === 'connect'
+    ? { ...group, links: [...group.links, repositoryLink] }
+    : group)
+}
+
 function mapSiteChrome(settings: SiteSetting): SiteChromeContent {
   const isLegacyDevFestChrome = settings.siteName === 'DevFest Nairobi' && settings.brandLabel === 'DevFest'
   if (isLegacyDevFestChrome) {
@@ -283,18 +303,20 @@ function mapSiteChrome(settings: SiteSetting): SiteChromeContent {
     heading: group.heading,
     links: group.links?.map(({ label, url }) => ({ label, url })) || [],
   }))
+  const resolvedNavigation = navigation?.length ? navigation : defaultSiteChromeContent.navigation
+  const resolvedFooterGroups = footerGroups?.length ? footerGroups : defaultSiteChromeContent.footerGroups
 
   return {
     siteName: withFallback(settings.siteName, defaultSiteChromeContent.siteName),
     brandLabel: withFallback(settings.brandLabel, defaultSiteChromeContent.brandLabel),
     editionLabel: withFallback(settings.editionLabel, defaultSiteChromeContent.editionLabel),
-    navigation: navigation?.length ? navigation : defaultSiteChromeContent.navigation,
+    navigation: appendUniqueLink(resolvedNavigation, shopLink),
     headerCTA: {
       label: withFallback(settings.headerCTA?.label, defaultSiteChromeContent.headerCTA.label),
       url: withFallback(settings.headerCTA?.url, defaultSiteChromeContent.headerCTA.url),
     },
     socialLinks: socialLinks?.length ? socialLinks : defaultSiteChromeContent.socialLinks,
-    footerGroups: footerGroups?.length ? footerGroups : defaultSiteChromeContent.footerGroups,
+    footerGroups: includeRepositoryLink(resolvedFooterGroups),
     footerNote: withFallback(settings.footer?.note, defaultSiteChromeContent.footerNote),
     seo: {
       title: withFallback(settings.seo?.title, defaultSiteChromeContent.seo.title),
