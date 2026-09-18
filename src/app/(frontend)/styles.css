@@ -105,9 +105,10 @@ button { font: inherit; }
 .scroll-cue { position: absolute; z-index: 5; left: max(5vw, 32px); bottom: 28px; display: flex; align-items: center; gap: 11px; font: 500 .66rem/1 var(--mono); text-transform: uppercase; }
 .scroll-cue i { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid var(--ink); border-radius: 50%; font-style: normal; animation: scrollBounce 2s ease-in-out infinite; }
 
-.ticker { position: relative; z-index: 6; overflow: hidden; color: var(--ink); background: var(--yellow); border-block: 1.5px solid var(--ink); transform: rotate(-1deg) scale(1.02); }
-.ticker-track { display: flex; width: max-content; align-items: center; gap: 28px; padding: 18px 0; font-size: clamp(1.15rem, 2vw, 1.8rem); font-weight: 800; letter-spacing: -.04em; animation: tickerMove 24s linear infinite; }
-.ticker-item { display: contents; }
+.ticker { position: relative; z-index: 6; width: 100%; overflow: hidden; color: var(--ink); background: var(--yellow); border-block: 1.5px solid var(--ink); }
+.ticker-track { display: flex; width: max-content; align-items: center; font-size: clamp(1.15rem, 2vw, 1.8rem); font-weight: 800; letter-spacing: -.04em; will-change: transform; animation: tickerLoop 42s linear infinite; }
+.ticker-group { display: flex; flex: none; align-items: center; gap: 28px; padding: 17px 28px; }
+.ticker-item { display: inline-flex; flex: none; align-items: center; gap: 28px; }
 .ticker-track i { color: var(--red); font-style: normal; }
 
 .story-section { padding: clamp(96px, 12vw, 170px) max(6vw, 28px) 90px; color: white; background: var(--deep-blue); }
@@ -397,6 +398,7 @@ button { font: inherit; }
 @keyframes floatPill { 50% { transform: translateY(-12px) rotate(1.5deg); } }
 @keyframes scrollBounce { 50% { transform: translateY(5px); } }
 @keyframes tickerMove { to { transform: translateX(-40%); } }
+@keyframes tickerLoop { to { transform: translateX(-50%); } }
 @keyframes orbitSpin { to { transform: rotate(360deg); } }
 @keyframes micFloat { 50% { transform: translateY(-14px) rotate(-2deg); box-shadow: 19px 22px 0 var(--ink); } }
 @keyframes gridBreathe { 50% { transform: scale(1.07) rotate(1deg); } }

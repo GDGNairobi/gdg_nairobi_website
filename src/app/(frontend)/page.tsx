@@ -21,6 +21,7 @@ function SmartLink({ children, className, eventName, url }: { children: ReactNod
 export default async function HomePage() {
   const [communityEvents, home] = await Promise.all([getCommunityEventCards(3), getHomeContent()])
   const community = home.community
+  const tickerItems = Array.from({ length: 4 }, () => home.ticker.items).flat()
 
   return (
     <main className="site-shell community-site">
@@ -53,7 +54,7 @@ export default async function HomePage() {
         <a className="scroll-cue" href="#about" aria-label="Scroll to learn about GDG Nairobi"><span>Meet the community</span><i aria-hidden="true">↓</i></a>
       </section>
 
-      {home.ticker.enabled && <div className="ticker" aria-label="Community values"><div className="ticker-track">{[...home.ticker.items, ...home.ticker.items].map((item, index) => <span className="ticker-item" key={`${item}-${index}`}><span>{item}</span><i>✦</i></span>)}</div></div>}
+      {home.ticker.enabled && <div className="ticker" aria-label="Community values"><div className="ticker-track">{[0, 1].map((copy) => <div aria-hidden={copy === 1} className="ticker-group" key={copy}>{tickerItems.map((item, index) => <span className="ticker-item" key={`${copy}-${item}-${index}`}><span>{item}</span><i>✦</i></span>)}</div>)}</div></div>}
 
       <section className="community-stats" aria-label="GDG Nairobi at a glance">
         {community.statistics.map((stat) => <div key={`${stat.value}-${stat.label}`}><strong>{stat.value}</strong><span>{stat.label}</span></div>)}
