@@ -24,7 +24,7 @@ export default async function HomePage() {
   const tickerItems = Array.from({ length: 4 }, () => home.ticker.items).flat()
 
   return (
-    <main className="site-shell community-site">
+    <main className="site-shell community-site" id="main-content" tabIndex={-1}>
       <SiteHeader
         cta={{ href: home.chrome.headerCTA.url, label: home.chrome.headerCTA.label }}
         links={home.chrome.navigation.map(({ label, url }) => ({ href: url, label }))}

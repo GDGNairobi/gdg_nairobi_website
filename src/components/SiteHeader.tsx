@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { GdgLogo } from './GdgLogo'
 
@@ -29,14 +29,28 @@ export function SiteHeader({
   cta = { href: 'https://gdg.community.dev/gdg-nairobi/', label: 'Join GDG Nairobi' },
 }: Props = {}) {
   const [open, setOpen] = useState(false)
+  const toggleRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      setOpen(false)
+      toggleRef.current?.focus()
+    }
+
+    window.addEventListener('keydown', closeOnEscape)
+    return () => window.removeEventListener('keydown', closeOnEscape)
+  }, [open])
 
   return (
     <header className={`site-header ${open ? 'menu-open' : ''}`}>
       <Link className="site-brand" href="/" aria-label={`${siteName} home`}>
         <GdgLogo />
       </Link>
-      <button className="menu-toggle" type="button" aria-expanded={open} aria-controls="site-navigation" onClick={() => setOpen(!open)}>
-        <span /><span /><span className="sr-only">Toggle menu</span>
+      <button ref={toggleRef} className="menu-toggle" type="button" aria-expanded={open} aria-controls="site-navigation" aria-label={open ? 'Close menu' : 'Open menu'} onClick={() => setOpen(!open)}>
+        <span /><span />
       </button>
       <nav id="site-navigation" aria-label="Primary navigation">
         {links.map((link) => isInternal(link.href) ? (
