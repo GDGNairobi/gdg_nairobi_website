@@ -15,6 +15,8 @@ Thank you for helping improve the GDG Nairobi website. Contributions should stre
 Requirements: Node.js 20.9+ and pnpm 9+.
 
 ```bash
+git clone https://github.com/GDGNairobi/gdg_nairobi_website.git
+cd gdg_nairobi_website
 cp .env.example .env
 pnpm install
 pnpm db:up

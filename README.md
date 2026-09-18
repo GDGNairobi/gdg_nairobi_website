@@ -2,6 +2,8 @@
 
 The public website and editorial platform for GDG Nairobi. The visual direction brings Nairobi's skyline and National Park into one sunrise landscape, using the Google colour system, restrained motion, and the chapter's year-round community as the main story. DevFest remains the flagship event, not the whole site.
 
+**Repository:** [github.com/GDGNairobi/gdg_nairobi_website](https://github.com/GDGNairobi/gdg_nairobi_website)
+
 ## What is included
 
 - A responsive Next.js 16 website for GDG Nairobi and DevFest Nairobi
