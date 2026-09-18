@@ -93,7 +93,7 @@ export const defaultSiteChromeContent: SiteChromeContent = {
     { label: 'About', url: '/about' },
     { label: 'Community', url: '/#community' },
     { label: 'Events', url: '/events' },
-    { label: 'DevFest', url: '/devfest' },
+    { label: 'DevFest 2026', url: '/devfest' },
     { label: 'Organizers', url: '/about#organizers' },
     { label: 'Shop', url: 'https://shop.gdgnairobi.com/' },
   ],
@@ -109,7 +109,7 @@ export const defaultSiteChromeContent: SiteChromeContent = {
       links: [
         { label: 'About GDG Nairobi', url: '/about' },
         { label: 'Events', url: '/events' },
-        { label: 'DevFest Nairobi', url: '/devfest' },
+        { label: 'DevFest Nairobi 2026', url: '/devfest' },
       ],
     },
     {
@@ -289,6 +289,17 @@ function includeRepositoryLink(groups: SiteChromeContent['footerGroups']) {
     : group)
 }
 
+function labelDevFestEdition(chrome: SiteChromeContent, year: string): SiteChromeContent {
+  return {
+    ...chrome,
+    navigation: chrome.navigation.map((link) => link.url === '/devfest' ? { ...link, label: `DevFest ${year}` } : link),
+    footerGroups: chrome.footerGroups.map((group) => ({
+      ...group,
+      links: group.links.map((link) => link.url === '/devfest' ? { ...link, label: `DevFest Nairobi ${year}` } : link),
+    })),
+  }
+}
+
 function mapSiteChrome(settings: SiteSetting): SiteChromeContent {
   const isLegacyDevFestChrome = settings.siteName === 'DevFest Nairobi' && settings.brandLabel === 'DevFest'
   if (isLegacyDevFestChrome) {
@@ -400,6 +411,8 @@ function mapArtwork(artwork: number | Media | null | undefined) {
 }
 
 function mapEdition(edition: DevfestEdition, chrome: SiteChromeContent): HomeContent {
+  const year = String(edition.year)
+  const editionChrome = labelDevFestEdition(chrome, year)
   const cmsTracks = edition.tracks?.map((track, index) => ({
     code: String(index + 1).padStart(2, '0'),
     title: track.title,
@@ -416,8 +429,8 @@ function mapEdition(edition: DevfestEdition, chrome: SiteChromeContent): HomeCon
 
   return {
     ...defaultHomeContent,
-    chrome,
-    year: String(edition.year),
+    chrome: editionChrome,
+    year,
     status: statusLabels[edition.status] || defaultHomeContent.status,
     locationLabel: withFallback(edition.eventDetails?.locationLabel, defaultHomeContent.locationLabel),
     eventDetails: {

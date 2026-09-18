@@ -21,6 +21,7 @@ function SmartLink({ children, className, eventName, url }: { children: ReactNod
 export default async function HomePage() {
   const [communityEvents, home] = await Promise.all([getCommunityEventCards(3), getHomeContent()])
   const community = home.community
+  const nextEvent = communityEvents[0]
   const tickerItems = Array.from({ length: 4 }, () => home.ticker.items).flat()
 
   return (
@@ -97,13 +98,14 @@ export default async function HomePage() {
           <p className="section-kicker light">Our flagship gathering · {home.year}</p>
           <h2 id="devfest-title">{home.hero.headline}<em>{home.hero.accentLine}</em></h2>
           <p>{home.hero.description}</p>
-          <SmartLink className="button button-light" eventName="devfest_feature" url="/devfest">Explore DevFest Nairobi <span aria-hidden="true">→</span></SmartLink>
+          <SmartLink className="button button-light" eventName="devfest_feature" url="/devfest">Explore DevFest Nairobi {home.year} <span aria-hidden="true">→</span></SmartLink>
         </div>
-        <div className="devfest-feature-art">
-          <div className="dawn-glow" />
-          <Image alt={home.hero.artwork.alt} className="city-image" fill sizes="(max-width: 900px) 100vw, 58vw" src={home.hero.artwork.src} />
-          <span className="signal-pill signal-pill-1">DEVFEST / {home.year}</span>
-          <span className="signal-pill signal-pill-2">NAIROBI / COMMUNITY</span>
+        <div className="devfest-poster" aria-hidden="true">
+          <div className="devfest-poster-routes"><i /><i /><i /></div>
+          <span className="devfest-poster-label">NAIROBI / FLAGSHIP EVENT</span>
+          <div className="devfest-poster-title"><span>DEVFEST</span><strong>{home.year}</strong></div>
+          <div className="devfest-poster-meta"><span>COMMUNITY-LED</span><span>TALKS · WORKSHOPS · CODELABS</span></div>
+          <div className="devfest-color-rail"><i /><i /><i /><i /></div>
         </div>
       </section>
 
@@ -112,14 +114,30 @@ export default async function HomePage() {
         <div className="ecosystem-copy"><p>{community.ecosystem.description}</p><div className="ecosystem-tags">{community.ecosystem.items.map((item) => <span key={item}>{item}</span>)}</div></div>
       </section>
 
-      <section className="closing-section community-closing">
+      <section className="closing-section community-closing" aria-labelledby="closing-title">
         <div className="closing-grid" aria-hidden="true" />
-        <p className="section-kicker light">{community.closing.kicker}</p>
-        <h2>{community.closing.heading}<br /><em>{community.closing.accentLine}</em></h2>
-        <div className="closing-actions">
-          <SmartLink className="button button-light" eventName="join_community_closing" url={community.closing.primaryCTA.url}>{community.closing.primaryCTA.label} <span>↗</span></SmartLink>
-          <SmartLink eventName="meet_organizers" url={community.closing.secondaryCTA.url}>{community.closing.secondaryCTA.label} →</SmartLink>
+        <div className="closing-copy">
+          <p className="section-kicker light">{community.closing.kicker}</p>
+          <h2 id="closing-title">{community.closing.heading}<em>{community.closing.accentLine}</em></h2>
+          <div className="closing-actions">
+            <SmartLink className="button button-light" eventName="all_events_closing" url="/events">See upcoming events <span aria-hidden="true">→</span></SmartLink>
+            <SmartLink eventName="join_community_closing" url={community.closing.primaryCTA.url}>{community.closing.primaryCTA.label} ↗</SmartLink>
+          </div>
         </div>
+        {nextEvent ? (
+          <a className="closing-event" data-analytics="next_event_closing" href={nextEvent.href} rel="noreferrer" target="_blank">
+            <div className="closing-event-top"><span>NEXT EVENT / 01</span><time>{nextEvent.date}</time></div>
+            <div><p>{nextEvent.type}</p><h3>{nextEvent.title}</h3></div>
+            <div className="closing-event-bottom"><span>View event</span><i aria-hidden="true">↗</i></div>
+            <div className="closing-event-rail" aria-hidden="true"><i /><i /><i /><i /></div>
+          </a>
+        ) : (
+          <div className="closing-event closing-event-empty">
+            <div className="closing-event-top"><span>NEXT EVENT</span><span>DATES SOON</span></div>
+            <div><p>GDG NAIROBI</p><h3>New community events are being prepared.</h3></div>
+            <div className="closing-event-bottom"><span>Check back soon</span></div>
+          </div>
+        )}
       </section>
 
       <footer className="footer">

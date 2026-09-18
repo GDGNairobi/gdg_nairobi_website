@@ -24,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
       default: title,
       template: '%s | GDG Nairobi',
     },
-    keywords: ['GDG Nairobi', 'Google Developer Groups Nairobi', 'Nairobi developer community', 'developer events Nairobi', 'DevFest Nairobi'],
+    keywords: ['GDG Nairobi', 'Google Developer Groups Nairobi', 'Nairobi developer community', 'developer events Nairobi', 'DevFest Nairobi 2026'],
     authors: [{ name: 'GDG Nairobi', url: '/' }],
     creator: 'GDG Nairobi',
     publisher: 'GDG Nairobi',

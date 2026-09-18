@@ -57,8 +57,8 @@ export default async function DevFestPage() {
       <header className="devfest-editorial-hero">
         <MotionLayer />
         <div className="devfest-editorial-copy">
-          <p className="section-kicker">DevFest · {home.year}</p>
-          <h1>DevFest<br />Nairobi.</h1>
+          <p className="section-kicker">DevFest Nairobi · {home.year}</p>
+          <h1>DevFest<br />Nairobi {home.year}.</h1>
           <p className="devfest-editorial-lede"><strong>{home.hero.headline} {home.hero.accentLine}</strong> {home.hero.description}</p>
           <div className="hero-actions">
             <a className="button button-primary" data-analytics="devfest_updates" href={`mailto:gdgnairobi@gmail.com?subject=DevFest%20Nairobi%20${home.year}%20updates`}>Get event updates <span aria-hidden="true">↗</span></a>
@@ -81,7 +81,7 @@ export default async function DevFestPage() {
 
       <div className="devfest-content">
         <section className="devfest-overview" id="about-devfest">
-          <p className="section-kicker">About DevFest</p>
+          <p className="section-kicker">About DevFest Nairobi {home.year}</p>
           <h2>One large event in a year-round programme.</h2>
           <p>DevFest brings the chapter together for technical sessions, hands-on learning and time to meet other participants. Confirmed information is published below as it becomes available.</p>
         </section>
