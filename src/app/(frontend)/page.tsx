@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 
 import { MotionLayer } from '@/components/MotionLayer'
 import { GdgLogo } from '@/components/GdgLogo'
+import { HeroProducts } from '@/components/HeroProducts'
 import { SiteHeader } from '@/components/SiteHeader'
 import { getCommunityEventCards } from '@/lib/community-events'
 import { getHomeContent } from '@/lib/site-content'
@@ -64,16 +65,13 @@ export default async function HomePage() {
             <SmartLink className="button button-primary" eventName="join_community" url={community.hero.primaryCTA.url}>{community.hero.primaryCTA.label} <span aria-hidden="true">↗</span></SmartLink>
             <SmartLink className="button button-ghost" eventName="explore_events" url={community.hero.secondaryCTA.url}>{community.hero.secondaryCTA.label} <span aria-hidden="true">→</span></SmartLink>
           </div>
-          <div className="hero-meta" aria-label="Community status"><span className="status-dot" /><span>Year-round community</span><span className="meta-divider" /><span>Nairobi, Kenya</span></div>
         </div>
 
         <div className="hero-art" aria-hidden="true">
           <div className="dawn-glow" />
           <Image alt={home.hero.artwork.alt} className="city-image" fill priority sizes="(max-width: 760px) 172vw, 99vw" src={home.hero.artwork.src} />
-          {home.hero.signals.slice(0, 3).map((label, index) => <span className={`signal-pill signal-pill-${index + 1}`} key={`${label}-${index}`}>{label}</span>)}
         </div>
-
-        <a className="scroll-cue" href="#about" aria-label="Scroll to learn about GDG Nairobi"><span>Meet the community</span><i aria-hidden="true">↓</i></a>
+        <HeroProducts />
       </section>
 
       {home.ticker.enabled && <div className="ticker" aria-label="Community values"><div className="ticker-track">{[0, 1].map((copy) => <div aria-hidden={copy === 1} className="ticker-group" key={copy}>{tickerItems.map((item, index) => <span className="ticker-item" key={`${copy}-${item}-${index}`}><span>{item}</span><i>✦</i></span>)}</div>)}</div></div>}

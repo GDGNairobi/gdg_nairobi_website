@@ -27,4 +27,21 @@ test.describe('Frontend', () => {
     await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', 'http://localhost:3000/social-card')
     await expect(page.locator('script[type="application/ld+json"]')).not.toHaveCount(0)
   })
+
+  test('hides a useful Jenga command palette and Nairobi greeting', async ({ page }) => {
+    const consoleMessages: string[] = []
+    page.on('console', (message) => consoleMessages.push(message.text()))
+
+    await page.goto('http://localhost:3000')
+    await expect.poll(() => consoleMessages.some((message) => message.includes('Nairobi is building.'))).toBe(true)
+
+    await page.keyboard.type('jenga')
+    const palette = page.getByRole('dialog', { name: 'Jenga' })
+    await expect(palette).toBeVisible()
+
+    await palette.getByRole('searchbox', { name: 'Search site commands' }).fill('schedule')
+    await expect(palette.getByRole('option')).toHaveCount(1)
+    await page.keyboard.press('Enter')
+    await expect(page).toHaveURL(/\/schedule$/)
+  })
 })

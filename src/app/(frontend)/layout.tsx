@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import React from 'react'
 
 import { JsonLd } from '@/components/JsonLd'
+import { SiteEasterEggs } from '@/components/SiteEasterEggs'
 import { getSiteURL } from '@/lib/metadata'
 import { getSiteChromeContent } from '@/lib/site-content'
 
@@ -100,6 +101,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <a className="skip-link" href="#main-content">Skip to main content</a>
         <JsonLd data={structuredData} />
+        <SiteEasterEggs />
         {children}
       </body>
     </html>
