@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import React from 'react'
 
+import '@fontsource-variable/manrope'
+
 import { JsonLd } from '@/components/JsonLd'
 import { SiteEasterEggs } from '@/components/SiteEasterEggs'
 import { getSiteURL } from '@/lib/metadata'

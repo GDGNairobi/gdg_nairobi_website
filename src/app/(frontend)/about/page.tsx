@@ -54,9 +54,9 @@ export default async function AboutPage() {
       {chapterPartners.length > 0 && <section className="about-partners" id="partners">
         <header><p className="section-kicker">Sponsors & partners</p><h2>Organisations listed by the chapter.</h2><p>This directory reflects the official GDG Nairobi chapter page and does not imply support for every current event.</p></header>
         <div className="chapter-sponsor-grid">
-          {localSponsors.map((partner) => <a href={partner.url || '#'} key={partner.id} rel={partner.url ? 'noreferrer' : undefined} target={partner.url ? '_blank' : undefined}>{partner.sourceLogoURL && <Image alt="" height={72} src={partner.sourceLogoURL} unoptimized width={150} />}<strong>{partner.name}</strong><span>Local sponsor</span></a>)}
+          {localSponsors.map((partner) => <a href={partner.url || '#'} key={partner.id} rel={partner.url ? 'noreferrer' : undefined} target={partner.url ? '_blank' : undefined}>{partner.sourceLogoURL && <Image alt="" height={72} src={partner.sourceLogoURL} width={150} />}<strong>{partner.name}</strong><span>Local sponsor</span></a>)}
         </div>
-        {communityPartners.length > 0 && <details className="partner-directory"><summary>View {communityPartners.length} chapter partners <span>＋</span></summary><div>{communityPartners.map((partner) => <a href={partner.url || '#'} key={partner.id} rel={partner.url ? 'noreferrer' : undefined} target={partner.url ? '_blank' : undefined}>{partner.sourceLogoURL && <Image alt="" height={56} src={partner.sourceLogoURL} unoptimized width={120} />}<strong>{partner.name}</strong></a>)}</div></details>}
+        {communityPartners.length > 0 && <details className="partner-directory"><summary>View {communityPartners.length} chapter partners <span>＋</span></summary><div>{communityPartners.map((partner) => <a href={partner.url || '#'} key={partner.id} rel={partner.url ? 'noreferrer' : undefined} target={partner.url ? '_blank' : undefined}>{partner.sourceLogoURL && <Image alt="" height={56} src={partner.sourceLogoURL} width={120} />}<strong>{partner.name}</strong></a>)}</div></details>}
       </section>}
 
       <a className="wide-cta" data-analytics="join_about" href={community.hero.primaryCTA.url} rel="noreferrer" target="_blank"><span>COME AS YOU ARE</span><strong>Join GDG Nairobi</strong><i>↗</i></a>

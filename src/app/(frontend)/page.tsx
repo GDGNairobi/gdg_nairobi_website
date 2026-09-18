@@ -69,7 +69,7 @@ export default async function HomePage() {
 
         <div className="hero-art" aria-hidden="true">
           <div className="dawn-glow" />
-          <Image alt={home.hero.artwork.alt} className="city-image" fill priority sizes="(max-width: 760px) 172vw, 99vw" src={home.hero.artwork.src} />
+          <Image alt={home.hero.artwork.alt} className="city-image" fill preload sizes="(max-width: 900px) 150vw, (max-width: 1600px) 78vw, 1240px" src={home.hero.artwork.src} />
         </div>
         <HeroProducts />
       </section>
@@ -118,10 +118,16 @@ export default async function HomePage() {
           <p className="section-intro">{home.highlights.intro}</p>
         </div>
         {home.highlights.photos.length > 0 && <div className="memory-grid">
-          {home.highlights.photos.map((photo, index) => <figure key={`${photo.src}-${index}`}>
-            <Image alt={photo.alt} fill sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 33vw" src={photo.src} />
-            {photo.caption && <figcaption>{photo.caption}</figcaption>}
-          </figure>)}
+          {home.highlights.photos.map((photo, index) => {
+            const wide = index === 0 || index % 6 === 3
+            const sizes = wide
+              ? '(max-width: 900px) calc(100vw - 44px), 66vw'
+              : '(max-width: 700px) calc(100vw - 36px), (max-width: 900px) 50vw, 33vw'
+            return <figure key={`${photo.src}-${index}`}>
+              <Image alt={photo.alt} fill sizes={sizes} src={photo.src} />
+              {photo.caption && <figcaption>{photo.caption}</figcaption>}
+            </figure>
+          })}
         </div>}
         {featuredVideos.length > 0 && <div className={`featured-videos featured-videos-${featuredVideos.length}`}>
           {featuredVideos.map((video, index) => <article key={`${video.url}-${index}`}>

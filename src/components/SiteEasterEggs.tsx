@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 type Command = {
@@ -31,6 +32,7 @@ const isTypingTarget = (target: EventTarget | null) => {
 }
 
 export function SiteEasterEggs() {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [activeIndex, setActiveIndex] = useState(0)
@@ -87,6 +89,15 @@ export function SiteEasterEggs() {
 
   const close = () => setOpen(false)
 
+  const openCommand = (command: Command) => {
+    close()
+    if (command.external) {
+      window.open(command.href, '_blank', 'noopener,noreferrer')
+      return
+    }
+    router.push(command.href)
+  }
+
   const onDialogKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Escape') {
       event.preventDefault()
@@ -99,7 +110,7 @@ export function SiteEasterEggs() {
       setActiveIndex((index) => (index - 1 + filteredCommands.length) % filteredCommands.length)
     } else if (event.key === 'Enter' && filteredCommands[activeIndex]) {
       event.preventDefault()
-      document.getElementById(`jenga-command-${activeIndex}`)?.click()
+      openCommand(filteredCommands[activeIndex])
     }
   }
 
@@ -152,7 +163,6 @@ export function SiteEasterEggs() {
             const props = {
               'aria-selected': index === activeIndex,
               className: index === activeIndex ? 'is-active' : undefined,
-              id: `jenga-command-${index}`,
               onClick: close,
               onMouseEnter: () => setActiveIndex(index),
               role: 'option',
