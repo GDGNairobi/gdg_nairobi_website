@@ -351,7 +351,20 @@ button { font: inherit; }
 .devfest-detail-section > header { margin-bottom: 55px; display: grid; grid-template-columns: .4fr 1fr; gap: 40px; align-items: start; }
 .devfest-detail-section > header h2 { max-width: 1050px; margin: 0; font-size: clamp(3rem, 5.5vw, 6rem); line-height: .96; letter-spacing: -.07em; }
 .compact-stage { min-height: 480px; }
-.devfest-page-hero { min-height: max(720px, 92svh); }
+.devfest-editorial-hero { position: relative; min-height: 650px; padding: 150px max(7vw, 28px) 72px; display: flex; align-items: center; overflow: hidden; border-bottom: 1.5px solid var(--ink); background: linear-gradient(110deg, #edf7f1 0%, var(--canvas) 68%); isolation: isolate; }
+.devfest-editorial-hero::before { content: ''; position: absolute; z-index: -2; inset: 0; opacity: .11; background-image: linear-gradient(var(--ink) 1px, transparent 1px), linear-gradient(90deg, var(--ink) 1px, transparent 1px); background-size: 55px 55px; mask-image: linear-gradient(90deg, black, transparent 76%); }
+.devfest-editorial-hero .motion-layer { z-index: -1; opacity: .25; }
+.devfest-editorial-copy { position: relative; z-index: 2; width: min(780px, 58vw); }
+.devfest-editorial-copy .section-kicker { margin-bottom: 26px; }
+.devfest-editorial-copy h1 { margin: 0; font-size: clamp(5.2rem, 8.8vw, 9.2rem); font-weight: 700; line-height: .82; letter-spacing: -.09em; }
+.devfest-editorial-lede { max-width: 660px; margin: 34px 0 0; color: rgba(32,33,36,.68); font-size: clamp(1.02rem, 1.35vw, 1.22rem); line-height: 1.65; }
+.devfest-editorial-lede strong { color: var(--ink); font-weight: 700; }
+.devfest-editorial-orbit { position: absolute; top: 52%; right: -4%; width: min(42vw, 590px); aspect-ratio: 1; transform: translateY(-50%); border: 1.5px solid var(--green); border-radius: 50%; animation: orbitSpin 32s linear infinite; }
+.devfest-editorial-orbit::before { content: ''; position: absolute; inset: 16%; border: 1px dashed rgba(32,33,36,.32); border-radius: 50%; }
+.devfest-editorial-orbit::after { content: ''; position: absolute; inset: 32%; border: 1px solid rgba(32,33,36,.28); border-radius: 50%; background: #ceead6; }
+.devfest-editorial-orbit i { position: absolute; z-index: 2; width: 16px; height: 16px; border: 5px solid var(--canvas); border-radius: 50%; background: var(--green); }
+.devfest-editorial-orbit i:nth-child(1) { top: 14%; left: 18%; }.devfest-editorial-orbit i:nth-child(2) { top: 46%; right: -1%; }.devfest-editorial-orbit i:nth-child(3) { bottom: 5%; left: 28%; }
+.devfest-editorial-orbit > span { position: absolute; z-index: 3; inset: 32%; display: grid; place-items: center; font: 500 clamp(.7rem, 1vw, .9rem)/1 var(--mono); letter-spacing: .16em; }
 .devfest-anchor-bar { display: grid; grid-template-columns: repeat(4, 1fr); border-block: 1.5px solid var(--ink); background: white; }
 .devfest-anchor-bar a { min-height: 94px; padding: 18px max(2vw, 18px); display: flex; align-items: flex-end; justify-content: space-between; border-right: 1px solid var(--ink); transition: color .25s ease, background .25s ease; }
 .devfest-anchor-bar a:last-child { border-right: 0; }.devfest-anchor-bar a:hover { color: white; background: var(--blue); }
@@ -458,7 +471,11 @@ button { font: inherit; }
   .devfest-section-nav a:nth-child(2) { border-right: 0; }.devfest-section-nav a:nth-child(-n+2) { border-bottom: 1px solid var(--ink); }
   .devfest-detail-section > header { grid-template-columns: 1fr; gap: 16px; }
   .devfest-detail-section > header h2 { font-size: clamp(3rem, 13vw, 5rem); }
-  .devfest-page-hero { min-height: 900px; }
+  .devfest-editorial-hero { min-height: 760px; padding: 120px 22px 64px; align-items: flex-start; }
+  .devfest-editorial-copy { width: 100%; }
+  .devfest-editorial-copy h1 { font-size: clamp(4.2rem, 18vw, 6.4rem); }
+  .devfest-editorial-lede { max-width: 88%; }
+  .devfest-editorial-orbit { top: auto; right: -38%; bottom: -24%; width: 92vw; opacity: .38; transform: none; }
   .devfest-anchor-bar { grid-template-columns: 1fr 1fr; }
   .devfest-anchor-bar a:nth-child(2) { border-right: 0; }.devfest-anchor-bar a:nth-child(-n+2) { border-bottom: 1px solid var(--ink); }
   .devfest-content { padding-inline: 22px; }

@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 
@@ -27,26 +26,23 @@ export default async function DevFestPage() {
     <main className="site-shell devfest-page">
       <SiteHeader cta={{ href: home.chrome.headerCTA.url, label: home.chrome.headerCTA.label }} links={home.chrome.navigation.map(({ label, url }) => ({ href: url, label }))} siteName={home.chrome.siteName} />
 
-      <section className="hero devfest-page-hero">
+      <header className="devfest-editorial-hero">
         <MotionLayer />
-        <div className="hero-noise" aria-hidden="true" />
-        <div className="hero-copy">
-          <p className="eyebrow"><span>DevFest Nairobi</span><span className="eyebrow-line" />{home.year}</p>
-          <h1>{home.hero.headline}<span className="hero-grow">{home.hero.accentLine}</span></h1>
-          <p className="hero-lede">{home.hero.description}</p>
+        <div className="devfest-editorial-copy">
+          <p className="section-kicker">DevFest · {home.year}</p>
+          <h1>DevFest<br />Nairobi.</h1>
+          <p className="devfest-editorial-lede"><strong>{home.hero.headline} {home.hero.accentLine}</strong> {home.hero.description}</p>
           <div className="hero-actions">
             <a className="button button-primary" data-analytics="devfest_updates" href={`mailto:gdgnairobi@gmail.com?subject=DevFest%20Nairobi%20${home.year}%20updates`}>Get event updates <span aria-hidden="true">↗</span></a>
             <a className="button button-ghost" href="#programme">View programme <span aria-hidden="true">↓</span></a>
           </div>
           <div className="hero-meta"><span className="status-dot" /><span>{home.status}</span><span className="meta-divider" /><span>{home.locationLabel}</span></div>
         </div>
-        <div className="hero-art" aria-hidden="true">
-          <div className="dawn-glow" />
-          <Image alt={home.hero.artwork.alt} className="city-image" fill priority sizes="(max-width: 760px) 172vw, 99vw" src={home.hero.artwork.src} />
-          {home.hero.signals.slice(0, 3).map((label, index) => <span className={`signal-pill signal-pill-${index + 1}`} key={`${label}-${index}`}>{label}</span>)}
+        <div className="devfest-editorial-orbit" aria-hidden="true">
+          <i /><i /><i />
+          <span>{home.year}</span>
         </div>
-        <a className="scroll-cue" href="#about-devfest"><span>Event details</span><i aria-hidden="true">↓</i></a>
-      </section>
+      </header>
 
       <nav className="devfest-anchor-bar" aria-label="DevFest page sections">
         <a href="#speakers"><small>01</small><strong>Speakers</strong></a>
