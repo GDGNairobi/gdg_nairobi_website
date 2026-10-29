@@ -128,7 +128,12 @@ export default async function EventPage({ params }: PageProps<'/events/[slug]'>)
       {event.tagline && <p className="event-tagline">{event.tagline}</p>}
       {cover?.url && (
         <div className="event-cover">
-          <Image src={mediaURL(cover.url)} alt={cover.alt} fill sizes="90vw" />
+          <Image
+            src={mediaURL(cover.url)}
+            alt={cover.alt}
+            fill
+            sizes="(max-width: 380px) calc(100vw - 36px), (max-width: 900px) calc(100vw - 44px), 86vw"
+          />
         </div>
       )}
       <section className="schedule-live-bar" aria-label="Event status">

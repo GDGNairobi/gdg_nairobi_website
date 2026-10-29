@@ -28,9 +28,9 @@ const nextConfig: NextConfig = {
     ]
   },
   images: {
-    deviceSizes: [360, 390, 640, 768, 900, 1024, 1280, 1440, 1920],
+    deviceSizes: [320, 360, 390, 480, 560, 640, 768, 900, 1024, 1280, 1440, 1920],
     formats: ['image/avif', 'image/webp'],
-    imageSizes: [32, 48, 64, 96, 120, 150, 256, 384],
+    imageSizes: [32, 48, 64, 96, 120, 150, 256],
     localPatterns: [
       {
         pathname: '/api/media/file/**',

@@ -210,7 +210,7 @@ export default async function HomePage() {
               alt={community.connection.image.alt}
               src={community.connection.image.src}
               fill
-              sizes="(max-width: 900px) 90vw, 50vw"
+              sizes="(max-width: 700px) calc(100vw - 47px), (max-width: 1024px) calc(48.4vw - 20.6px), calc(48.4vw - 36px)"
             />
           </div>
           <div>
@@ -257,7 +257,7 @@ export default async function HomePage() {
                 src={mediaURL(featured.coverImage.url)}
                 alt={featured.coverImage.alt}
                 fill
-                sizes="(max-width: 900px) 90vw, 50vw"
+                sizes="(max-width: 900px) calc(100vw - 47px), (max-width: 1714px) calc(47.79vw - 3px), calc(51.92vw - 73.8px)"
               />
             ) : (
               <strong>{featured.tagline || featured.title}</strong>

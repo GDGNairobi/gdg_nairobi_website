@@ -1,5 +1,8 @@
 import { expect, test } from '@playwright/test'
 
+// Retina screens should receive a sharp image without downloading oversized variants.
+test.use({ deviceScaleFactor: 2 })
+
 for (const width of [320, 390, 768, 1024, 1025, 1440]) {
   test(`community postcards fit and load at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 1000 })
@@ -23,11 +26,32 @@ for (const width of [320, 390, 768, 1024, 1025, 1440]) {
       expect(bounds).not.toBeNull()
       expect(bounds!.x).toBeGreaterThanOrEqual(0)
       expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width)
+      const selection = await photo.evaluate((image: HTMLImageElement) => ({
+        url: image.currentSrc,
+        width: image.clientWidth,
+        dpr: devicePixelRatio,
+      }))
+      const variant = new URL(selection.url)
+      expect(variant.pathname).toBe('/_next/image')
+      const requestedWidth = Number(variant.searchParams.get('w'))
+      expect(requestedWidth).toBeGreaterThanOrEqual(selection.width * selection.dpr * 0.98)
+      expect(requestedWidth).toBeLessThanOrEqual(selection.width * selection.dpr * 1.25)
     }
 
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1),
     ).toBe(true)
+    const featured = await page.locator('.featured-event-photo').boundingBox()
+    expect(featured!.x).toBeGreaterThanOrEqual(0)
+    expect(featured!.x + featured!.width).toBeLessThanOrEqual(width)
+    const response = await page.request.get(
+      await photos.first().evaluate((image: HTMLImageElement) => image.currentSrc),
+      { headers: { Accept: 'image/avif,image/webp,image/*' } },
+    )
+    expect(response.ok()).toBe(true)
+    expect(response.headers()['content-type']).toMatch(/^image\/(avif|webp)/)
+    expect(response.headers()['cache-control']).toMatch(/max-age=[1-9]\d*/)
+    expect((await response.body()).length).toBeLessThan(100_000)
     const imageWidths = await photos.evaluateAll((images) =>
       images.map((image) => image.clientWidth),
     )
@@ -57,6 +81,11 @@ for (const width of [320, 390, 768, 1024, 1025, 1440]) {
 test('hero actions retain keyboard focus with reduced motion', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('http://localhost:3000')
+  const photos = page.locator('.community-photo-hero img')
+  await expect(photos.first()).toHaveAttribute('loading', 'eager')
+  await expect(photos.first()).toHaveAttribute('fetchpriority', 'high')
+  for (const photo of (await photos.all()).slice(1))
+    await expect(photo).toHaveAttribute('loading', 'lazy')
   const join = page
     .locator('.community-photo-hero')
     .getByRole('link', { name: /Join the community/ })

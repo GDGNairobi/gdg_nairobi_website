@@ -435,7 +435,7 @@ section[id], div[id] { scroll-margin-top: 100px; }
 .featured-videos h3 { margin: 12px 0 20px; font-size: clamp(1.3rem, 2.2vw, 2.15rem); line-height: 1.08; letter-spacing: -.04em; }
 .featured-videos article > a { font-size: .78rem; font-weight: 800; }
 
-.devfest-feature { position: relative; min-height: 680px; padding: clamp(54px, 6vw, 88px) max(6vw, 28px); display: grid; grid-template-columns: minmax(360px, .82fr) minmax(520px, 1.18fr); gap: clamp(48px, 7vw, 120px); align-items: center; overflow: hidden; color: white; background: var(--deep-blue); }
+.devfest-feature { position: relative; min-height: 680px; padding: clamp(54px, 6vw, 88px) max(6vw, 28px); display: grid; grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr); gap: clamp(48px, 7vw, 120px); align-items: center; overflow: hidden; color: white; background: var(--deep-blue); }
 .devfest-feature::before { content: ''; position: absolute; inset: 0; opacity: .12; background-image: linear-gradient(rgba(255,255,255,.24) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.24) 1px, transparent 1px); background-size: 54px 54px; mask-image: linear-gradient(90deg, transparent, black 46%, black); }
 .devfest-feature-copy { position: relative; z-index: 4; display: flex; flex-direction: column; justify-content: center; }
 .devfest-feature-copy h2 { margin: 0; font-size: clamp(3.1rem, 5.2vw, 5.1rem); line-height: .97; letter-spacing: -.045em; }

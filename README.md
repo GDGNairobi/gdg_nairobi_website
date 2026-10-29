@@ -69,6 +69,8 @@ Set `ENABLE_CMS=false` to run the public site without PostgreSQL. The applicatio
 
 In **Site Settings → Community homepage → Hero**, order up to four Media photos and edit the photo caption. The first photo leads a grid of equal-sized postcards; the built-in selection starts with the wide audience shot. Use landscape photos with descriptive Media alt text; images retain their full content inside 3:2 frames. A published selection replaces the built-in photos, including selections of fewer than four. An empty or unavailable selection uses all four original bundled photographs. Tablet and phone layouts show the photos in two columns below the headline and buttons.
 
+Public photos use Next.js responsive variants with AVIF/WebP negotiation and cached delivery. Image sizes follow the actual grid and its frames, including tablet width caps and retina screens. The leading hero photo loads eagerly at high priority; the others and lower-page photos use lazy loading. Originals remain available in Media.
+
 Run `pnpm migrate` before deploying this schema change. The `add_community_hero_photos` migration adds photo rows and the caption to Site Settings and its draft/version tables without changing existing editorial content.
 
 ### Media storage
