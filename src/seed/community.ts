@@ -188,11 +188,12 @@ export async function seedCommunity(payload: Payload, req?: PayloadRequest) {
           { upstreamURL: { like: seed.slug || '__no_slug__' } },
         ],
       },
-      limit: 1,
+      limit: 0,
+      pagination: false,
       draft: false,
       req,
     })
-    const existing = found.docs[0]
+    const existing = found.docs.find((event) => event.slug === seed.slug) || found.docs[0]
     if (existing?.seedRevision === revision) continue
     const data = {
       ...seed,
@@ -205,39 +206,59 @@ export async function seedCommunity(payload: Payload, req?: PayloadRequest) {
       await payload.update({ collection: 'community-events', id: existing.id, data, req })
     else await payload.create({ collection: 'community-events', data, req })
   }
-  // Legacy sync rows predate the public slug field and draft versions.
-  const unlinked = await payload.find({
+  // Older chapter syncs can contain repeated titles and null slugs. Give every
+  // remaining row a unique URL before consolidating duplicates below.
+  const stored = await payload.find({
     collection: 'community-events',
-    where: { slug: { exists: false } },
-    limit: 1000,
+    limit: 0,
+    pagination: false,
+    depth: 0,
     draft: false,
     req,
   })
-  for (const event of unlinked.docs) {
+  const usedSlugs = new Set(stored.docs.flatMap((event) => (event.slug ? [event.slug] : [])))
+  for (const event of stored.docs.filter((event) => !event.slug)) {
+    const title = event.localTitle || event.sourceTitle || `Community event ${event.id}`
+    const base =
+      title
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '') || `community-event-${event.id}`
+    let slug = base,
+      suffix = 0
+    while (usedSlugs.has(slug)) {
+      suffix++
+      slug = `${base}-${event.id}${suffix > 1 ? `-${suffix}` : ''}`
+    }
+    usedSlugs.add(slug)
     await payload.update({
       collection: 'community-events',
       id: event.id,
-      data: {
-        localTitle: event.localTitle || event.sourceTitle || `Community event ${event.id}`,
-        _status: event._status || 'draft',
-      },
+      data: { localTitle: title, slug, _status: event._status || 'draft' },
       req,
     })
   }
   // Consolidate legacy duplicate DevFest records without deleting their sessions.
   const devfests = await payload.find({
     collection: 'community-events',
-    where: { eventKind: { equals: 'devfest' } },
-    limit: 200,
+    limit: 0,
+    pagination: false,
+    depth: 0,
     draft: false,
     req,
   })
-  for (const canonical of devfests.docs.filter((e) => e.seedRevision === revision)) {
+  for (const canonical of devfests.docs.filter(
+    (e) => e.eventKind === 'devfest' && e.seedRevision === revision,
+  )) {
     const year = canonical.editionYear
     for (const duplicate of devfests.docs.filter(
       (e) =>
         e.id !== canonical.id &&
-        (e.editionYear === year || (e.localTitle || e.sourceTitle || '').includes(String(year))),
+        (e.eventKind === 'devfest' ||
+          /^(?:gdg\s+)?devfest\b/i.test(e.localTitle || e.sourceTitle || '')) &&
+        (e.editionYear ||
+          Number(`${e.localTitle || ''} ${e.sourceTitle || ''}`.match(/20\d{2}/)?.[0])) === year,
     )) {
       await payload.update({
         collection: 'sessions',
@@ -245,12 +266,19 @@ export async function seedCommunity(payload: Payload, req?: PayloadRequest) {
         data: { event: canonical.id },
         req,
       })
-      await payload.update({
-        collection: 'community-events',
-        id: duplicate.id,
-        data: { showOnSite: false, featured: false },
-        req,
-      })
+      if (
+        duplicate.showOnSite ||
+        duplicate.featured ||
+        duplicate.eventKind !== 'devfest' ||
+        duplicate.editionYear !== year
+      ) {
+        await payload.update({
+          collection: 'community-events',
+          id: duplicate.id,
+          data: { showOnSite: false, featured: false, eventKind: 'devfest', editionYear: year },
+          req,
+        })
+      }
     }
   }
   const settings = await payload.findGlobal({ slug: 'site-settings', draft: false, req })
