@@ -1,233 +1,352 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Field } from 'payload'
 
 import { isAdmin, isEditor, sourceFieldsReadOnly } from '@/access'
+import { eventDayKey, youtubeVideoID } from '@/lib/event-dates'
+import { scheduleEndpoints } from '@/lib/schedule-endpoints'
 
-const sourceFieldAccess = { update: sourceFieldsReadOnly }
-const slugify = (value: string) => value
-  .toLowerCase()
-  .trim()
-  .replace(/[^a-z0-9]+/g, '-')
-  .replace(/(^-|-$)/g, '')
+const sourceAccess = { update: sourceFieldsReadOnly }
+const urlField = (name: string, label: string): Field => ({
+  name,
+  label,
+  type: 'text',
+  validate: (value: unknown) => {
+    if (!value) return true
+    try {
+      return (
+        ['https:', 'http:'].includes(new URL(String(value)).protocol) || 'Use an http or https URL.'
+      )
+    } catch {
+      return 'Enter a complete URL.'
+    }
+  },
+})
 
 export const CommunityEvents: CollectionConfig = {
   slug: 'community-events',
+  endpoints: scheduleEndpoints,
+  labels: { singular: 'Event', plural: 'Events' },
   access: {
     create: isEditor,
     delete: isAdmin,
-    read: ({ req }) => req.user ? true : { showOnSite: { equals: true } },
     update: isEditor,
+    read: ({ req }) =>
+      req.user ? true : { showOnSite: { equals: true }, _status: { equals: 'published' } },
   },
   admin: {
-    defaultColumns: ['localTitle', 'sourceTitle', 'eventKind', 'localStartDate', 'sourceStartDate', 'eventDestination', 'liveStatus', 'showOnSite'],
-    description: 'The canonical home for every GDG Nairobi event, including DevFest. Sync, schedule, venue and live operations all live here.',
-    useAsTitle: 'sourceTitle',
+    group: 'Community',
+    useAsTitle: 'localTitle',
+    defaultColumns: ['localTitle', 'editionYear', 'eventKind', 'featured', '_status'],
+    description:
+      'One record per event or edition. Manage its days, venues, programme, registration and media here. Publish when ready.',
   },
   hooks: {
-    beforeValidate: [({ data, originalDoc }) => {
-      if (data?.eventDestination === 'schedule' && !data.slug) {
-        data.slug = slugify(data.localTitle || data.sourceTitle || originalDoc?.sourceTitle || '')
-      }
-      return data
-    }],
+    beforeValidate: [
+      ({ data, originalDoc }) => {
+        if (!data) return data
+        const title =
+          data.localTitle || data.sourceTitle || originalDoc?.localTitle || originalDoc?.sourceTitle
+        if (!data.localTitle && title) data.localTitle = title
+        if (!data.slug && !originalDoc?.slug && title)
+          data.slug = title
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '')
+        return data
+      },
+    ],
   },
   fields: [
-    { name: 'source', type: 'select', defaultValue: 'manual', options: [{ label: 'Locally managed', value: 'manual' }, { label: 'GDG Community sync', value: 'bevy' }], required: true, admin: { readOnly: true }, access: sourceFieldAccess },
-    {
-      name: 'upstreamURL',
-      label: 'Upstream event URL (optional)',
-      type: 'text',
-      unique: true,
-      index: true,
-      admin: { description: 'Used to match synchronized events. Leave empty for locally managed events.', readOnly: true },
-      access: sourceFieldAccess,
-    },
-    { name: 'sourceTitle', type: 'text', admin: { readOnly: true }, access: sourceFieldAccess },
-    { name: 'sourceStartDate', type: 'date', admin: { readOnly: true }, access: sourceFieldAccess },
-    { name: 'sourceType', type: 'text', admin: { readOnly: true }, access: sourceFieldAccess },
-    { name: 'registrationURL', type: 'text', admin: { readOnly: true }, access: sourceFieldAccess },
-    { name: 'imageURL', type: 'text', admin: { readOnly: true }, access: sourceFieldAccess },
-    { name: 'excerpt', type: 'textarea', admin: { readOnly: true }, access: sourceFieldAccess },
-    {
-      name: 'upstreamStatus',
-      type: 'select',
-      options: ['live', 'completed', 'stale'],
-      admin: { readOnly: true },
-      access: sourceFieldAccess,
-    },
-    { name: 'lastSyncedAt', type: 'date', admin: { readOnly: true }, access: sourceFieldAccess },
-    { name: 'showOnSite', type: 'checkbox', defaultValue: true },
-    { name: 'featured', type: 'checkbox', defaultValue: false },
-    {
-      name: 'eventKind',
-      label: 'Event type',
-      type: 'select',
-      defaultValue: 'community',
-      required: true,
-      options: [
-        { label: 'Community event', value: 'community' },
-        { label: 'Workshop / codelab', value: 'workshop' },
-        { label: 'DevFest', value: 'devfest' },
-        { label: 'I/O Extended', value: 'io-extended' },
-        { label: 'Build with AI', value: 'build-with-ai' },
-      ],
-      admin: { position: 'sidebar' },
-    },
-    { name: 'localLabel', type: 'text', admin: { description: 'Optional short label such as “Workshop” or “Community day”.' } },
-    { name: 'displayOrder', type: 'number', defaultValue: 0 },
-    {
-      name: 'eventDestination',
-      label: 'Event experience',
-      type: 'select',
-      defaultValue: 'community',
-      required: true,
-      options: [
-        { label: 'Community page (external)', value: 'community' },
-        { label: 'Schedule on this website', value: 'schedule' },
-      ],
-      admin: {
-        description: 'Choose one destination for the event card. The synced Community event remains the canonical record.',
-        position: 'sidebar',
-      },
-    },
+    { name: 'seedRevision', type: 'text', admin: { hidden: true } },
+    { name: 'localTitle', label: 'Event name', type: 'text', required: true },
     {
       name: 'slug',
       type: 'text',
       unique: true,
       index: true,
       admin: {
-        condition: (_, siblingData) => siblingData?.eventDestination === 'schedule',
-        description: 'Generated from the title when the internal schedule is enabled.',
-      },
-    },
-    {
-      name: 'scheduleMode',
-      label: 'Schedule layout',
-      type: 'select',
-      defaultValue: 'single',
-      options: [
-        { label: 'Single track', value: 'single' },
-        { label: 'Multiple tracks', value: 'multi' },
-      ],
-      admin: { condition: (_, siblingData) => siblingData?.eventDestination === 'schedule' },
-    },
-    {
-      name: 'localTitle',
-      label: 'Display title',
-      type: 'text',
-      admin: {
-        description: 'Optional public title override; the synchronized title is used when empty.',
-      },
-    },
-    {
-      name: 'localStartDate',
-      label: 'Public event date override',
-      type: 'date',
-      admin: {
-        description: 'Optional. Useful when the public date changes without changing the upstream record.',
-        date: { pickerAppearance: 'dayAndTime', displayFormat: 'dd MMM yyyy, HH:mm' },
-      },
-    },
-    {
-      name: 'localRegistrationURL',
-      label: 'Registration URL override',
-      type: 'text',
-      admin: { description: 'Optional destination when there is no upstream URL or registration moves elsewhere.' },
-    },
-    {
-      name: 'localDescription',
-      label: 'Event summary',
-      type: 'textarea',
-      admin: { condition: (_, siblingData) => siblingData?.eventDestination === 'schedule' },
-    },
-    {
-      name: 'venueName',
-      type: 'text',
-      admin: { condition: (_, siblingData) => siblingData?.eventDestination === 'schedule' },
-    },
-    {
-      name: 'venueAddress',
-      type: 'textarea',
-      admin: { condition: (_, siblingData) => siblingData?.eventDestination === 'schedule' },
-    },
-    {
-      name: 'liveStatus',
-      label: 'Live schedule status',
-      type: 'select',
-      defaultValue: 'scheduled',
-      options: [
-        { label: 'Scheduled', value: 'scheduled' },
-        { label: 'Delayed', value: 'delayed' },
-        { label: 'In progress', value: 'live' },
-        { label: 'Complete', value: 'complete' },
-      ],
-      admin: {
-        condition: (_, siblingData) => siblingData?.eventDestination === 'schedule',
         position: 'sidebar',
+        description:
+          'Public URL: /events/your-slug. Generated from the name; keep it stable after publishing.',
       },
     },
     {
-      name: 'scheduleStartOverride',
-      label: 'Actual schedule start',
-      type: 'date',
-      admin: {
-        condition: (_, siblingData) => siblingData?.eventDestination === 'schedule',
-        description: 'Live control: set the actual start time and every session moves by the same amount. Clear it to use the planned times.',
-        position: 'sidebar',
-        date: { pickerAppearance: 'dayAndTime', displayFormat: 'dd MMM yyyy, HH:mm' },
-      },
+      name: 'featured',
+      label: 'Feature on the homepage',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: { position: 'sidebar' },
     },
     {
-      name: 'scheduleOffsetMinutes',
-      label: 'Shift the entire schedule (minutes)',
+      name: 'showOnSite',
+      label: 'Show on website',
+      type: 'checkbox',
+      defaultValue: true,
+      admin: { position: 'sidebar', description: 'Uncheck to hide an event without deleting it.' },
+    },
+    {
+      name: 'displayOrder',
       type: 'number',
       defaultValue: 0,
-      min: -180,
-      max: 360,
       admin: {
-        condition: (_, siblingData) => siblingData?.eventDestination === 'schedule',
-        description: 'Optional fine adjustment. The actual start control above takes priority when set.',
         position: 'sidebar',
-        step: 5,
+        description: 'Lower numbers appear first among featured events.',
       },
     },
     {
-      name: 'scheduleNotice',
-      label: 'Live schedule notice',
-      type: 'text',
-      admin: {
-        condition: (_, siblingData) => siblingData?.eventDestination === 'schedule',
-        description: 'Short public message, for example “Running 15 minutes behind”.',
-        position: 'sidebar',
-      },
-    },
-    {
-      name: 'sessions',
-      label: 'Event sessions',
-      type: 'join',
-      collection: 'sessions',
-      on: 'event',
-      defaultLimit: 100,
-      defaultSort: 'startsAt',
-      admin: {
-        allowCreate: true,
-        condition: (_, siblingData) => siblingData?.eventDestination === 'schedule',
-        defaultColumns: ['title', 'startsAt', 'scheduleTrack', 'sessionStatus', 'room', '_status'],
-        description: 'Create and update this event’s sessions without leaving the event management screen.',
-      },
-    },
-    {
-      name: 'eventPage',
-      label: 'Campaign page content',
-      type: 'join',
-      collection: 'devfest-editions',
-      on: 'event',
-      defaultLimit: 1,
-      admin: {
-        allowCreate: true,
-        condition: (_, siblingData) => siblingData?.eventKind === 'devfest',
-        defaultColumns: ['title', 'year', 'status', '_status'],
-        description: 'Optional DevFest campaign presentation attached to this event—not a second event record.',
-      },
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Overview',
+          fields: [
+            {
+              name: 'eventKind',
+              label: 'Event type',
+              type: 'select',
+              required: true,
+              defaultValue: 'community',
+              options: [
+                { label: 'Community event', value: 'community' },
+                { label: 'Workshop / codelab', value: 'workshop' },
+                { label: 'DevFest', value: 'devfest' },
+                { label: 'I/O Extended', value: 'io-extended' },
+                { label: 'Build with AI', value: 'build-with-ai' },
+              ],
+            },
+            {
+              name: 'editionYear',
+              type: 'number',
+              label: 'Edition year',
+              min: 2000,
+              max: 2200,
+              admin: {
+                description: 'Also groups historical events when the exact date is not known.',
+              },
+            },
+            { name: 'tagline', type: 'text' },
+            { name: 'localDescription', label: 'Event introduction', type: 'textarea' },
+            { name: 'coverImage', type: 'upload', relationTo: 'media' },
+            {
+              name: 'registrationStatus',
+              type: 'select',
+              defaultValue: 'announced',
+              options: [
+                { label: 'Announced', value: 'announced' },
+                { label: 'Registration open', value: 'open' },
+                { label: 'Registration closed', value: 'closed' },
+              ],
+            },
+            {
+              name: 'registrationLabel',
+              label: 'Registration button label',
+              type: 'text',
+              admin: { description: 'Leave empty for “Register for [event name]”.' },
+            },
+            urlField('localRegistrationURL', 'Registration link'),
+            { name: 'localLabel', label: 'Short card label', type: 'text' },
+          ],
+        },
+        {
+          label: 'Days & venues',
+          fields: [
+            {
+              name: 'days',
+              label: 'Event days',
+              type: 'array',
+              dbName: 'event_days',
+              admin: {
+                description:
+                  'Add one row per day. Each day has its own venue and directions. Dates use East Africa Time.',
+                initCollapsed: true,
+                components: { RowLabel: '@/components/admin/EventDayLabel#EventDayLabel' },
+              },
+              fields: [
+                {
+                  name: 'title',
+                  label: 'Day name',
+                  type: 'text',
+                  required: true,
+                  admin: { placeholder: 'Conference day / Workshops / Day 2' },
+                },
+                {
+                  name: 'date',
+                  type: 'date',
+                  required: true,
+                  admin: { date: { pickerAppearance: 'dayOnly', displayFormat: 'dd MMM yyyy' } },
+                },
+                { name: 'description', label: 'What to expect', type: 'textarea' },
+                { name: 'venueName', label: 'Venue name', type: 'text' },
+                { name: 'venueAddress', label: 'Address', type: 'textarea' },
+                urlField('venueWebsite', 'Venue website'),
+                urlField('mapURL', 'Directions link'),
+              ],
+              validate: (value: unknown) => {
+                if (!Array.isArray(value)) return true
+                const keys = value
+                  .map((day: { date?: string }) => (day.date ? eventDayKey(day.date) : ''))
+                  .filter(Boolean)
+                return (
+                  new Set(keys).size === keys.length ||
+                  'Use one day row per calendar date. Add sessions for activities on the same day.'
+                )
+              },
+            },
+          ],
+        },
+        {
+          label: 'Programme',
+          fields: [
+            {
+              name: 'scheduleImport',
+              type: 'ui',
+              admin: { components: { Field: '@/components/admin/ScheduleImport#ScheduleImport' } },
+            },
+            {
+              name: 'scheduleMode',
+              label: 'Programme layout',
+              type: 'select',
+              defaultValue: 'single',
+              options: [
+                { label: 'Single track', value: 'single' },
+                { label: 'Multiple tracks', value: 'multi' },
+              ],
+            },
+            {
+              name: 'liveStatus',
+              label: 'Live event status',
+              type: 'select',
+              defaultValue: 'scheduled',
+              options: [
+                { label: 'Scheduled', value: 'scheduled' },
+                { label: 'Delayed', value: 'delayed' },
+                { label: 'In progress', value: 'live' },
+                { label: 'Complete', value: 'complete' },
+              ],
+            },
+            {
+              name: 'scheduleStartOverride',
+              label: 'Actual programme start',
+              type: 'date',
+              admin: {
+                description:
+                  'Move all sessions together by setting the actual first-session start. Clear to restore planned times.',
+              },
+            },
+            {
+              name: 'scheduleOffsetMinutes',
+              label: 'Programme adjustment (minutes)',
+              type: 'number',
+              defaultValue: 0,
+              min: -180,
+              max: 360,
+            },
+            { name: 'scheduleNotice', label: 'Attendee notice', type: 'text' },
+            {
+              name: 'sessions',
+              type: 'join',
+              collection: 'sessions',
+              on: 'event',
+              defaultLimit: 100,
+              defaultSort: 'startsAt',
+              admin: {
+                allowCreate: true,
+                defaultColumns: ['title', 'startsAt', 'scheduleTrack', 'room', '_status'],
+                description:
+                  'Create sessions here to attach them to this event automatically. The session date selects its event day and venue.',
+              },
+            },
+          ],
+        },
+        {
+          label: 'Media',
+          fields: [
+            {
+              name: 'videos',
+              type: 'array',
+              dbName: 'event_videos',
+              admin: { initCollapsed: true },
+              fields: [
+                { name: 'title', type: 'text', required: true },
+                {
+                  name: 'url',
+                  type: 'text',
+                  required: true,
+                  validate: (value: unknown) =>
+                    !value || youtubeVideoID(String(value))
+                      ? true
+                      : 'Use a valid YouTube video URL.',
+                },
+                {
+                  name: 'featured',
+                  label: 'Show in community highlights',
+                  type: 'checkbox',
+                  defaultValue: true,
+                },
+              ],
+            },
+            {
+              name: 'albums',
+              label: 'Photo albums',
+              type: 'array',
+              dbName: 'event_albums',
+              fields: [
+                { name: 'title', type: 'text', required: true },
+                urlField('url', 'Album link'),
+              ],
+            },
+          ],
+        },
+        {
+          label: 'Imported source',
+          fields: [
+            {
+              name: 'source',
+              type: 'select',
+              defaultValue: 'manual',
+              required: true,
+              options: [
+                { label: 'Locally managed', value: 'manual' },
+                { label: 'GDG Community sync', value: 'bevy' },
+              ],
+              admin: { readOnly: true },
+              access: sourceAccess,
+            },
+            {
+              name: 'upstreamURL',
+              type: 'text',
+              unique: true,
+              index: true,
+              admin: { readOnly: true },
+              access: sourceAccess,
+            },
+            { name: 'sourceTitle', type: 'text', admin: { readOnly: true }, access: sourceAccess },
+            {
+              name: 'sourceStartDate',
+              type: 'date',
+              admin: { readOnly: true },
+              access: sourceAccess,
+            },
+            { name: 'sourceType', type: 'text', admin: { readOnly: true }, access: sourceAccess },
+            {
+              name: 'registrationURL',
+              type: 'text',
+              admin: { readOnly: true },
+              access: sourceAccess,
+            },
+            { name: 'imageURL', type: 'text', admin: { readOnly: true }, access: sourceAccess },
+            { name: 'excerpt', type: 'textarea', admin: { readOnly: true }, access: sourceAccess },
+            {
+              name: 'upstreamStatus',
+              type: 'select',
+              options: ['live', 'completed', 'stale'],
+              admin: { readOnly: true },
+              access: sourceAccess,
+            },
+            { name: 'lastSyncedAt', type: 'date', admin: { readOnly: true }, access: sourceAccess },
+          ],
+        },
+      ],
     },
   ],
+  versions: { drafts: { autosave: true, schedulePublish: true }, maxPerDoc: 30 },
 }

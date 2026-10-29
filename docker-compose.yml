@@ -6,15 +6,15 @@ services:
     container_name: gdg-nairobi-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: devfest_nairobi_cms
+      POSTGRES_DB: gdg_nairobi_events
       POSTGRES_USER: devfest
       POSTGRES_PASSWORD: devfest_local
     ports:
-      - '127.0.0.1:5433:5432'
+      - '127.0.0.1:55439:5432'
     volumes:
       - gdg_nairobi_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U devfest -d devfest_nairobi_cms']
+      test: ['CMD-SHELL', 'pg_isready -U devfest -d gdg_nairobi_events']
       interval: 5s
       timeout: 5s
       retries: 10

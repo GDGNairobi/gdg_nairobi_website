@@ -69,7 +69,6 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
-    'devfest-editions': DevfestEdition;
     speakers: Speaker;
     sessions: Session;
     partners: Partner;
@@ -85,13 +84,11 @@ export interface Config {
   collectionsJoins: {
     'community-events': {
       sessions: 'sessions';
-      eventPage: 'devfest-editions';
     };
   };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
-    'devfest-editions': DevfestEditionsSelect<false> | DevfestEditionsSelect<true>;
     speakers: SpeakersSelect<false> | SpeakersSelect<true>;
     sessions: SessionsSelect<false> | SessionsSelect<true>;
     partners: PartnersSelect<false> | PartnersSelect<true>;
@@ -218,311 +215,6 @@ export interface Media {
   };
 }
 /**
- * Optional campaign presentation for a canonical event. Dates, venue, sessions and live operations belong to the linked event.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "devfest-editions".
- */
-export interface DevfestEdition {
-  id: number;
-  /**
-   * The single canonical DevFest event record used across the website.
-   */
-  event?: (number | null) | CommunityEvent;
-  title: string;
-  year: number;
-  slug: string;
-  status: 'announcement' | 'cfp-open' | 'registration-open' | 'live' | 'ended';
-  hero: {
-    eyebrow?: string | null;
-    headline: string;
-    accentLine: string;
-    description: string;
-    artwork?: (number | null) | Media;
-    signals?:
-      | {
-          label: string;
-          id?: string | null;
-        }[]
-      | null;
-    scrollLabel?: string | null;
-  };
-  eventDetails?: {
-    startsAt?: string | null;
-    endsAt?: string | null;
-    venueName?: string | null;
-    address?: string | null;
-    mapURL?: string | null;
-    locationLabel?: string | null;
-  };
-  callsToAction?:
-    | {
-        label: string;
-        url: string;
-        style?: ('primary' | 'secondary' | 'text') | null;
-        id?: string | null;
-      }[]
-    | null;
-  ticker?: {
-    enabled?: boolean | null;
-    items?:
-      | {
-          label: string;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  storySection?: {
-    enabled?: boolean | null;
-    kicker?: string | null;
-    heading?: string | null;
-    paragraphs?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-    quote?: string | null;
-  };
-  tracksSection?: {
-    enabled?: boolean | null;
-    kicker?: string | null;
-    heading?: string | null;
-    intro?: string | null;
-  };
-  tracks?:
-    | {
-        title: string;
-        description: string;
-        accent: 'blue' | 'red' | 'yellow' | 'green';
-        topics?: string[] | null;
-        id?: string | null;
-      }[]
-    | null;
-  experienceSection?: {
-    enabled?: boolean | null;
-    kicker?: string | null;
-    heading?: string | null;
-    marker?: string | null;
-    markerLabel?: string | null;
-    items?:
-      | {
-          eyebrow: string;
-          title: string;
-          description: string;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  cfpSection?: {
-    enabled?: boolean | null;
-    badge?: string | null;
-    kicker?: string | null;
-    heading?: string | null;
-    description?: string | null;
-    ctaLabel?: string | null;
-    ctaURL?: string | null;
-    artLabelTop?: string | null;
-    artLabelBottom?: string | null;
-  };
-  eventsSection?: {
-    enabled?: boolean | null;
-    kicker?: string | null;
-    heading?: string | null;
-    allEventsLabel?: string | null;
-    allEventsURL?: string | null;
-    syncNote?: string | null;
-  };
-  /**
-   * Curate the homepage photo wall and up to three featured videos.
-   */
-  highlightsSection?: {
-    enabled?: boolean | null;
-    kicker?: string | null;
-    heading?: string | null;
-    intro?: string | null;
-    /**
-     * Use 4–9 strong images. The first and fourth images receive more space in the grid.
-     */
-    photos?:
-      | {
-          image: number | Media;
-          caption?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Displayed in this order and numbered automatically as 01, 02 and 03.
-     */
-    videos?:
-      | {
-          title: string;
-          /**
-           * YouTube watch, youtu.be, Shorts, or embed URL.
-           */
-          url: string;
-          label?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  closingSection?: {
-    enabled?: boolean | null;
-    kicker?: string | null;
-    heading?: string | null;
-    accentLine?: string | null;
-    primaryLabel?: string | null;
-    primaryURL?: string | null;
-    secondaryLabel?: string | null;
-    secondaryURL?: string | null;
-  };
-  statistics?:
-    | {
-        value: string;
-        label: string;
-        id?: string | null;
-      }[]
-    | null;
-  featuredCommunityEvent?: (number | null) | CommunityEvent;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * The canonical home for every GDG Nairobi event, including DevFest. Sync, schedule, venue and live operations all live here.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "community-events".
- */
-export interface CommunityEvent {
-  id: number;
-  source: 'manual' | 'bevy';
-  /**
-   * Used to match synchronized events. Leave empty for locally managed events.
-   */
-  upstreamURL?: string | null;
-  sourceTitle?: string | null;
-  sourceStartDate?: string | null;
-  sourceType?: string | null;
-  registrationURL?: string | null;
-  imageURL?: string | null;
-  excerpt?: string | null;
-  upstreamStatus?: ('live' | 'completed' | 'stale') | null;
-  lastSyncedAt?: string | null;
-  showOnSite?: boolean | null;
-  featured?: boolean | null;
-  eventKind: 'community' | 'workshop' | 'devfest' | 'io-extended' | 'build-with-ai';
-  /**
-   * Optional short label such as “Workshop” or “Community day”.
-   */
-  localLabel?: string | null;
-  displayOrder?: number | null;
-  /**
-   * Choose one destination for the event card. The synced Community event remains the canonical record.
-   */
-  eventDestination: 'community' | 'schedule';
-  /**
-   * Generated from the title when the internal schedule is enabled.
-   */
-  slug?: string | null;
-  scheduleMode?: ('single' | 'multi') | null;
-  /**
-   * Optional public title override; the synchronized title is used when empty.
-   */
-  localTitle?: string | null;
-  /**
-   * Optional. Useful when the public date changes without changing the upstream record.
-   */
-  localStartDate?: string | null;
-  /**
-   * Optional destination when there is no upstream URL or registration moves elsewhere.
-   */
-  localRegistrationURL?: string | null;
-  localDescription?: string | null;
-  venueName?: string | null;
-  venueAddress?: string | null;
-  liveStatus?: ('scheduled' | 'delayed' | 'live' | 'complete') | null;
-  /**
-   * Live control: set the actual start time and every session moves by the same amount. Clear it to use the planned times.
-   */
-  scheduleStartOverride?: string | null;
-  /**
-   * Optional fine adjustment. The actual start control above takes priority when set.
-   */
-  scheduleOffsetMinutes?: number | null;
-  /**
-   * Short public message, for example “Running 15 minutes behind”.
-   */
-  scheduleNotice?: string | null;
-  /**
-   * Create and update this event’s sessions without leaving the event management screen.
-   */
-  sessions?: {
-    docs?: (number | Session)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  /**
-   * Optional DevFest campaign presentation attached to this event—not a second event record.
-   */
-  eventPage?: {
-    docs?: (number | DevfestEdition)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Sessions belong to an internal event schedule. Times are the planned times; use the event delay control to shift the whole live schedule.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "sessions".
- */
-export interface Session {
-  id: number;
-  title: string;
-  slug: string;
-  description?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  /**
-   * Leave empty only for the standalone DevFest programme.
-   */
-  event?: (number | null) | CommunityEvent;
-  speakers?: (number | Speaker)[] | null;
-  startsAt: string;
-  endsAt: string;
-  room: string;
-  /**
-   * For multi-track events, use any organizer-friendly label such as “Main Stage” or “Workshop Room”.
-   */
-  scheduleTrack?: string | null;
-  track: 'ai' | 'web-mobile' | 'cloud' | 'open';
-  format: 'talk' | 'workshop' | 'keynote' | 'panel' | 'break';
-  level?: ('all' | 'beginner' | 'intermediate' | 'advanced') | null;
-  sessionStatus?: ('scheduled' | 'delayed' | 'live' | 'complete' | 'cancelled') | null;
-  /**
-   * Short live note such as “Moved to Room B” or “Starting in 10 minutes”.
-   */
-  publicNote?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
  * Reusable speaker profiles. Updates flow through to every linked event session.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -559,6 +251,154 @@ export interface Speaker {
         id?: string | null;
       }[]
     | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Sessions belong to an internal event schedule. Times are the planned times; use the event delay control to shift the whole live schedule.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sessions".
+ */
+export interface Session {
+  id: number;
+  importKey?: string | null;
+  title: string;
+  slug: string;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * The parent event. Import a CSV or Excel schedule from its Programme tab.
+   */
+  event: number | CommunityEvent;
+  speakers?: (number | Speaker)[] | null;
+  startsAt: string;
+  endsAt: string;
+  room: string;
+  /**
+   * For multi-track events, use any organizer-friendly label such as “Main Stage” or “Workshop Room”.
+   */
+  scheduleTrack?: string | null;
+  track: 'ai' | 'web-mobile' | 'cloud' | 'open';
+  format: 'talk' | 'workshop' | 'keynote' | 'panel' | 'break';
+  level?: ('all' | 'beginner' | 'intermediate' | 'advanced') | null;
+  sessionStatus?: ('scheduled' | 'delayed' | 'live' | 'complete' | 'cancelled') | null;
+  /**
+   * Short live note such as “Moved to Room B” or “Starting in 10 minutes”.
+   */
+  publicNote?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * One record per event or edition. Manage its days, venues, programme, registration and media here. Publish when ready.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-events".
+ */
+export interface CommunityEvent {
+  id: number;
+  seedRevision?: string | null;
+  localTitle: string;
+  /**
+   * Public URL: /events/your-slug. Generated from the name; keep it stable after publishing.
+   */
+  slug?: string | null;
+  featured?: boolean | null;
+  /**
+   * Uncheck to hide an event without deleting it.
+   */
+  showOnSite?: boolean | null;
+  /**
+   * Lower numbers appear first among featured events.
+   */
+  displayOrder?: number | null;
+  eventKind: 'community' | 'workshop' | 'devfest' | 'io-extended' | 'build-with-ai';
+  /**
+   * Also groups historical events when the exact date is not known.
+   */
+  editionYear?: number | null;
+  tagline?: string | null;
+  localDescription?: string | null;
+  coverImage?: (number | null) | Media;
+  registrationStatus?: ('announced' | 'open' | 'closed') | null;
+  /**
+   * Leave empty for “Register for [event name]”.
+   */
+  registrationLabel?: string | null;
+  localRegistrationURL?: string | null;
+  localLabel?: string | null;
+  /**
+   * Add one row per day. Each day has its own venue and directions. Dates use East Africa Time.
+   */
+  days?:
+    | {
+        title: string;
+        date: string;
+        description?: string | null;
+        venueName?: string | null;
+        venueAddress?: string | null;
+        venueWebsite?: string | null;
+        mapURL?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  scheduleMode?: ('single' | 'multi') | null;
+  liveStatus?: ('scheduled' | 'delayed' | 'live' | 'complete') | null;
+  /**
+   * Move all sessions together by setting the actual first-session start. Clear to restore planned times.
+   */
+  scheduleStartOverride?: string | null;
+  scheduleOffsetMinutes?: number | null;
+  scheduleNotice?: string | null;
+  /**
+   * Create sessions here to attach them to this event automatically. The session date selects its event day and venue.
+   */
+  sessions?: {
+    docs?: (number | Session)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  videos?:
+    | {
+        title: string;
+        url: string;
+        featured?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  albums?:
+    | {
+        title: string;
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  source: 'manual' | 'bevy';
+  upstreamURL?: string | null;
+  sourceTitle?: string | null;
+  sourceStartDate?: string | null;
+  sourceType?: string | null;
+  registrationURL?: string | null;
+  imageURL?: string | null;
+  excerpt?: string | null;
+  upstreamStatus?: ('live' | 'completed' | 'stale') | null;
+  lastSyncedAt?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -747,10 +587,6 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
-        relationTo: 'devfest-editions';
-        value: number | DevfestEdition;
-      } | null)
-    | ({
         relationTo: 'speakers';
         value: number | Speaker;
       } | null)
@@ -886,179 +722,6 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "devfest-editions_select".
- */
-export interface DevfestEditionsSelect<T extends boolean = true> {
-  event?: T;
-  title?: T;
-  year?: T;
-  slug?: T;
-  status?: T;
-  hero?:
-    | T
-    | {
-        eyebrow?: T;
-        headline?: T;
-        accentLine?: T;
-        description?: T;
-        artwork?: T;
-        signals?:
-          | T
-          | {
-              label?: T;
-              id?: T;
-            };
-        scrollLabel?: T;
-      };
-  eventDetails?:
-    | T
-    | {
-        startsAt?: T;
-        endsAt?: T;
-        venueName?: T;
-        address?: T;
-        mapURL?: T;
-        locationLabel?: T;
-      };
-  callsToAction?:
-    | T
-    | {
-        label?: T;
-        url?: T;
-        style?: T;
-        id?: T;
-      };
-  ticker?:
-    | T
-    | {
-        enabled?: T;
-        items?:
-          | T
-          | {
-              label?: T;
-              id?: T;
-            };
-      };
-  storySection?:
-    | T
-    | {
-        enabled?: T;
-        kicker?: T;
-        heading?: T;
-        paragraphs?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        quote?: T;
-      };
-  tracksSection?:
-    | T
-    | {
-        enabled?: T;
-        kicker?: T;
-        heading?: T;
-        intro?: T;
-      };
-  tracks?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        accent?: T;
-        topics?: T;
-        id?: T;
-      };
-  experienceSection?:
-    | T
-    | {
-        enabled?: T;
-        kicker?: T;
-        heading?: T;
-        marker?: T;
-        markerLabel?: T;
-        items?:
-          | T
-          | {
-              eyebrow?: T;
-              title?: T;
-              description?: T;
-              id?: T;
-            };
-      };
-  cfpSection?:
-    | T
-    | {
-        enabled?: T;
-        badge?: T;
-        kicker?: T;
-        heading?: T;
-        description?: T;
-        ctaLabel?: T;
-        ctaURL?: T;
-        artLabelTop?: T;
-        artLabelBottom?: T;
-      };
-  eventsSection?:
-    | T
-    | {
-        enabled?: T;
-        kicker?: T;
-        heading?: T;
-        allEventsLabel?: T;
-        allEventsURL?: T;
-        syncNote?: T;
-      };
-  highlightsSection?:
-    | T
-    | {
-        enabled?: T;
-        kicker?: T;
-        heading?: T;
-        intro?: T;
-        photos?:
-          | T
-          | {
-              image?: T;
-              caption?: T;
-              id?: T;
-            };
-        videos?:
-          | T
-          | {
-              title?: T;
-              url?: T;
-              label?: T;
-              id?: T;
-            };
-      };
-  closingSection?:
-    | T
-    | {
-        enabled?: T;
-        kicker?: T;
-        heading?: T;
-        accentLine?: T;
-        primaryLabel?: T;
-        primaryURL?: T;
-        secondaryLabel?: T;
-        secondaryURL?: T;
-      };
-  statistics?:
-    | T
-    | {
-        value?: T;
-        label?: T;
-        id?: T;
-      };
-  featuredCommunityEvent?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "speakers_select".
  */
 export interface SpeakersSelect<T extends boolean = true> {
@@ -1086,6 +749,7 @@ export interface SpeakersSelect<T extends boolean = true> {
  * via the `definition` "sessions_select".
  */
 export interface SessionsSelect<T extends boolean = true> {
+  importKey?: T;
   title?: T;
   slug?: T;
   description?: T;
@@ -1162,6 +826,54 @@ export interface AnnouncementsSelect<T extends boolean = true> {
  * via the `definition` "community-events_select".
  */
 export interface CommunityEventsSelect<T extends boolean = true> {
+  seedRevision?: T;
+  localTitle?: T;
+  slug?: T;
+  featured?: T;
+  showOnSite?: T;
+  displayOrder?: T;
+  eventKind?: T;
+  editionYear?: T;
+  tagline?: T;
+  localDescription?: T;
+  coverImage?: T;
+  registrationStatus?: T;
+  registrationLabel?: T;
+  localRegistrationURL?: T;
+  localLabel?: T;
+  days?:
+    | T
+    | {
+        title?: T;
+        date?: T;
+        description?: T;
+        venueName?: T;
+        venueAddress?: T;
+        venueWebsite?: T;
+        mapURL?: T;
+        id?: T;
+      };
+  scheduleMode?: T;
+  liveStatus?: T;
+  scheduleStartOverride?: T;
+  scheduleOffsetMinutes?: T;
+  scheduleNotice?: T;
+  sessions?: T;
+  videos?:
+    | T
+    | {
+        title?: T;
+        url?: T;
+        featured?: T;
+        id?: T;
+      };
+  albums?:
+    | T
+    | {
+        title?: T;
+        url?: T;
+        id?: T;
+      };
   source?: T;
   upstreamURL?: T;
   sourceTitle?: T;
@@ -1172,28 +884,9 @@ export interface CommunityEventsSelect<T extends boolean = true> {
   excerpt?: T;
   upstreamStatus?: T;
   lastSyncedAt?: T;
-  showOnSite?: T;
-  featured?: T;
-  eventKind?: T;
-  localLabel?: T;
-  displayOrder?: T;
-  eventDestination?: T;
-  slug?: T;
-  scheduleMode?: T;
-  localTitle?: T;
-  localStartDate?: T;
-  localRegistrationURL?: T;
-  localDescription?: T;
-  venueName?: T;
-  venueAddress?: T;
-  liveStatus?: T;
-  scheduleStartOverride?: T;
-  scheduleOffsetMinutes?: T;
-  scheduleNotice?: T;
-  sessions?: T;
-  eventPage?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1272,10 +965,10 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface SiteSetting {
   id: number;
+  seedRevision?: string | null;
   siteName: string;
   brandLabel: string;
   editionLabel: string;
-  currentEdition?: (number | null) | DevfestEdition;
   navigation?:
     | {
         label: string;
@@ -1298,6 +991,16 @@ export interface SiteSetting {
       primaryURL?: string | null;
       secondaryLabel?: string | null;
       secondaryURL?: string | null;
+      /**
+       * Order up to four community photos in equal-sized postcards. The first leads the grid. Leave empty to use the four built-in photographs. Use landscape photos with descriptive Media alt text.
+       */
+      photos?:
+        | {
+            image: number | Media;
+            id?: string | null;
+          }[]
+        | null;
+      photoCaption?: string | null;
     };
     statistics?:
       | {
@@ -1310,6 +1013,41 @@ export interface SiteSetting {
       kicker?: string | null;
       heading?: string | null;
       description?: string | null;
+      welcomeLead?: string | null;
+      welcomeLine?: string | null;
+    };
+    programmes?: {
+      intro?: string | null;
+      items?:
+        | {
+            title: string;
+            description: string;
+            id?: string | null;
+          }[]
+        | null;
+      closing?: string | null;
+      accessNote?: string | null;
+    };
+    connection?: {
+      heading?: string | null;
+      description?: string | null;
+      image?: (number | null) | Media;
+    };
+    ticker?: {
+      enabled?: boolean | null;
+      items?:
+        | {
+            label: string;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    eventsEnabled?: boolean | null;
+    highlights?: {
+      enabled?: boolean | null;
+      kicker?: string | null;
+      heading?: string | null;
+      intro?: string | null;
     };
     pillars?:
       | {
@@ -1376,10 +1114,10 @@ export interface SiteSetting {
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
+  seedRevision?: T;
   siteName?: T;
   brandLabel?: T;
   editionLabel?: T;
-  currentEdition?: T;
   navigation?:
     | T
     | {
@@ -1408,6 +1146,13 @@ export interface SiteSettingsSelect<T extends boolean = true> {
               primaryURL?: T;
               secondaryLabel?: T;
               secondaryURL?: T;
+              photos?:
+                | T
+                | {
+                    image?: T;
+                    id?: T;
+                  };
+              photoCaption?: T;
             };
         statistics?:
           | T
@@ -1422,6 +1167,49 @@ export interface SiteSettingsSelect<T extends boolean = true> {
               kicker?: T;
               heading?: T;
               description?: T;
+              welcomeLead?: T;
+              welcomeLine?: T;
+            };
+        programmes?:
+          | T
+          | {
+              intro?: T;
+              items?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    id?: T;
+                  };
+              closing?: T;
+              accessNote?: T;
+            };
+        connection?:
+          | T
+          | {
+              heading?: T;
+              description?: T;
+              image?: T;
+            };
+        ticker?:
+          | T
+          | {
+              enabled?: T;
+              items?:
+                | T
+                | {
+                    label?: T;
+                    id?: T;
+                  };
+            };
+        eventsEnabled?: T;
+        highlights?:
+          | T
+          | {
+              enabled?: T;
+              kicker?: T;
+              heading?: T;
+              intro?: T;
             };
         pillars?:
           | T
@@ -1512,10 +1300,6 @@ export interface TaskSchedulePublish {
     locale?: string | null;
     doc?:
       | ({
-          relationTo: 'devfest-editions';
-          value: number | DevfestEdition;
-        } | null)
-      | ({
           relationTo: 'speakers';
           value: number | Speaker;
         } | null)
@@ -1534,6 +1318,10 @@ export interface TaskSchedulePublish {
       | ({
           relationTo: 'announcements';
           value: number | Announcement;
+        } | null)
+      | ({
+          relationTo: 'community-events';
+          value: number | CommunityEvent;
         } | null);
     global?: 'site-settings' | null;
     user?: (number | null) | User;

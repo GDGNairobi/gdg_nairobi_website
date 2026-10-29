@@ -12,7 +12,7 @@ const defaultLinks: HeaderLink[] = [
   { href: '/#community', label: 'Community' },
   { href: '/events', label: 'Events' },
   { href: '/devfest', label: 'DevFest' },
-  { href: '/about#organizers', label: 'Organizers' },
+  { href: '/about#organizers', label: 'Organisers' },
 ]
 
 type Props = {
@@ -49,19 +49,50 @@ export function SiteHeader({
       <Link className="site-brand" href="/" aria-label={`${siteName} home`}>
         <GdgLogo />
       </Link>
-      <button ref={toggleRef} className="menu-toggle" type="button" aria-expanded={open} aria-controls="site-navigation" aria-label={open ? 'Close menu' : 'Open menu'} onClick={() => setOpen(!open)}>
-        <span /><span />
+      <button
+        ref={toggleRef}
+        className="menu-toggle"
+        type="button"
+        aria-expanded={open}
+        aria-controls="site-navigation"
+        aria-label={open ? 'Close menu' : 'Open menu'}
+        onClick={() => setOpen(!open)}
+      >
+        <span />
+        <span />
       </button>
       <nav id="site-navigation" aria-label="Primary navigation">
-        {links.map((link) => isInternal(link.href) ? (
-          <Link href={link.href} key={link.href} onClick={() => setOpen(false)}>{link.label}</Link>
-        ) : (
-          <a href={link.href} key={link.href} onClick={() => setOpen(false)} rel="noreferrer" target="_blank">{link.label}</a>
-        ))}
+        {links.map((link) =>
+          isInternal(link.href) ? (
+            <Link href={link.href} key={link.href} onClick={() => setOpen(false)}>
+              {link.label}
+            </Link>
+          ) : (
+            <a
+              href={link.href}
+              key={link.href}
+              onClick={() => setOpen(false)}
+              rel="noreferrer"
+              target="_blank"
+            >
+              {link.label}
+            </a>
+          ),
+        )}
         {isInternal(cta.href) ? (
-          <Link className="nav-cta" href={cta.href} onClick={() => setOpen(false)}>{cta.label} <span>↗</span></Link>
+          <Link className="nav-cta" href={cta.href} onClick={() => setOpen(false)}>
+            {cta.label} <span>↗</span>
+          </Link>
         ) : (
-          <a className="nav-cta" href={cta.href} onClick={() => setOpen(false)} rel="noreferrer" target="_blank">{cta.label} <span>↗</span></a>
+          <a
+            className="nav-cta"
+            href={cta.href}
+            onClick={() => setOpen(false)}
+            rel="noreferrer"
+            target="_blank"
+          >
+            {cta.label} <span>↗</span>
+          </a>
         )}
       </nav>
     </header>

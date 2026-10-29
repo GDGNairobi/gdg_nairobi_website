@@ -1,10 +1,11 @@
 import config from '@payload-config'
 import { getPayload } from 'payload'
 
-import type { DevfestEdition, Media, SiteSetting } from '@/payload-types'
+import { mediaURL } from '@/lib/media-url'
+
+import type { Media, SiteSetting } from '@/payload-types'
 
 export type SiteLink = { label: string; url: string }
-
 export type SiteChromeContent = {
   siteName: string
   brandLabel: string
@@ -16,9 +17,6 @@ export type SiteChromeContent = {
   footerNote: string
   seo: { title: string; description: string }
 }
-
-type SectionState = { enabled: boolean; kicker: string; heading: string }
-
 export type CommunityHomeContent = {
   hero: {
     eyebrow: string
@@ -27,68 +25,40 @@ export type CommunityHomeContent = {
     description: string
     primaryCTA: SiteLink
     secondaryCTA: SiteLink
+    photos: Array<{ src: string; alt: string }>
+    photoCaption: string
   }
   statistics: Array<{ value: string; label: string }>
-  about: { kicker: string; heading: string; description: string }
+  about: {
+    kicker: string
+    heading: string
+    description: string
+    welcomeLead: string
+    welcomeLine: string
+  }
+  programmes: {
+    intro: string
+    items: Array<{ title: string; description: string }>
+    closing: string
+    accessNote: string
+  }
+  connection: { heading: string; description: string; image: { src: string; alt: string } | null }
   pillars: Array<{ code: string; title: string; description: string; accent: string }>
   ecosystem: { kicker: string; heading: string; description: string; items: string[] }
-  closing: { kicker: string; heading: string; accentLine: string; primaryCTA: SiteLink; secondaryCTA: SiteLink }
+  closing: {
+    kicker: string
+    heading: string
+    accentLine: string
+    primaryCTA: SiteLink
+    secondaryCTA: SiteLink
+  }
 }
-
 export type HomeContent = {
   chrome: SiteChromeContent
   community: CommunityHomeContent
-  year: string
-  eventID?: number
-  status: string
-  locationLabel: string
-  eventDetails: {
-    startsAt?: string
-    endsAt?: string
-    venueName?: string
-    address?: string
-    mapURL?: string
-  }
-  hero: {
-    eyebrow: string
-    headline: string
-    accentLine: string
-    description: string
-    artwork: { src: string; alt: string }
-    signals: string[]
-    scrollLabel: string
-  }
-  callsToAction: Array<{ label: string; url: string; style: string }>
   ticker: { enabled: boolean; items: string[] }
-  story: SectionState & { paragraphs: string[]; quote: string }
-  tracksSection: SectionState & { intro: string }
-  tracks: Array<{
-    code: string
-    title: string
-    copy: string
-    color: string
-    tags: string[]
-  }>
-  experience: SectionState & {
-    marker: string
-    markerLabel: string
-    items: Array<{ eyebrow: string; title: string; description: string }>
-  }
-  cfp: SectionState & {
-    badge: string
-    description: string
-    cta: SiteLink
-    artLabelTop: string
-    artLabelBottom: string
-  }
-  eventsSection: SectionState & { allEvents: SiteLink; syncNote: string }
-  highlights: SectionState & {
-    intro: string
-    photos: Array<{ src: string; alt: string; caption: string }>
-    videos: Array<{ title: string; url: string; label: string }>
-  }
-  closing: SectionState & { accentLine: string; primaryCTA: SiteLink; secondaryCTA: SiteLink }
-  memberStat: { value: string; label: string }
+  eventsSection: { enabled: boolean }
+  highlights: { enabled: boolean; kicker: string; heading: string; intro: string }
 }
 
 export const defaultSiteChromeContent: SiteChromeContent = {
@@ -99,8 +69,8 @@ export const defaultSiteChromeContent: SiteChromeContent = {
     { label: 'About', url: '/about' },
     { label: 'Community', url: '/#community' },
     { label: 'Events', url: '/events' },
-    { label: 'DevFest 2026', url: '/devfest' },
-    { label: 'Organizers', url: '/about#organizers' },
+    { label: 'DevFest Nairobi', url: '/devfest' },
+    { label: 'Organisers', url: '/about#organizers' },
     { label: 'Shop', url: 'https://shop.gdgnairobi.com/' },
   ],
   headerCTA: { label: 'Join GDG Nairobi', url: 'https://gdg.community.dev/gdg-nairobi/' },
@@ -115,7 +85,7 @@ export const defaultSiteChromeContent: SiteChromeContent = {
       links: [
         { label: 'About GDG Nairobi', url: '/about' },
         { label: 'Events', url: '/events' },
-        { label: 'DevFest Nairobi 2026', url: '/devfest' },
+        { label: 'DevFest Nairobi', url: '/devfest' },
       ],
     },
     {
@@ -130,16 +100,18 @@ export const defaultSiteChromeContent: SiteChromeContent = {
     {
       heading: 'Information',
       links: [
-        { label: 'Organizers', url: '/about#organizers' },
-        { label: 'DevFest partners', url: '/devfest#partners' },
+        { label: 'Organisers', url: '/about#organizers' },
+        { label: 'Community partners', url: '/about#partners' },
         { label: 'Code of conduct', url: '/code-of-conduct' },
       ],
     },
   ],
-  footerNote: 'GDG Nairobi is an independent group. Our activities and the opinions expressed here should not be linked to Google, the corporation.',
+  footerNote:
+    'GDG Nairobi is an independent group. Our activities and the opinions expressed here should not be linked to Google, the corporation.',
   seo: {
     title: 'GDG Nairobi — Learn, connect and build',
-    description: 'A volunteer-led Google Developer Group for Nairobi: events, workshops, community and DevFest.',
+    description:
+      'A volunteer-led Google Developer Group for Nairobi: events, workshops, community and DevFest.',
   },
 }
 
@@ -148,424 +120,278 @@ export const defaultCommunityHomeContent: CommunityHomeContent = {
     eyebrow: 'GDG Nairobi · Volunteer-led',
     headline: 'A developer community',
     accentLine: 'for Nairobi.',
-    description: 'Meet peers, learn through practical events and share experience around Google technologies and modern software development.',
+    description:
+      'Learn something new, share what you know and meet people who enjoy building. Come as you are.',
     primaryCTA: { label: 'Join the community', url: 'https://gdg.community.dev/gdg-nairobi/' },
     secondaryCTA: { label: 'Explore events', url: '/events' },
+    photos: [
+      {
+        src: '/images/community-audience-wide.jpg',
+        alt: 'A wide view of the DevFest Nairobi community gathered in the conference hall.',
+      },
+      {
+        src: '/images/community-speaker.jpg',
+        alt: 'A speaker presents at a podium while DevFest Nairobi attendees follow along on laptops.',
+      },
+      {
+        src: '/images/community-panel.jpg',
+        alt: 'DevFest Nairobi attendees take part in a discussion with panelists seated on stage.',
+      },
+      {
+        src: '/images/community-audience.jpg',
+        alt: 'Rows of developers listening to a session at DevFest Nairobi.',
+      },
+    ],
+    photoCaption: 'There is a seat for you here.',
   },
   statistics: [
-    { value: '9,000+', label: 'community members' },
+    { value: '11k+', label: 'community members' },
     { value: 'Year-round', label: 'meetups and workshops' },
     { value: 'All levels', label: 'welcome to participate' },
   ],
   about: {
     kicker: 'Community, all year round',
     heading: 'Year-round events for Nairobi’s developer community.',
-    description: 'GDG Nairobi is a local chapter of the global Google Developer Groups network. Volunteers organise talks, workshops, study sessions and larger events for people at different stages of their careers.',
+    description:
+      'Google Developer Groups are local communities where developers connect and learn together. As part of a global community that values inclusion, GDGs welcome everyone interested in technology, from beginners taking their first steps to experienced developers building and shipping products.\n\nAt GDG Nairobi, you can learn something new, share what you know, meet people who share your interests, and grow alongside a community of builders.',
+    welcomeLead: "Whether you're just getting started or have years of experience,",
+    welcomeLine: "you're welcome here.",
+  },
+  programmes: {
+    intro:
+      "We run events throughout the year, including Nairobi editions of Google's global developer programmes:",
+    items: [
+      {
+        title: 'DevFest',
+        description:
+          'The community tech conference hosted by GDGs around the world toward the end of each year.',
+      },
+      {
+        title: 'Google I/O Extended',
+        description:
+          'We bring the announcements, ideas, and energy from Google I/O home to Nairobi.',
+      },
+      {
+        title: 'Build with AI',
+        description:
+          "Hands-on sessions exploring Google's latest AI tools, technologies, and models.",
+      },
+    ],
+    closing:
+      'Alongside these, GDG Nairobi hosts hackathons, workshops, study jams, community meetups, and other learning experiences throughout the year.',
+    accessNote:
+      'Most of our events are free, because the only barrier to learning should be your curiosity, not your budget.',
+  },
+  connection: {
+    heading: 'Find your people.',
+    description:
+      'Meet a mentor, talk through an idea or find someone to build with. There is time for conversations, questions and new connections at our events.',
+    image: null,
   },
   pillars: [
-    { code: '01', title: 'Learn', description: 'Technical talks, study jams and workshops led by community contributors.', accent: 'blue' },
-    { code: '02', title: 'Build', description: 'Codelabs and hackathons for applying ideas in working projects.', accent: 'red' },
-    { code: '03', title: 'Connect', description: 'Meet peers, mentors and collaborators from different parts of the industry.', accent: 'yellow' },
-    { code: '04', title: 'Share', description: 'Present a practical lesson, document an approach or support another learner.', accent: 'green' },
+    {
+      code: '01',
+      title: 'Learn',
+      description: 'Technical talks, study jams and workshops led by community contributors.',
+      accent: 'blue',
+    },
+    {
+      code: '02',
+      title: 'Connect',
+      description:
+        'Find a mentor, swap ideas after a talk or meet your next collaborator. Start with a conversation.',
+      accent: 'red',
+    },
+    {
+      code: '03',
+      title: 'Build',
+      description:
+        'Try a codelab, join a hackathon and put new ideas to work alongside other developers.',
+      accent: 'yellow',
+    },
+    {
+      code: '04',
+      title: 'Share',
+      description: 'Present a practical lesson, document an approach or support another learner.',
+      accent: 'green',
+    },
   ],
   ecosystem: {
     kicker: 'More than code',
     heading: 'Connected to the wider developer community.',
-    description: 'Our programmes often involve Women Techmakers, Google Developer Experts, other GDG chapters and independent technology communities. Those relationships vary by event and are credited where relevant.',
-    items: ['Women Techmakers', 'Google Developer Experts', 'GDG chapters across Africa', 'Nairobi tech communities'],
+    description:
+      'We build alongside Women Techmakers, Google Developer Experts, GDG chapters across Africa and Nairobi’s tech communities. Meet people, share opportunities and help each other grow.',
+    items: [
+      'Women Techmakers',
+      'Google Developer Experts',
+      'GDG chapters across Africa',
+      'Nairobi tech communities',
+    ],
   },
   closing: {
     kicker: 'Open to every experience level',
     heading: 'Join GDG Nairobi.',
     accentLine: 'Start with the next event.',
     primaryCTA: { label: 'Join GDG Nairobi', url: 'https://gdg.community.dev/gdg-nairobi/' },
-    secondaryCTA: { label: 'Meet the organizers', url: '/about#organizers' },
+    secondaryCTA: { label: 'Meet the organisers', url: '/about#organizers' },
   },
 }
 
 export const defaultHomeContent: HomeContent = {
   chrome: defaultSiteChromeContent,
   community: defaultCommunityHomeContent,
-  year: '2026',
-  status: 'Announcement season',
-  locationLabel: 'Nairobi, Kenya',
-  eventDetails: {},
-  hero: {
-    eyebrow: 'Karibu Nairobi',
-    headline: 'The future',
-    accentLine: 'grows here.',
-    description: 'A community-led conference where developers connect, learn, and build with Google technologies.',
-    artwork: { src: '/images/nairobi-national-park-big-five-v2.png', alt: '' },
-    signals: ['NAIROBI / 01', 'COMMUNITY / 02', 'BUILD / 03'],
-    scrollLabel: 'Scroll to grow',
-  },
-  callsToAction: [
-    { label: 'Join GDG Nairobi', url: 'https://gdg.community.dev/gdg-nairobi/', style: 'primary' },
-    { label: 'See upcoming events', url: '/events', style: 'secondary' },
-  ],
-  ticker: { enabled: true, items: ['Jenga', 'Learn', 'Share', 'Ship', 'Together'] },
-  story: {
-    enabled: true,
-    kicker: 'Community-led, Nairobi-built',
-    heading: 'A local home for people who build.',
-    paragraphs: [
-      'GDG Nairobi is a volunteer-led developer community where people connect, learn, and grow around Google technologies.',
-      'DevFest brings that community together for practical talks, hands-on workshops, and time to meet other builders. All experience levels are welcome.',
-    ],
-    quote: 'There is a seat for you here.',
-  },
-  tracksSection: {
-    enabled: true,
-    kicker: 'What grows here',
-    heading: 'Four paths.\nOne ecosystem.',
-    intro: 'Explore mobile, web, cloud, open source, product craft, and the tools that help ideas become useful products.',
-  },
-  tracks: [
-    { code: '01', title: 'Build with purpose', copy: 'Turn useful ideas into responsible products that solve real problems for real people.', color: 'blue', tags: ['Product', 'AI', 'Accessibility'] },
-    { code: '02', title: 'Build for everyone', copy: 'Craft fast, inclusive experiences across the web, Android, Flutter and every screen between.', color: 'red', tags: ['Web', 'Mobile', 'UX'] },
-    { code: '03', title: 'Scale with confidence', copy: 'Take ideas from a Nairobi whiteboard to dependable products used around the world.', color: 'yellow', tags: ['Cloud', 'Firebase', 'DevOps'] },
-    { code: '04', title: 'Ship in the open', copy: 'Share tools, lessons and hard-won experience with the community that helped you grow.', color: 'green', tags: ['Open source', 'Community'] },
-  ],
-  experience: {
-    enabled: true,
-    kicker: 'The experience',
-    heading: 'Make it.\nThen meet around it.',
-    marker: '2',
-    markerLabel: 'Ways to\ngo deep',
-    items: [
-      { eyebrow: 'Day 01', title: 'Workshops & codelabs', description: 'Hands-on sessions for learning new tools and building alongside the community.' },
-      { eyebrow: 'Day 02', title: 'Conference & community', description: 'Practical talks, shared lessons, and time to connect with other developers.' },
-    ],
-  },
-  cfp: {
-    enabled: true,
-    badge: 'CFP / 2026',
-    kicker: 'Bring your voice',
-    heading: "Your lesson could unlock someone else's next idea.",
-    description: 'Share a practical lesson, a useful idea, or something the community can build on. First-time and experienced speakers are welcome.',
-    cta: { label: 'Register your interest', url: 'mailto:gdgnairobi@gmail.com?subject=DevFest%20Nairobi%202026%20CFP' },
-    artLabelTop: 'Your story',
-    artLabelBottom: 'Our stage',
-  },
-  eventsSection: {
-    enabled: true,
-    kicker: 'The root system',
-    heading: 'The community never stops.',
-    allEvents: { label: 'All GDG Nairobi events', url: 'https://gdg.community.dev/gdg-nairobi/' },
-    syncNote: 'Events are refreshed from the official GDG Nairobi chapter page.',
-  },
+  ticker: { enabled: true, items: ['Learn', 'Connect', 'Build', 'Share', 'Together'] },
+  eventsSection: { enabled: true },
   highlights: {
     enabled: true,
     kicker: 'Previously, in Nairobi',
-    heading: 'Made by the community.',
-    intro: 'A few moments, talks and builds from previous GDG Nairobi events.',
-    photos: [],
-    videos: [],
+    heading: 'See the community in action.',
+    intro: 'Watch the talks, meet the people and get a feel for our events.',
   },
-  closing: {
-    enabled: true,
-    kicker: 'Nairobi / 2026',
-    heading: 'Come curious.',
-    accentLine: 'Leave connected.',
-    primaryCTA: { label: 'Stay in the loop', url: 'mailto:gdgnairobi@gmail.com?subject=DevFest%20Nairobi%202026' },
-    secondaryCTA: { label: 'Partner with DevFest', url: '/partners' },
-  },
-  memberStat: { value: '9,951', label: 'GDG Nairobi members' },
 }
+const enabled = () => process.env.ENABLE_CMS === 'true' || process.env.VERCEL === '1'
+const text = (value: string | null | undefined, fallback: string) => value?.trim() || fallback
+const media = (value: number | Media | null | undefined) =>
+  typeof value === 'object' && value?.url && value.alt.trim()
+    ? { src: mediaURL(value.url), alt: value.alt }
+    : null
 
-const statusLabels: Record<string, string> = {
-  announcement: 'Announcement season',
-  'cfp-open': 'Call for papers open',
-  'registration-open': 'Registration open',
-  live: 'Happening now',
-  ended: 'See you next time',
-}
-
-const cmsEnabled = () => process.env.ENABLE_CMS === 'true' || process.env.VERCEL === '1'
-
-const withFallback = (value: string | null | undefined, fallback: string) => value?.trim() || fallback
-
-const shopLink: SiteLink = { label: 'Shop', url: 'https://shop.gdgnairobi.com/' }
-const repositoryLink: SiteLink = { label: 'GitHub', url: 'https://github.com/GDGNairobi/gdg_nairobi_website' }
-
-function appendUniqueLink(links: SiteLink[], link: SiteLink) {
-  return links.some(({ url }) => url === link.url) ? links : [...links, link]
-}
-
-function includeRepositoryLink(groups: SiteChromeContent['footerGroups']) {
-  if (groups.some((group) => group.links.some(({ url }) => url === repositoryLink.url))) return groups
-
-  const hasConnectGroup = groups.some(({ heading }) => heading.trim().toLowerCase() === 'connect')
-  if (!hasConnectGroup) return [...groups, { heading: 'Connect', links: [repositoryLink] }]
-
-  return groups.map((group) => group.heading.trim().toLowerCase() === 'connect'
-    ? { ...group, links: [...group.links, repositoryLink] }
-    : group)
-}
-
-function labelDevFestEdition(chrome: SiteChromeContent, year: string): SiteChromeContent {
-  return {
-    ...chrome,
-    navigation: chrome.navigation.map((link) => link.url === '/devfest' ? { ...link, label: `DevFest ${year}` } : link),
-    footerGroups: chrome.footerGroups.map((group) => ({
-      ...group,
-      links: group.links.map((link) => link.url === '/devfest' ? { ...link, label: `DevFest Nairobi ${year}` } : link),
-    })),
-  }
-}
-
-function mapSiteChrome(settings: SiteSetting): SiteChromeContent {
-  const isLegacyDevFestChrome = settings.siteName === 'DevFest Nairobi' && settings.brandLabel === 'DevFest'
-  if (isLegacyDevFestChrome) {
-    return defaultSiteChromeContent
-  }
-
+function mapChrome(settings: SiteSetting): SiteChromeContent {
+  const d = defaultSiteChromeContent
   const navigation = settings.navigation
     ?.filter((item) => item.enabled !== false)
     .map(({ label, url }) => ({ label, url }))
-  const socialLinks = settings.socialLinks?.map(({ label, url }) => ({ label, url }))
-  const footerGroups = settings.footer?.groups?.map((group) => ({
+  const groups = settings.footer?.groups?.map((group) => ({
     heading: group.heading,
-    links: group.links?.map(({ label, url }) => ({ label, url })) || [],
+    links: group.links || [],
   }))
-  const resolvedNavigation = navigation?.length ? navigation : defaultSiteChromeContent.navigation
-  const resolvedFooterGroups = footerGroups?.length ? footerGroups : defaultSiteChromeContent.footerGroups
-
   return {
-    siteName: withFallback(settings.siteName, defaultSiteChromeContent.siteName),
-    brandLabel: withFallback(settings.brandLabel, defaultSiteChromeContent.brandLabel),
-    editionLabel: withFallback(settings.editionLabel, defaultSiteChromeContent.editionLabel),
-    navigation: appendUniqueLink(resolvedNavigation, shopLink),
+    siteName: text(settings.siteName, d.siteName),
+    brandLabel: text(settings.brandLabel, d.brandLabel),
+    editionLabel: text(settings.editionLabel, d.editionLabel),
+    navigation: navigation?.length ? navigation : d.navigation,
     headerCTA: {
-      label: withFallback(settings.headerCTA?.label, defaultSiteChromeContent.headerCTA.label),
-      url: withFallback(settings.headerCTA?.url, defaultSiteChromeContent.headerCTA.url),
+      label: text(settings.headerCTA?.label, d.headerCTA.label),
+      url: text(settings.headerCTA?.url, d.headerCTA.url),
     },
-    socialLinks: socialLinks?.length ? socialLinks : defaultSiteChromeContent.socialLinks,
-    footerGroups: includeRepositoryLink(resolvedFooterGroups),
-    footerNote: withFallback(settings.footer?.note, defaultSiteChromeContent.footerNote),
+    socialLinks: settings.socialLinks?.length ? settings.socialLinks : d.socialLinks,
+    footerGroups: groups?.length ? groups : d.footerGroups,
+    footerNote: text(settings.footer?.note, d.footerNote),
     seo: {
-      title: withFallback(settings.seo?.title, defaultSiteChromeContent.seo.title),
-      description: withFallback(settings.seo?.description, defaultSiteChromeContent.seo.description),
+      title: text(settings.seo?.title, d.seo.title),
+      description: text(settings.seo?.description, d.seo.description),
     },
   }
 }
-
-function mapCommunityHomepage(settings: SiteSetting): CommunityHomeContent {
-  const community = settings.communityHomepage
-  const statistics = community?.statistics?.map(({ value, label }) => ({ value, label }))
-  const pillars = community?.pillars?.map((pillar, index) => ({
-    code: String(index + 1).padStart(2, '0'),
-    title: pillar.title,
-    description: pillar.description,
-    accent: pillar.accent,
-  }))
-  const ecosystemItems = community?.ecosystem?.items?.map(({ label }) => label)
-
+function mapCommunity(settings: SiteSetting): CommunityHomeContent {
+  const c = settings.communityHomepage,
+    d = defaultCommunityHomeContent
+  const photos = c?.hero?.photos?.slice(0, 4).flatMap(({ image }) => {
+    const photo = media(image)
+    return photo ? [photo] : []
+  })
   return {
     hero: {
-      eyebrow: withFallback(community?.hero?.eyebrow, defaultCommunityHomeContent.hero.eyebrow),
-      headline: withFallback(community?.hero?.headline, defaultCommunityHomeContent.hero.headline),
-      accentLine: withFallback(community?.hero?.accentLine, defaultCommunityHomeContent.hero.accentLine),
-      description: withFallback(community?.hero?.description, defaultCommunityHomeContent.hero.description),
+      eyebrow: text(c?.hero?.eyebrow, d.hero.eyebrow),
+      headline: text(c?.hero?.headline, d.hero.headline),
+      accentLine: text(c?.hero?.accentLine, d.hero.accentLine),
+      description: text(c?.hero?.description, d.hero.description),
       primaryCTA: {
-        label: withFallback(community?.hero?.primaryLabel, defaultCommunityHomeContent.hero.primaryCTA.label),
-        url: withFallback(community?.hero?.primaryURL, defaultCommunityHomeContent.hero.primaryCTA.url),
+        label: text(c?.hero?.primaryLabel, d.hero.primaryCTA.label),
+        url: text(c?.hero?.primaryURL, d.hero.primaryCTA.url),
       },
       secondaryCTA: {
-        label: withFallback(community?.hero?.secondaryLabel, defaultCommunityHomeContent.hero.secondaryCTA.label),
-        url: withFallback(community?.hero?.secondaryURL, defaultCommunityHomeContent.hero.secondaryCTA.url),
+        label: text(c?.hero?.secondaryLabel, d.hero.secondaryCTA.label),
+        url: text(c?.hero?.secondaryURL, d.hero.secondaryCTA.url),
       },
+      photos: photos?.length ? photos : d.hero.photos,
+      photoCaption: text(c?.hero?.photoCaption, d.hero.photoCaption),
     },
-    statistics: statistics?.length ? statistics : defaultCommunityHomeContent.statistics,
+    statistics: c?.statistics?.length ? c.statistics : d.statistics,
     about: {
-      kicker: withFallback(community?.about?.kicker, defaultCommunityHomeContent.about.kicker),
-      heading: withFallback(community?.about?.heading, defaultCommunityHomeContent.about.heading),
-      description: withFallback(community?.about?.description, defaultCommunityHomeContent.about.description),
+      kicker: text(c?.about?.kicker, d.about.kicker),
+      heading: text(c?.about?.heading, d.about.heading),
+      description: text(c?.about?.description, d.about.description),
+      welcomeLead: text(c?.about?.welcomeLead, d.about.welcomeLead),
+      welcomeLine: text(c?.about?.welcomeLine, d.about.welcomeLine),
     },
-    pillars: pillars?.length ? pillars : defaultCommunityHomeContent.pillars,
+    programmes: {
+      intro: text(c?.programmes?.intro, d.programmes.intro),
+      items: c?.programmes?.items?.length ? c.programmes.items : d.programmes.items,
+      closing: text(c?.programmes?.closing, d.programmes.closing),
+      accessNote: text(c?.programmes?.accessNote, d.programmes.accessNote),
+    },
+    connection: {
+      heading: text(c?.connection?.heading, d.connection.heading),
+      description: text(c?.connection?.description, d.connection.description),
+      image: media(c?.connection?.image),
+    },
+    pillars: c?.pillars?.length
+      ? c.pillars.map((p, i) => ({
+          code: String(i + 1).padStart(2, '0'),
+          title: p.title,
+          description: p.description,
+          accent: p.accent,
+        }))
+      : d.pillars,
     ecosystem: {
-      kicker: withFallback(community?.ecosystem?.kicker, defaultCommunityHomeContent.ecosystem.kicker),
-      heading: withFallback(community?.ecosystem?.heading, defaultCommunityHomeContent.ecosystem.heading),
-      description: withFallback(community?.ecosystem?.description, defaultCommunityHomeContent.ecosystem.description),
-      items: ecosystemItems?.length ? ecosystemItems : defaultCommunityHomeContent.ecosystem.items,
+      kicker: text(c?.ecosystem?.kicker, d.ecosystem.kicker),
+      heading: text(c?.ecosystem?.heading, d.ecosystem.heading),
+      description: text(c?.ecosystem?.description, d.ecosystem.description),
+      items: c?.ecosystem?.items?.length
+        ? c.ecosystem.items.map((i) => i.label)
+        : d.ecosystem.items,
     },
     closing: {
-      kicker: withFallback(community?.closing?.kicker, defaultCommunityHomeContent.closing.kicker),
-      heading: withFallback(community?.closing?.heading, defaultCommunityHomeContent.closing.heading),
-      accentLine: withFallback(community?.closing?.accentLine, defaultCommunityHomeContent.closing.accentLine),
+      kicker: text(c?.closing?.kicker, d.closing.kicker),
+      heading: text(c?.closing?.heading, d.closing.heading),
+      accentLine: text(c?.closing?.accentLine, d.closing.accentLine),
       primaryCTA: {
-        label: withFallback(community?.closing?.primaryLabel, defaultCommunityHomeContent.closing.primaryCTA.label),
-        url: withFallback(community?.closing?.primaryURL, defaultCommunityHomeContent.closing.primaryCTA.url),
+        label: text(c?.closing?.primaryLabel, d.closing.primaryCTA.label),
+        url: text(c?.closing?.primaryURL, d.closing.primaryCTA.url),
       },
       secondaryCTA: {
-        label: withFallback(community?.closing?.secondaryLabel, defaultCommunityHomeContent.closing.secondaryCTA.label),
-        url: withFallback(community?.closing?.secondaryURL, defaultCommunityHomeContent.closing.secondaryCTA.url),
+        label: text(c?.closing?.secondaryLabel, d.closing.secondaryCTA.label),
+        url: text(c?.closing?.secondaryURL, d.closing.secondaryCTA.url),
       },
     },
   }
 }
-
-export async function getSiteChromeContent(): Promise<SiteChromeContent> {
-  if (!cmsEnabled()) return defaultSiteChromeContent
-
-  try {
-    const payload = await getPayload({ config })
-    const settings = await payload.findGlobal({ slug: 'site-settings', depth: 1, draft: false })
-    return mapSiteChrome(settings)
-  } catch {
-    return defaultSiteChromeContent
-  }
-}
-
-function mapArtwork(artwork: number | Media | null | undefined) {
-  if (typeof artwork === 'object' && artwork?.url) {
-    return { src: artwork.url, alt: artwork.alt || '' }
-  }
-  return defaultHomeContent.hero.artwork
-}
-
-function mapMedia(media: number | Media | null | undefined) {
-  if (typeof media !== 'object' || !media?.url) return null
-  return { src: media.url, alt: media.alt || '' }
-}
-
-function mapEdition(edition: DevfestEdition, chrome: SiteChromeContent): HomeContent {
-  const year = String(edition.year)
-  const event = typeof edition.event === 'object' ? edition.event : null
-  const editionChrome = labelDevFestEdition(chrome, year)
-  const cmsTracks = edition.tracks?.map((track, index) => ({
-    code: String(index + 1).padStart(2, '0'),
-    title: track.title,
-    copy: track.description,
-    color: track.accent,
-    tags: track.topics || [],
-  }))
-  const callsToAction = edition.callsToAction?.map((cta) => ({
-    label: cta.label,
-    url: cta.url,
-    style: cta.style || 'primary',
-  }))
-  const stat = edition.statistics?.[0]
-
-  return {
-    ...defaultHomeContent,
-    chrome: editionChrome,
-    year,
-    eventID: event?.id,
-    status: statusLabels[edition.status] || defaultHomeContent.status,
-    locationLabel: withFallback(edition.eventDetails?.locationLabel, defaultHomeContent.locationLabel),
-    eventDetails: {
-      startsAt: event?.localStartDate || event?.sourceStartDate || edition.eventDetails?.startsAt || undefined,
-      endsAt: edition.eventDetails?.endsAt || undefined,
-      venueName: event?.venueName || edition.eventDetails?.venueName || undefined,
-      address: event?.venueAddress || edition.eventDetails?.address || undefined,
-      mapURL: edition.eventDetails?.mapURL || undefined,
-    },
-    hero: {
-      eyebrow: withFallback(edition.hero.eyebrow, defaultHomeContent.hero.eyebrow),
-      headline: edition.hero.headline,
-      accentLine: edition.hero.accentLine,
-      description: edition.hero.description,
-      artwork: mapArtwork(edition.hero.artwork),
-      signals: edition.hero.signals?.length ? edition.hero.signals.map(({ label }) => label) : defaultHomeContent.hero.signals,
-      scrollLabel: withFallback(edition.hero.scrollLabel, defaultHomeContent.hero.scrollLabel),
-    },
-    callsToAction: callsToAction?.length ? callsToAction : defaultHomeContent.callsToAction,
-    ticker: {
-      enabled: edition.ticker?.enabled ?? defaultHomeContent.ticker.enabled,
-      items: edition.ticker?.items?.length ? edition.ticker.items.map(({ label }) => label) : defaultHomeContent.ticker.items,
-    },
-    story: {
-      enabled: edition.storySection?.enabled ?? defaultHomeContent.story.enabled,
-      kicker: withFallback(edition.storySection?.kicker, defaultHomeContent.story.kicker),
-      heading: withFallback(edition.storySection?.heading, defaultHomeContent.story.heading),
-      paragraphs: edition.storySection?.paragraphs?.length
-        ? edition.storySection.paragraphs.map(({ text }) => text)
-        : defaultHomeContent.story.paragraphs,
-      quote: withFallback(edition.storySection?.quote, defaultHomeContent.story.quote),
-    },
-    tracksSection: {
-      enabled: edition.tracksSection?.enabled ?? defaultHomeContent.tracksSection.enabled,
-      kicker: withFallback(edition.tracksSection?.kicker, defaultHomeContent.tracksSection.kicker),
-      heading: withFallback(edition.tracksSection?.heading, defaultHomeContent.tracksSection.heading),
-      intro: withFallback(edition.tracksSection?.intro, defaultHomeContent.tracksSection.intro),
-    },
-    tracks: cmsTracks?.length ? cmsTracks : defaultHomeContent.tracks,
-    experience: {
-      enabled: edition.experienceSection?.enabled ?? defaultHomeContent.experience.enabled,
-      kicker: withFallback(edition.experienceSection?.kicker, defaultHomeContent.experience.kicker),
-      heading: withFallback(edition.experienceSection?.heading, defaultHomeContent.experience.heading),
-      marker: withFallback(edition.experienceSection?.marker, defaultHomeContent.experience.marker),
-      markerLabel: withFallback(edition.experienceSection?.markerLabel, defaultHomeContent.experience.markerLabel),
-      items: edition.experienceSection?.items?.length ? edition.experienceSection.items : defaultHomeContent.experience.items,
-    },
-    cfp: {
-      enabled: edition.cfpSection?.enabled ?? defaultHomeContent.cfp.enabled,
-      badge: withFallback(edition.cfpSection?.badge, defaultHomeContent.cfp.badge),
-      kicker: withFallback(edition.cfpSection?.kicker, defaultHomeContent.cfp.kicker),
-      heading: withFallback(edition.cfpSection?.heading, defaultHomeContent.cfp.heading),
-      description: withFallback(edition.cfpSection?.description, defaultHomeContent.cfp.description),
-      cta: {
-        label: withFallback(edition.cfpSection?.ctaLabel, defaultHomeContent.cfp.cta.label),
-        url: withFallback(edition.cfpSection?.ctaURL, defaultHomeContent.cfp.cta.url),
-      },
-      artLabelTop: withFallback(edition.cfpSection?.artLabelTop, defaultHomeContent.cfp.artLabelTop),
-      artLabelBottom: withFallback(edition.cfpSection?.artLabelBottom, defaultHomeContent.cfp.artLabelBottom),
-    },
-    eventsSection: {
-      enabled: edition.eventsSection?.enabled ?? defaultHomeContent.eventsSection.enabled,
-      kicker: withFallback(edition.eventsSection?.kicker, defaultHomeContent.eventsSection.kicker),
-      heading: withFallback(edition.eventsSection?.heading, defaultHomeContent.eventsSection.heading),
-      allEvents: {
-        label: withFallback(edition.eventsSection?.allEventsLabel, defaultHomeContent.eventsSection.allEvents.label),
-        url: withFallback(edition.eventsSection?.allEventsURL, defaultHomeContent.eventsSection.allEvents.url),
-      },
-      syncNote: withFallback(edition.eventsSection?.syncNote, defaultHomeContent.eventsSection.syncNote),
-    },
-    highlights: {
-      enabled: edition.highlightsSection?.enabled ?? defaultHomeContent.highlights.enabled,
-      kicker: withFallback(edition.highlightsSection?.kicker, defaultHomeContent.highlights.kicker),
-      heading: withFallback(edition.highlightsSection?.heading, defaultHomeContent.highlights.heading),
-      intro: withFallback(edition.highlightsSection?.intro, defaultHomeContent.highlights.intro),
-      photos: edition.highlightsSection?.photos?.flatMap((photo) => {
-        const image = mapMedia(photo.image)
-        return image ? [{ ...image, caption: photo.caption || '' }] : []
-      }) || [],
-      videos: edition.highlightsSection?.videos?.map((video) => ({
-        title: video.title,
-        url: video.url,
-        label: video.label || 'Watch on YouTube',
-      })) || [],
-    },
-    closing: {
-      enabled: edition.closingSection?.enabled ?? defaultHomeContent.closing.enabled,
-      kicker: withFallback(edition.closingSection?.kicker, defaultHomeContent.closing.kicker),
-      heading: withFallback(edition.closingSection?.heading, defaultHomeContent.closing.heading),
-      accentLine: withFallback(edition.closingSection?.accentLine, defaultHomeContent.closing.accentLine),
-      primaryCTA: {
-        label: withFallback(edition.closingSection?.primaryLabel, defaultHomeContent.closing.primaryCTA.label),
-        url: withFallback(edition.closingSection?.primaryURL, defaultHomeContent.closing.primaryCTA.url),
-      },
-      secondaryCTA: {
-        label: withFallback(edition.closingSection?.secondaryLabel, defaultHomeContent.closing.secondaryCTA.label),
-        url: withFallback(edition.closingSection?.secondaryURL, defaultHomeContent.closing.secondaryCTA.url),
-      },
-    },
-    memberStat: stat ? { value: stat.value, label: stat.label } : defaultHomeContent.memberStat,
-  }
-}
-
 export async function getHomeContent(): Promise<HomeContent> {
-  if (!cmsEnabled()) return defaultHomeContent
-
+  if (!enabled()) return defaultHomeContent
   try {
     const payload = await getPayload({ config })
     const settings = await payload.findGlobal({ slug: 'site-settings', depth: 2, draft: false })
-    const chrome = mapSiteChrome(settings)
-    const community = mapCommunityHomepage(settings)
-    const edition = typeof settings.currentEdition === 'object' ? settings.currentEdition : null
-    return edition ? { ...mapEdition(edition, chrome), community } : { ...defaultHomeContent, chrome, community }
+    return {
+      chrome: mapChrome(settings),
+      community: mapCommunity(settings),
+      ticker: {
+        enabled: settings.communityHomepage?.ticker?.enabled ?? true,
+        items: settings.communityHomepage?.ticker?.items?.length
+          ? settings.communityHomepage.ticker.items.map((i) => i.label)
+          : defaultHomeContent.ticker.items,
+      },
+      eventsSection: { enabled: settings.communityHomepage?.eventsEnabled ?? true },
+      highlights: {
+        enabled: settings.communityHomepage?.highlights?.enabled ?? true,
+        kicker: text(
+          settings.communityHomepage?.highlights?.kicker,
+          defaultHomeContent.highlights.kicker,
+        ),
+        heading: text(
+          settings.communityHomepage?.highlights?.heading,
+          defaultHomeContent.highlights.heading,
+        ),
+        intro: text(
+          settings.communityHomepage?.highlights?.intro,
+          defaultHomeContent.highlights.intro,
+        ),
+      },
+    }
   } catch {
     return defaultHomeContent
   }
+}
+export async function getSiteChromeContent() {
+  return (await getHomeContent()).chrome
 }

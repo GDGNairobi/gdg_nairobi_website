@@ -1,0 +1,88 @@
+.importer {
+  padding: 24px;
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: 8px;
+  margin-bottom: 24px;
+  background: var(--theme-elevation-0);
+}
+.importer h3 {
+  margin: 0 0 12px;
+}
+.importer p {
+  margin: 12px 0 18px;
+  line-height: 1.6;
+}
+.importer label {
+  display: block;
+  font-weight: 500;
+  line-height: 1.6;
+}
+.importer input[type='file'],
+.importer select {
+  display: block;
+  width: 100%;
+  min-height: 42px;
+  margin-top: 6px;
+  padding: 10px 12px;
+  color: var(--theme-text);
+  background: var(--theme-input-bg);
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: 4px;
+  font: inherit;
+}
+.importer input[type='file']::file-selector-button {
+  padding: 7px 12px;
+  margin-right: 12px;
+  border: 1px solid var(--theme-elevation-300);
+  border-radius: 4px;
+  background: var(--theme-elevation-100);
+  color: var(--theme-text);
+  cursor: pointer;
+}
+.importer input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.importer details {
+  margin: 24px 0;
+  padding-block: 16px;
+  border-block: 1px solid var(--theme-elevation-150);
+}
+.importer summary {
+  font-weight: 600;
+  cursor: pointer;
+}
+.importer table {
+  width: 100%;
+  min-width: 550px;
+  border-collapse: collapse;
+}
+.importer th,
+.importer td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--theme-elevation-150);
+}
+.importer th {
+  background: var(--theme-elevation-50);
+}
+.importer :is(input, select, summary):focus-visible {
+  outline: 2px solid var(--theme-text);
+  outline-offset: 3px;
+}
+.importer [role='alert'] {
+  padding: 16px;
+  border-left: 3px solid var(--theme-error-500);
+  background: var(--theme-error-50);
+}
+.importer [role='status'] {
+  padding: 16px;
+  background: var(--theme-success-50);
+}
+@media (max-width: 700px) {
+  .importer {
+    padding: 16px;
+  }
+}

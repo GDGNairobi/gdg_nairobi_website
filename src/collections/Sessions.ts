@@ -6,11 +6,22 @@ export const Sessions: CollectionConfig = {
   slug: 'sessions',
   access: { create: isEditor, delete: isAdmin, read: publishedOrEditor, update: isEditor },
   admin: {
-    defaultColumns: ['title', 'event', 'startsAt', 'scheduleTrack', 'sessionStatus', 'room', '_status'],
-    description: 'Sessions belong to an internal event schedule. Times are the planned times; use the event delay control to shift the whole live schedule.',
+    group: 'Community',
+    defaultColumns: [
+      'title',
+      'event',
+      'startsAt',
+      'scheduleTrack',
+      'sessionStatus',
+      'room',
+      '_status',
+    ],
+    description:
+      'Sessions belong to an internal event schedule. Times are the planned times; use the event delay control to shift the whole live schedule.',
     useAsTitle: 'title',
   },
   fields: [
+    { name: 'importKey', type: 'text', admin: { hidden: true } },
     { name: 'title', type: 'text', required: true },
     { name: 'slug', type: 'text', required: true, unique: true, index: true },
     { name: 'description', type: 'richText' },
@@ -18,8 +29,10 @@ export const Sessions: CollectionConfig = {
       name: 'event',
       type: 'relationship',
       relationTo: 'community-events',
-      filterOptions: { eventDestination: { equals: 'schedule' } },
-      admin: { description: 'Leave empty only for the standalone DevFest programme.' },
+      required: true,
+      admin: {
+        description: 'The parent event. Import a CSV or Excel schedule from its Programme tab.',
+      },
     },
     { name: 'speakers', type: 'relationship', relationTo: 'speakers', hasMany: true },
     { name: 'startsAt', type: 'date', required: true },
@@ -29,7 +42,10 @@ export const Sessions: CollectionConfig = {
       name: 'scheduleTrack',
       label: 'Schedule column / stage',
       type: 'text',
-      admin: { description: 'For multi-track events, use any organizer-friendly label such as “Main Stage” or “Workshop Room”.' },
+      admin: {
+        description:
+          'For multi-track events, use any organizer-friendly label such as “Main Stage” or “Workshop Room”.',
+      },
     },
     {
       name: 'track',
@@ -42,8 +58,18 @@ export const Sessions: CollectionConfig = {
       ],
       required: true,
     },
-    { name: 'format', type: 'select', options: ['talk', 'workshop', 'keynote', 'panel', 'break'], required: true },
-    { name: 'level', type: 'select', options: ['all', 'beginner', 'intermediate', 'advanced'], defaultValue: 'all' },
+    {
+      name: 'format',
+      type: 'select',
+      options: ['talk', 'workshop', 'keynote', 'panel', 'break'],
+      required: true,
+    },
+    {
+      name: 'level',
+      type: 'select',
+      options: ['all', 'beginner', 'intermediate', 'advanced'],
+      defaultValue: 'all',
+    },
     {
       name: 'sessionStatus',
       label: 'Live session status',
@@ -62,8 +88,12 @@ export const Sessions: CollectionConfig = {
       name: 'publicNote',
       label: 'Attendee update',
       type: 'text',
-      admin: { description: 'Short live note such as “Moved to Room B” or “Starting in 10 minutes”.', position: 'sidebar' },
+      admin: {
+        description: 'Short live note such as “Moved to Room B” or “Starting in 10 minutes”.',
+        position: 'sidebar',
+      },
     },
   ],
+  indexes: [{ fields: ['event', 'importKey'], unique: true }],
   versions: { drafts: { autosave: true, schedulePublish: true }, maxPerDoc: 20 },
 }

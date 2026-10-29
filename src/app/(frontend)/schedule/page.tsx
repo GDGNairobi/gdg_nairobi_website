@@ -1,5 +1,7 @@
-import { permanentRedirect } from 'next/navigation'
+import { redirect } from 'next/navigation'
+import { getFeaturedEvent } from '@/lib/community-events'
 
-export default function ScheduleRedirect() {
-  permanentRedirect('/devfest#programme')
+export default async function EventSectionRedirect() {
+  const event = await getFeaturedEvent('devfest')
+  redirect(event ? `${event.href}#programme` : '/events')
 }

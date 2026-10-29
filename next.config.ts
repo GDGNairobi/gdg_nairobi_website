@@ -40,6 +40,7 @@ const nextConfig: NextConfig = {
       },
     ],
     remotePatterns: [
+      { hostname: 'i.ytimg.com', protocol: 'https', pathname: '/vi/**' },
       {
         hostname: 'res.cloudinary.com',
         protocol: 'https',

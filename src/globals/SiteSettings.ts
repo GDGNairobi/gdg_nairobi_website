@@ -6,10 +6,10 @@ export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
   access: { read: () => true, update: isEditor },
   fields: [
+    { name: 'seedRevision', type: 'text', admin: { hidden: true } },
     { name: 'siteName', type: 'text', defaultValue: 'GDG Nairobi', required: true },
     { name: 'brandLabel', type: 'text', defaultValue: 'GDG', required: true },
     { name: 'editionLabel', type: 'text', defaultValue: 'Nairobi', required: true },
-    { name: 'currentEdition', type: 'relationship', relationTo: 'devfest-editions' },
     {
       name: 'navigation',
       type: 'array',
@@ -25,7 +25,12 @@ export const SiteSettings: GlobalConfig = {
       type: 'group',
       fields: [
         { name: 'label', type: 'text', defaultValue: 'Join GDG Nairobi', required: true },
-        { name: 'url', type: 'text', defaultValue: 'https://gdg.community.dev/gdg-nairobi/', required: true },
+        {
+          name: 'url',
+          type: 'text',
+          defaultValue: 'https://gdg.community.dev/gdg-nairobi/',
+          required: true,
+        },
       ],
     },
     {
@@ -43,12 +48,29 @@ export const SiteSettings: GlobalConfig = {
             {
               name: 'description',
               type: 'textarea',
-              defaultValue: 'Meet peers, learn through practical events and share experience around Google technologies and modern software development.',
+              defaultValue:
+                'Meet peers, learn through practical events and share experience around Google technologies and modern software development.',
             },
             { name: 'primaryLabel', type: 'text', defaultValue: 'Join the community' },
-            { name: 'primaryURL', type: 'text', defaultValue: 'https://gdg.community.dev/gdg-nairobi/' },
+            {
+              name: 'primaryURL',
+              type: 'text',
+              defaultValue: 'https://gdg.community.dev/gdg-nairobi/',
+            },
             { name: 'secondaryLabel', type: 'text', defaultValue: 'Explore events' },
             { name: 'secondaryURL', type: 'text', defaultValue: '/events' },
+            {
+              name: 'photos',
+              type: 'array',
+              dbName: 'community_hero_photos',
+              maxRows: 4,
+              admin: {
+                description:
+                  'Order up to four community photos in equal-sized postcards. The first leads the grid. Leave empty to use the four built-in photographs. Use landscape photos with descriptive Media alt text.',
+              },
+              fields: [{ name: 'image', type: 'upload', relationTo: 'media', required: true }],
+            },
+            { name: 'photoCaption', type: 'text', defaultValue: 'There is a seat for you here.' },
           ],
         },
         {
@@ -66,8 +88,72 @@ export const SiteSettings: GlobalConfig = {
           type: 'group',
           fields: [
             { name: 'kicker', type: 'text', defaultValue: 'Community, all year round' },
-            { name: 'heading', type: 'textarea', defaultValue: 'Year-round events for Nairobi’s developer community.' },
+            {
+              name: 'heading',
+              type: 'textarea',
+              defaultValue: 'Year-round events for Nairobi’s developer community.',
+            },
             { name: 'description', type: 'textarea' },
+            { name: 'welcomeLead', type: 'text' },
+            { name: 'welcomeLine', type: 'text', defaultValue: "you're welcome here." },
+          ],
+        },
+        {
+          name: 'programmes',
+          label: 'What we do',
+          type: 'group',
+          fields: [
+            { name: 'intro', type: 'textarea' },
+            {
+              name: 'items',
+              type: 'array',
+              dbName: 'community_programmes',
+              fields: [
+                { name: 'title', type: 'text', required: true },
+                { name: 'description', type: 'textarea', required: true },
+              ],
+            },
+            { name: 'closing', type: 'textarea' },
+            { name: 'accessNote', label: 'Free events note', type: 'textarea' },
+          ],
+        },
+        {
+          name: 'connection',
+          label: 'Connect with the community',
+          type: 'group',
+          fields: [
+            { name: 'heading', type: 'text' },
+            { name: 'description', type: 'textarea' },
+            { name: 'image', type: 'upload', relationTo: 'media' },
+          ],
+        },
+        {
+          name: 'ticker',
+          type: 'group',
+          fields: [
+            { name: 'enabled', type: 'checkbox', defaultValue: true },
+            {
+              name: 'items',
+              type: 'array',
+              dbName: 'community_ticker',
+              fields: [{ name: 'label', type: 'text', required: true }],
+            },
+          ],
+        },
+        {
+          name: 'eventsEnabled',
+          label: 'Show homepage events',
+          type: 'checkbox',
+          defaultValue: true,
+        },
+        {
+          name: 'highlights',
+          type: 'group',
+          fields: [
+            { name: 'enabled', type: 'checkbox', defaultValue: true },
+            { name: 'kicker', type: 'text' },
+            { name: 'heading', type: 'text' },
+            { name: 'intro', type: 'textarea' },
           ],
         },
         {
@@ -78,7 +164,12 @@ export const SiteSettings: GlobalConfig = {
           fields: [
             { name: 'title', type: 'text', required: true },
             { name: 'description', type: 'textarea', required: true },
-            { name: 'accent', type: 'select', options: ['blue', 'red', 'yellow', 'green'], required: true },
+            {
+              name: 'accent',
+              type: 'select',
+              options: ['blue', 'red', 'yellow', 'green'],
+              required: true,
+            },
           ],
         },
         {
@@ -86,7 +177,11 @@ export const SiteSettings: GlobalConfig = {
           type: 'group',
           fields: [
             { name: 'kicker', type: 'text', defaultValue: 'More than code' },
-            { name: 'heading', type: 'textarea', defaultValue: 'Connected to the wider developer community.' },
+            {
+              name: 'heading',
+              type: 'textarea',
+              defaultValue: 'Connected to the wider developer community.',
+            },
             { name: 'description', type: 'textarea' },
             {
               name: 'items',
@@ -105,7 +200,11 @@ export const SiteSettings: GlobalConfig = {
             { name: 'heading', type: 'text', defaultValue: 'Join GDG Nairobi.' },
             { name: 'accentLine', type: 'text', defaultValue: 'Start with the next event.' },
             { name: 'primaryLabel', type: 'text', defaultValue: 'Join GDG Nairobi' },
-            { name: 'primaryURL', type: 'text', defaultValue: 'https://gdg.community.dev/gdg-nairobi/' },
+            {
+              name: 'primaryURL',
+              type: 'text',
+              defaultValue: 'https://gdg.community.dev/gdg-nairobi/',
+            },
             { name: 'secondaryLabel', type: 'text', defaultValue: 'Meet the organizers' },
             { name: 'secondaryURL', type: 'text', defaultValue: '/about#organizers' },
           ],
@@ -145,7 +244,8 @@ export const SiteSettings: GlobalConfig = {
         {
           name: 'note',
           type: 'textarea',
-          defaultValue: 'GDG Nairobi is an independent group. Our activities and the opinions expressed here should not be linked to Google, the corporation.',
+          defaultValue:
+            'GDG Nairobi is an independent group. Our activities and the opinions expressed here should not be linked to Google, the corporation.',
         },
       ],
     },
@@ -157,7 +257,8 @@ export const SiteSettings: GlobalConfig = {
         {
           name: 'description',
           type: 'textarea',
-          defaultValue: 'A volunteer-led Google Developer Group for Nairobi: events, workshops, community and DevFest.',
+          defaultValue:
+            'A volunteer-led Google Developer Group for Nairobi: events, workshops, community and DevFest.',
         },
       ],
     },

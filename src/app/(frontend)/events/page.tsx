@@ -1,40 +1,96 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-
 import { EditorialPage } from '@/components/EditorialPage'
 import { JsonLd } from '@/components/JsonLd'
-import { getCommunityEventCards } from '@/lib/community-events'
+import { getEventIndex, type EventCard } from '@/lib/community-events'
 import { buildPageMetadata } from '@/lib/metadata'
+import { absoluteSiteURL } from '@/lib/metadata'
 
 export const metadata: Metadata = buildPageMetadata({
   title: 'Developer events in Nairobi',
-  description: 'Browse upcoming GDG Nairobi meetups, workshops, codelabs and community events, with registration on the official chapter page.',
+  description:
+    'Find your next GDG Nairobi event and explore past meetups, workshops and DevFest editions.',
   path: '/events',
-  keywords: ['developer events Nairobi', 'tech meetups Nairobi', 'GDG Nairobi events', 'coding workshops Nairobi'],
 })
-
-export default async function EventsPage() {
-  const events = await getCommunityEventCards(8)
+function EventList({ events }: { events: EventCard[] }) {
   return (
-    <EditorialPage eyebrow="THE ROOT SYSTEM" title="Nairobi keeps building." intro="DevFest is one moment in a year-round rhythm of workshops, codelabs, meetups and conversations led by the GDG Nairobi community." accent="green">
-      <JsonLd data={{
-        '@context': 'https://schema.org',
-        '@type': 'ItemList',
-        name: 'GDG Nairobi community events',
-        itemListElement: events.map((event, index) => ({ '@type': 'ListItem', position: index + 1, name: event.title, url: event.href })),
-      }} />
-      <div className="editorial-list">
-        {events.map((event, index) => event.external ? (
-          <a href={event.href} target="_blank" rel="noreferrer" key={event.href}>
-            <span>{String(index + 1).padStart(2, '0')}</span><time>{event.date}</time><div><h2>{event.title}</h2><p>{event.type}</p></div><i>↗</i>
-          </a>
+    <div className="editorial-list">
+      {events.map((event, index) => (
+        <Link href={event.href} key={event.id}>
+          <span>{String(index + 1).padStart(2, '0')}</span>
+          <time dateTime={event.startsAt}>{event.date}</time>
+          <div>
+            <h3>{event.title}</h3>
+            <p>
+              {event.type}
+              {event.days && event.days.length > 1 ? ` · ${event.days.length} days` : ''}
+            </p>
+          </div>
+          <i aria-hidden="true">→</i>
+        </Link>
+      ))}
+    </div>
+  )
+}
+export default async function EventsPage() {
+  const { upcoming, past, undated } = await getEventIndex()
+  const years = [...new Set(past.map((e) => e.year))].sort((a, b) => (b || 0) - (a || 0))
+  return (
+    <EditorialPage
+      eyebrow="LEARN · CONNECT · BUILD"
+      title="Find your next community."
+      intro="Join a workshop, share an idea or spend a day with people who love building. There is a seat for you here."
+      accent="green"
+    >
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'ItemList',
+          name: 'GDG Nairobi events',
+          itemListElement: [...upcoming, ...past, ...undated].map((e, i) => ({
+            '@type': 'ListItem',
+            position: i + 1,
+            name: e.title,
+            url: absoluteSiteURL(e.href),
+          })),
+        }}
+      />
+      <section className="event-index-section" aria-labelledby="upcoming-title">
+        <p className="section-kicker">What’s next</p>
+        <h2 id="upcoming-title">Upcoming events</h2>
+        {upcoming.length ? (
+          <EventList events={upcoming} />
         ) : (
-          <Link href={event.href} key={event.href}>
-            <span>{String(index + 1).padStart(2, '0')}</span><time>{event.date}</time><div><h2>{event.title}</h2><p>{event.type}</p></div><i>→</i>
-          </Link>
+          <p>We’re preparing our next events. Join the chapter for updates.</p>
+        )}
+      </section>
+      {undated.length > 0 && (
+        <section className="event-index-section">
+          <h2>Dates coming soon</h2>
+          <EventList events={undated} />
+        </section>
+      )}
+      <section className="event-index-section" id="past-events" aria-labelledby="past-title">
+        <p className="section-kicker">The archive</p>
+        <h2 id="past-title">Past events</h2>
+        {years.map((year) => (
+          <section className="event-archive-year" key={year || 'undated'}>
+            <h3>{year || 'Earlier events'}</h3>
+            <EventList events={past.filter((e) => e.year === year)} />
+          </section>
         ))}
-      </div>
-      <div className="info-callout"><span>ONE EVENT SOURCE</span><p>Event facts stay synchronized with the official chapter. Selected events add their schedule here; older events continue to their Community page.</p><a href="https://gdg.community.dev/gdg-nairobi/">Visit the official chapter ↗</a></div>
+        {past.length === 0 && <p>Past events will appear here with their photos and highlights.</p>}
+      </section>
+      <a
+        className="wide-cta"
+        href="https://gdg.community.dev/gdg-nairobi/"
+        target="_blank"
+        rel="noreferrer"
+      >
+        <span>COME AS YOU ARE</span>
+        <strong>Join GDG Nairobi</strong>
+        <i aria-hidden="true">↗</i>
+      </a>
     </EditorialPage>
   )
 }

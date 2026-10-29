@@ -14,10 +14,22 @@ type Command = {
 const commands: Command[] = [
   { href: '/', label: 'Go home', detail: 'Back to the GDG Nairobi homepage' },
   { href: '/events', label: 'Explore events', detail: 'See upcoming and past community events' },
-  { href: '/schedule', label: 'Open the schedule', detail: 'Find sessions, tracks, and start times' },
-  { href: '/speakers', label: 'Meet the speakers', detail: 'Discover the people sharing what they know' },
-  { href: '/about#organizers', label: 'Meet the organizers', detail: 'The volunteers behind the community' },
-  { href: '/devfest', label: 'Enter DevFest', detail: 'Everything DevFest Nairobi 2026' },
+  {
+    href: '/schedule',
+    label: 'Open the schedule',
+    detail: 'Find sessions, tracks, and start times',
+  },
+  {
+    href: '/speakers',
+    label: 'Meet the speakers',
+    detail: 'Discover the people sharing what they know',
+  },
+  {
+    href: '/about#organizers',
+    label: 'Meet the organisers',
+    detail: 'The volunteers behind the community',
+  },
+  { href: '/devfest', label: 'Enter DevFest', detail: 'Explore the featured DevFest event' },
   {
     href: 'https://gdg.community.dev/gdg-nairobi/',
     label: 'Join GDG Nairobi',
@@ -41,7 +53,9 @@ export function SiteEasterEggs() {
   const filteredCommands = useMemo(() => {
     const search = query.trim().toLowerCase()
     if (!search) return commands
-    return commands.filter(({ detail, label }) => `${label} ${detail}`.toLowerCase().includes(search))
+    return commands.filter(({ detail, label }) =>
+      `${label} ${detail}`.toLowerCase().includes(search),
+    )
   }, [query])
 
   useEffect(() => {
@@ -68,7 +82,8 @@ export function SiteEasterEggs() {
         return
       }
 
-      if (open || event.metaKey || event.ctrlKey || event.altKey || isTypingTarget(event.target)) return
+      if (open || event.metaKey || event.ctrlKey || event.altKey || isTypingTarget(event.target))
+        return
       if (event.key.length !== 1) {
         typedKeys.current = ''
         return
@@ -117,9 +132,13 @@ export function SiteEasterEggs() {
   if (!open) return null
 
   return (
-    <div className="jenga-backdrop" role="presentation" onMouseDown={(event) => {
-      if (event.currentTarget === event.target) close()
-    }}>
+    <div
+      className="jenga-backdrop"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.currentTarget === event.target) close()
+      }}
+    >
       <div
         aria-describedby="jenga-description"
         aria-labelledby="jenga-title"
@@ -134,7 +153,14 @@ export function SiteEasterEggs() {
             <h2 id="jenga-title">Jenga</h2>
             <p id="jenga-description">Build your way around GDG Nairobi.</p>
           </div>
-          <button aria-label="Close command palette" className="jenga-close" onClick={close} type="button">Esc</button>
+          <button
+            aria-label="Close command palette"
+            className="jenga-close"
+            onClick={close}
+            type="button"
+          >
+            Esc
+          </button>
         </header>
         <label className="jenga-search">
           <span aria-hidden="true">⌕</span>
@@ -156,7 +182,10 @@ export function SiteEasterEggs() {
           {filteredCommands.map((command, index) => {
             const content = (
               <>
-                <span><strong>{command.label}</strong><small>{command.detail}</small></span>
+                <span>
+                  <strong>{command.label}</strong>
+                  <small>{command.detail}</small>
+                </span>
                 <i aria-hidden="true">{command.external ? '↗' : '→'}</i>
               </>
             )
@@ -169,14 +198,24 @@ export function SiteEasterEggs() {
             } as const
 
             return command.external ? (
-              <a {...props} href={command.href} key={command.href} rel="noreferrer" target="_blank">{content}</a>
+              <a {...props} href={command.href} key={command.href} rel="noreferrer" target="_blank">
+                {content}
+              </a>
             ) : (
-              <Link {...props} href={command.href} key={command.href}>{content}</Link>
+              <Link {...props} href={command.href} key={command.href}>
+                {content}
+              </Link>
             )
           })}
-          {!filteredCommands.length && <p className="jenga-empty">No blocks fit that search yet.</p>}
+          {!filteredCommands.length && (
+            <p className="jenga-empty">No blocks fit that search yet.</p>
+          )}
         </div>
-        <footer className="jenga-footer"><span>↑↓ Navigate</span><span>↵ Open</span><span>Esc Close</span></footer>
+        <footer className="jenga-footer">
+          <span>↑↓ Navigate</span>
+          <span>↵ Open</span>
+          <span>Esc Close</span>
+        </footer>
       </div>
     </div>
   )

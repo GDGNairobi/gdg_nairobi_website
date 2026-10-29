@@ -65,7 +65,7 @@ This is a GDG Nairobi website first and a DevFest website second. Changes should
 Editorial information should be managed in Payload when the GDG Nairobi team may need to change it without a deployment.
 
 - Put site-wide copy and navigation in **Site Settings**.
-- Put edition-specific DevFest information in **DevFest Editions**.
+- Put event and edition information in **Events**, including each day’s venue, registration, programme and media.
 - Use the existing collections for speakers, sessions, partners, organizers, announcements, media, and community events.
 - Preserve designed fallback content for empty or unavailable CMS values.
 - Do not hand-edit `src/payload-types.ts` or the generated Payload import map.

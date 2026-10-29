@@ -1,11 +1,11 @@
 # GDG Nairobi
 
-The public website and editorial platform for GDG Nairobi. The visual direction brings Nairobi's skyline and National Park into one sunrise landscape, using the Google colour system, restrained motion, and the chapter's year-round community as the main story. DevFest remains the flagship event, not the whole site.
+The public website and editorial platform for GDG Nairobi. The homepage puts the community's real event photography first, using the Google colour system, restrained motion, and the chapter's year-round community as the main story. DevFest remains the flagship event, not the whole site.
 
 ## What is included
 
 - A responsive Next.js 16 website for GDG Nairobi and DevFest Nairobi 2026
-- The established Nairobi skyline, sunrise, and Big Five hero artwork
+- A responsive four-photo community hero with original event photography
 - Public pages for the community, events, DevFest, organizers, partners, and code of conduct
 - Payload CMS 3 with editor/admin roles, drafts, version history, and scheduled publishing
 - PostgreSQL for CMS data and optional S3-compatible storage for uploaded media
@@ -20,12 +20,13 @@ The public website and editorial platform for GDG Nairobi. The visual direction 
 | --- | --- |
 | `/` | GDG Nairobi landing page and year-round community overview |
 | `/about` | Chapter background, programmes, organizers, sponsors, and partners |
-| `/events` | Upcoming and recent community events imported from the chapter page |
-| `/devfest` | DevFest overview, speakers, programme, venue, and event partners |
+| `/events` | Upcoming events and a past archive grouped by year |
+| `/devfest` | Redirect to the featured DevFest event |
+| `/events/[slug]` | One event page with its days, venues, programme and media |
 | `/code-of-conduct` | Community conduct summary and link to the full policy |
 | `/admin` | Payload CMS |
 
-Legacy URLs such as `/speakers`, `/schedule`, `/venue`, `/partners`, and `/team` permanently redirect to the relevant section instead of returning a 404.
+Legacy URLs such as `/speakers`, `/schedule`, `/venue`, `/partners`, and `/team` redirect to the relevant section instead of returning a 404.
 
 ## Technology
 
@@ -51,7 +52,7 @@ pnpm dev
 
 Open the website at [http://localhost:3000](http://localhost:3000) and Payload at [http://localhost:3000/admin](http://localhost:3000/admin). On a new database, Payload redirects `/admin` to `/admin/create-first-user` so you can create the first administrator.
 
-The included Docker Compose service exposes PostgreSQL only on `127.0.0.1:5433` and keeps its data in the `gdg_nairobi_postgres_data` named volume.
+The included Docker Compose service exposes PostgreSQL only on `127.0.0.1:55439` and keeps its data in the `gdg_nairobi_postgres_data` named volume.
 
 ```bash
 pnpm db:logs
@@ -62,7 +63,13 @@ pnpm db:down
 
 ### Design-only mode
 
-Set `ENABLE_CMS=false` to run the public site without PostgreSQL. The application uses its designed fallback content, so the visual experience remains complete while Payload and `/admin` are unavailable.
+Set `ENABLE_CMS=false` to run the public site without PostgreSQL. The application uses designed community copy and all four bundled hero photographs. Events and event highlights require the CMS, so unavailable data is not replaced with hardcoded event facts.
+
+### Homepage photography
+
+In **Site Settings → Community homepage → Hero**, order up to four Media photos and edit the photo caption. The first photo leads a grid of equal-sized postcards; the built-in selection starts with the wide audience shot. Use landscape photos with descriptive Media alt text; images retain their full content inside 3:2 frames. A published selection replaces the built-in photos, including selections of fewer than four. An empty or unavailable selection uses all four original bundled photographs. Tablet and phone layouts show the photos in two columns below the headline and buttons.
+
+Run `pnpm migrate` before deploying this schema change. The `add_community_hero_photos` migration adds photo rows and the caption to Site Settings and its draft/version tables without changing existing editorial content.
 
 ### Media storage
 
@@ -77,18 +84,37 @@ Local media uses Payload's default filesystem behavior. S3-compatible storage is
 
 ## CMS content model
 
-- **Site Settings** — GDG Nairobi homepage, current DevFest edition, navigation, header CTA, social links, footer, and default SEO copy
-- **DevFest Editions** — lifecycle state, hero, event details, calls to action, ticker, sections, tracks, CFP, and statistics
-- **Speakers** — names, bios, portraits, topics, social links, and edition relationships
+- **Site Settings** — GDG Nairobi homepage, navigation, header CTA, social links, footer, and default SEO copy
+- **Speakers** — names, bios, portraits, topics, social links, and reusable profiles
 - **Sessions** — title, format, track, level, room, time, speakers, slides, and recording links
 - **Partners** — chapter or DevFest scope, tier, logo, URL, and display order
 - **Team Members** — organizer names, roles, biographies, and social links
-- **Community Events** — synchronized source facts plus editor-controlled labels, visibility, feature state, and order
+- **Events** — one record per edition or event, with registration, featured status, ordered days and venues, programme imports, video highlights and photo albums. The existing API collection slug remains `community-events`.
 - **Announcements** — time-bound notices and calls to action
 - **Media** — uploaded images and files
 - **Users** — authenticated CMS editors and administrators
 
 Empty CMS fields fall back to the designed Nairobi defaults. This lets the team publish confirmed information gradually without creating empty or broken sections. Initial migrations seed the supplied organizer list, chapter partners, and community events.
+
+## Organiser event workflow
+
+1. Open **Community → Events**, create an event and enter its name and edition year. The URL slug is generated; keep it stable after sharing.
+2. In **Overview**, add the introduction, cover and registration link. Enable **Feature on the homepage** for the flagship event. Lower display order wins when several events are featured.
+3. In **Days & venues**, add each date and its venue, address, website and directions. Days can have different venues.
+4. Save the event, then open **Programme**. Download a CSV or Excel template, upload `.csv` or `.xlsx` (first sheet), match columns and preview. No data changes during preview. Dates and times without offsets use Africa/Nairobi (EAT). Select the date format for slash-separated dates.
+5. Resolve all row errors. Import as drafts to review first, or choose **Publish event, sessions and linked speaker profiles now**. Draft changes stay private until published. Add video highlights and album links in **Media**, then publish the event.
+
+Uploads support up to 2,000 sessions and 10 MB. Keep `session_id` values stable for repeat uploads: matching IDs update sessions within that event. Without IDs, the importer derives a key from title and start time; changing those values creates a new session. Missing rows never delete sessions. Optional blank fields preserve existing editorial values. Separate speaker names with `|`; imported speakers can be enriched in **Speakers**. Formula cells must be replaced with values before uploading. CSV and Excel are the only programme import options. Column mapping accommodates differing exports; no documented Bevy agenda schema was available to verify a native format.
+
+`/events/[slug]` is the single public detail page. Schedule, speaker and venue aliases follow the featured event with temporary redirects because that destination changes each edition. `/devfest` follows the featured DevFest event. Only published, visible events and sessions appear publicly; the archive uses Nairobi dates and groups past events by year.
+
+### Seed and migration
+
+`pnpm migrate` applies the unified model and seeds the supplied community content, original photos, confirmed 14 November 2026 DevFest date, Sarit venue links and historical highlights. `pnpm seed` reruns the idempotent seed; records already marked with its revision retain organiser edits. No administrator credentials are seeded.
+
+The unified-events migration consolidates the early site's edition model into Events, removes the old DevFest Editions tables and obsolete event fields, and hides duplicate DevFest cards after moving their sessions. It is intended for the approved early-site reset/consolidation. Back up an existing environment before applying it: schema rollback cannot recover removed legacy editorial fields. Review new days and venues before publishing imported programmes. Railway's existing pre-deploy migration command performs the same migration/seed; no Railway reset or deployment is part of local verification.
+
+The local Compose database is `gdg_nairobi_events` on port `55439`; an older database in the same volume is retained. If reusing an existing volume, create the new database explicitly or point `DATABASE_URL` at the existing site database and apply the migration.
 
 ## Event synchronization
 

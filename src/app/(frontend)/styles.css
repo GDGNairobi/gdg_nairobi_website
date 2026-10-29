@@ -776,3 +776,66 @@ section[id], div[id] { scroll-margin-top: 100px; }
   .site-header { background: var(--canvas); }
   .story-copy p, .section-intro, .track-card p { color: currentColor; }
 }
+
+/* Community photography replaces the illustration only on the homepage. */
+.community-photo-hero { min-height: max(820px, 100svh); padding: 150px max(5vw, 32px) 115px; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: clamp(32px, 4vw, 72px); }
+.community-photo-hero::before { display: none; }
+.community-photo-hero .hero-copy { width: 100%; min-width: 0; padding-left: 0; }
+.community-photo-hero h1 { max-width: 620px; font-size: clamp(3.1rem, 5.2vw, 5rem); }
+.community-photo-hero .hero-lede { max-width: 510px; }
+.community-photo-hero .eyebrow { flex-wrap: wrap; line-height: 1.4; }
+.community-photo-hero .hero-actions { gap: 12px; }
+
+@media (max-width: 1024px) {
+  .community-photo-hero { min-height: auto; padding: 140px 36px 100px; grid-template-columns: minmax(0, 1fr); gap: 48px; align-items: start; }
+  .community-photo-hero .hero-copy { max-width: 760px; margin-inline: auto; }
+  .community-photo-hero h1 { max-width: 760px; font-size: clamp(3.5rem, 7.5vw, 5rem); }
+  .community-photo-hero .hero-lede { max-width: 640px; }
+}
+
+@media (max-width: 700px) {
+  .community-photo-hero { display: grid; padding: 126px 22px 80px; gap: 34px; }
+  .community-photo-hero h1 { font-size: clamp(2.65rem, 10.8vw, 4.4rem); line-height: 1.03; }
+  .community-photo-hero .hero-lede { max-width: 100%; margin-top: 24px; }
+  .community-photo-hero .hero-actions { margin-top: 26px; }
+}
+
+@media (max-width: 380px) {
+  .community-photo-hero { padding-inline: 18px; }
+  .community-photo-hero .hero-actions { grid-template-columns: 1fr; }
+}
+
+/* Community content and the shared event journey. */
+.community-introduction { max-width: 760px; }
+.community-introduction > p { margin: 0 0 22px; color: rgba(32,33,36,.76); font-size: 1.06rem; line-height: 1.8; }
+.community-welcome { margin-top: 36px; padding-block: 28px; border-block: 1px solid var(--line); }
+.community-welcome > span { color: var(--deep-blue); font-weight: 700; }
+.community-welcome p { margin: 10px 0 3px; }
+.community-welcome strong { display: block; font-size: clamp(1.6rem, 3vw, 2.6rem); letter-spacing: -.035em; }
+.about-programmes .programmes-title { margin: 0 0 20px; font-size: clamp(2.5rem, 5vw, 4rem); }
+.about-programmes > p { max-width: 840px; margin-block: 28px; }
+.programme-card h3 { margin: auto 0 18px; font-size: clamp(1.7rem,2.6vw,2.7rem); line-height: 1.1; letter-spacing: -.035em; }
+.community-access-note { padding: 26px; border: 1px solid var(--ink); border-radius: 20px; background: #feefc3; }
+.community-connect { padding: 85px max(6vw,28px); display: grid; grid-template-columns: 1.1fr .9fr; align-items: center; gap: 60px; background: #ceead6; }
+.community-connect-image,.featured-event-photo { position: relative; aspect-ratio: 3 / 2; overflow: hidden; border: 1.5px solid var(--ink); border-radius: 26px; background: var(--canvas); }
+.community-connect-image img,.featured-event-photo img { object-fit: contain; }
+.community-connect h2 { font-size: clamp(2.7rem,4vw,4.5rem); line-height: 1; letter-spacing: -.04em; margin: 0 0 24px; }
+.community-connect p:not(.section-kicker) { margin-bottom: 28px; }
+.featured-event-photo strong { display: grid; place-content: center; height: 100%; padding: 30px; color: var(--deep-blue); font-size: clamp(2rem,4vw,4rem); line-height: 1.1; }
+.video-gallery { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 20px; }
+.video-card { overflow: hidden; border: 1.5px solid var(--ink); border-radius: 22px; background: white; transition: transform .2s ease; }
+.video-card:hover { transform: translateY(-4px); }
+.video-thumbnail { position: relative; aspect-ratio: 16 / 9; background: var(--ink); }
+.video-thumbnail img { object-fit: cover; }
+.video-thumbnail > span { position: absolute; inset: 0; display: grid; place-content: center; color: white; font-size: 2.5rem; text-shadow: 0 2px 12px black; background: rgba(0,0,0,.1); }
+.video-card > div:last-child { padding: 20px; }.video-card small { color: var(--deep-blue); font-size: .65rem; font-weight: 700; }.video-card h3 { font-size: 1.12rem; line-height: 1.4; margin: 10px 0 0; }
+.album-links { margin-top: 32px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }.album-links p { width: 100%; margin: 0; font-weight: 700; }.album-links a { padding: 10px 16px; border: 1px solid var(--ink); border-radius: 999px; background: white; }
+.event-index-section,.event-programme,.event-days { margin-bottom: 90px; }.event-index-section h2,.event-programme > h2,.event-days > h2 { margin: 0 0 32px; font-size: clamp(2.3rem,4vw,4rem); line-height: 1.1; letter-spacing: -.035em; }
+.event-archive-year { margin-top: 50px; }.event-archive-year > h3 { font-size: 2rem; }.editorial-list h3 { margin: 0; font-size: clamp(1.2rem,2vw,1.7rem); line-height: 1.3; }
+.event-detail-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 35px; }.event-tagline { font-size: 2rem; color: var(--deep-blue); font-weight: 700; }
+.event-cover { position: relative; aspect-ratio: 3 / 1.5; border-radius: 28px; overflow: hidden; background: var(--canvas); margin-bottom: 35px; }.event-cover img { object-fit: contain; }
+.event-day-card { padding: 32px; border: 1.5px solid var(--ink); border-radius: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 18px; background: #e8f0fe; }
+.event-day-card h3 { font-size: 1.6rem; line-height: 1.3; margin: 10px 0; }.event-day-card h4 { margin: 0; font-size: 1.2rem; }.event-venue-links { display: flex; flex-wrap: wrap; gap: 18px; font-weight: 700; color: var(--deep-blue); }
+.event-session-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; }.event-session-grid .schedule-session-card { min-width: 0; }.event-session-grid.single-track { grid-template-columns: minmax(0,1fr); }
+@media(max-width:1024px) { .video-gallery { grid-template-columns: repeat(2,minmax(0,1fr)); }.community-connect { gap: 32px; } }
+@media(max-width:700px) { .video-gallery,.community-connect,.event-day-card,.event-session-grid { grid-template-columns: minmax(0,1fr); }.community-connect { padding: 65px 22px; }.event-day-card { padding: 24px; }.event-detail-actions .button { width: 100%; }.album-links a { max-width: 100%; } }

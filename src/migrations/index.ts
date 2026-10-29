@@ -1,14 +1,16 @@
-import * as migration_20260917_221459_railway_baseline from './20260917_221459_railway_baseline';
-import * as migration_20260917_231324_gdg_community_homepage from './20260917_231324_gdg_community_homepage';
-import * as migration_20260917_231914_seed_organizers from './20260917_231914_seed_organizers';
-import * as migration_20260917_233522_seed_chapter_partners_and_events from './20260917_233522_seed_chapter_partners_and_events';
-import * as migration_20260918_035500_add_official_website_links from './20260918_035500_add_official_website_links';
-import * as migration_20260918_062217_add_event_schedules from './20260918_062217_add_event_schedules';
-import * as migration_20260918_062254_add_schedule_start_control from './20260918_062254_add_schedule_start_control';
-import * as migration_20260918_064738_improve_event_operations from './20260918_064738_improve_event_operations';
-import * as migration_20260918_064823_allow_local_events from './20260918_064823_allow_local_events';
-import * as migration_20260918_065620_add_homepage_highlights from './20260918_065620_add_homepage_highlights';
-import * as migration_20260918_070008_unify_devfest_event from './20260918_070008_unify_devfest_event';
+import * as migration_20260917_221459_railway_baseline from './20260917_221459_railway_baseline'
+import * as migration_20260917_231324_gdg_community_homepage from './20260917_231324_gdg_community_homepage'
+import * as migration_20260917_231914_seed_organizers from './20260917_231914_seed_organizers'
+import * as migration_20260917_233522_seed_chapter_partners_and_events from './20260917_233522_seed_chapter_partners_and_events'
+import * as migration_20260918_035500_add_official_website_links from './20260918_035500_add_official_website_links'
+import * as migration_20260918_062217_add_event_schedules from './20260918_062217_add_event_schedules'
+import * as migration_20260918_062254_add_schedule_start_control from './20260918_062254_add_schedule_start_control'
+import * as migration_20260918_064738_improve_event_operations from './20260918_064738_improve_event_operations'
+import * as migration_20260918_064823_allow_local_events from './20260918_064823_allow_local_events'
+import * as migration_20260918_065620_add_homepage_highlights from './20260918_065620_add_homepage_highlights'
+import * as migration_20260918_070008_unify_devfest_event from './20260918_070008_unify_devfest_event'
+import * as migration_20261028_233750_add_community_hero_photos from './20261028_233750_add_community_hero_photos'
+import * as migration_20261029_001331_unify_events_and_community_content from './20261029_001331_unify_events_and_community_content'
 
 export const migrations = [
   {
@@ -64,6 +66,16 @@ export const migrations = [
   {
     up: migration_20260918_070008_unify_devfest_event.up,
     down: migration_20260918_070008_unify_devfest_event.down,
-    name: '20260918_070008_unify_devfest_event'
+    name: '20260918_070008_unify_devfest_event',
   },
-];
+  {
+    up: migration_20261028_233750_add_community_hero_photos.up,
+    down: migration_20261028_233750_add_community_hero_photos.down,
+    name: '20261028_233750_add_community_hero_photos',
+  },
+  {
+    up: migration_20261029_001331_unify_events_and_community_content.up,
+    down: migration_20261029_001331_unify_events_and_community_content.down,
+    name: '20261029_001331_unify_events_and_community_content',
+  },
+]

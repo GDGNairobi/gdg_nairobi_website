@@ -10,21 +10,40 @@ test.describe('Frontend', () => {
 
     await expect(heading).toContainText('A developer community')
     await expect(page.getByRole('link', { name: /Join GDG Nairobi/i }).first()).toBeVisible()
-    await expect(page.getByRole('link', { name: 'GitHub', exact: true })).toHaveAttribute('href', 'https://github.com/GDGNairobi/gdg_nairobi_website')
-    await expect(page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('link', { name: 'Shop', exact: true })).toHaveAttribute('href', 'https://shop.gdgnairobi.com/')
+    await expect(page.getByRole('link', { name: 'GitHub', exact: true })).toHaveAttribute(
+      'href',
+      'https://github.com/GDGNairobi/gdg_nairobi_website',
+    )
+    await expect(
+      page
+        .getByRole('navigation', { name: 'Primary navigation' })
+        .getByRole('link', { name: 'Shop', exact: true }),
+    ).toHaveAttribute('href', 'https://shop.gdgnairobi.com/')
   })
 
   test('publishes complete search and sharing metadata', async ({ page }) => {
     await page.goto('http://localhost:3000/about')
 
     await expect(page).toHaveTitle('About GDG Nairobi | GDG Nairobi')
-    await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /volunteer-led GDG Nairobi community/i)
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'http://localhost:3000/about')
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+      'content',
+      /volunteer-led GDG Nairobi community/i,
+    )
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      'http://localhost:3000/about',
+    )
     const socialImage = await page.locator('meta[property="og:image"]').getAttribute('content')
     expect(socialImage).toBe('http://localhost:3000/social-card')
     expect((await page.request.get(socialImage!)).ok()).toBe(true)
-    await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image')
-    await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', 'http://localhost:3000/social-card')
+    await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
+      'content',
+      'summary_large_image',
+    )
+    await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
+      'content',
+      'http://localhost:3000/social-card',
+    )
     await expect(page.locator('script[type="application/ld+json"]')).not.toHaveCount(0)
   })
 
@@ -33,7 +52,9 @@ test.describe('Frontend', () => {
     page.on('console', (message) => consoleMessages.push(message.text()))
 
     await page.goto('http://localhost:3000')
-    await expect.poll(() => consoleMessages.some((message) => message.includes('Nairobi is building.'))).toBe(true)
+    await expect
+      .poll(() => consoleMessages.some((message) => message.includes('Nairobi is building.')))
+      .toBe(true)
 
     await page.keyboard.type('jenga')
     const palette = page.getByRole('dialog', { name: 'Jenga' })
@@ -42,6 +63,6 @@ test.describe('Frontend', () => {
     await palette.getByRole('searchbox', { name: 'Search site commands' }).fill('schedule')
     await expect(palette.getByRole('option')).toHaveCount(1)
     await page.keyboard.press('Enter')
-    await expect(page).toHaveURL(/\/schedule$/)
+    await expect(page).toHaveURL(/\/events\/devfest-nairobi-2026#programme$/)
   })
 })

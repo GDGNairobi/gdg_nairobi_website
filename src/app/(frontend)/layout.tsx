@@ -27,7 +27,13 @@ export async function generateMetadata(): Promise<Metadata> {
       default: title,
       template: '%s | GDG Nairobi',
     },
-    keywords: ['GDG Nairobi', 'Google Developer Groups Nairobi', 'Nairobi developer community', 'developer events Nairobi', 'DevFest Nairobi 2026'],
+    keywords: [
+      'GDG Nairobi',
+      'Google Developer Groups Nairobi',
+      'Nairobi developer community',
+      'developer events Nairobi',
+      'DevFest Nairobi',
+    ],
     authors: [{ name: 'GDG Nairobi', url: '/' }],
     creator: 'GDG Nairobi',
     publisher: 'GDG Nairobi',
@@ -43,7 +49,9 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: 'GDG Nairobi',
       locale: 'en_KE',
       type: 'website',
-      images: [{ url: '/social-card', width: 1200, height: 630, alt: 'GDG Nairobi developer community' }],
+      images: [
+        { url: '/social-card', width: 1200, height: 630, alt: 'GDG Nairobi developer community' },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
@@ -54,7 +62,13 @@ export async function generateMetadata(): Promise<Metadata> {
     robots: {
       index: true,
       follow: true,
-      googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1, 'max-video-preview': -1 },
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+        'max-video-preview': -1,
+      },
     },
   }
 }
@@ -70,7 +84,9 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const chrome = await getSiteChromeContent()
   const origin = getSiteURL().toString().replace(/\/$/, '')
-  const sameAs = chrome.socialLinks.map(({ url }) => url).filter((url) => url.startsWith('https://'))
+  const sameAs = chrome.socialLinks
+    .map(({ url }) => url)
+    .filter((url) => url.startsWith('https://'))
 
   const structuredData = {
     '@context': 'https://schema.org',
@@ -99,9 +115,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <html lang="en-KE">
+    <html lang="en-KE" data-scroll-behavior="smooth">
       <body>
-        <a className="skip-link" href="#main-content">Skip to main content</a>
+        <a className="skip-link" href="#main-content">
+          Skip to main content
+        </a>
         <JsonLd data={structuredData} />
         <SiteEasterEggs />
         {children}

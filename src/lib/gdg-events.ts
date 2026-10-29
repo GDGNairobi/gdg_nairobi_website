@@ -33,24 +33,29 @@ type RawEvent = {
   url?: unknown
 }
 
-const asString = (value: unknown) => typeof value === 'string' ? value.trim() : ''
+const asString = (value: unknown) => (typeof value === 'string' ? value.trim() : '')
 
-const decodeEntities = (value: string) => value
-  .replaceAll('&amp;', '&')
-  .replaceAll('&lt;', '<')
-  .replaceAll('&gt;', '>')
-  .replaceAll('&quot;', '"')
-  .replaceAll('&#39;', "'")
-  .replace(/<[^>]*>/g, ' ')
-  .replace(/\s+/g, ' ')
-  .trim()
+const decodeEntities = (value: string) =>
+  value
+    .replaceAll('&amp;', '&')
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>')
+    .replaceAll('&quot;', '"')
+    .replaceAll('&#39;', "'")
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
 
 function normalizeEvent(raw: RawEvent, status: 'live' | 'completed'): CommunityEventSource | null {
   const upstreamURL = asString(raw.url)
   const sourceTitle = asString(raw.title)
   const sourceStartDate = asString(raw.start_date)
 
-  if (!upstreamURL.startsWith('https://gdg.community.dev/events/') || !sourceTitle || Number.isNaN(Date.parse(sourceStartDate))) {
+  if (
+    !upstreamURL.startsWith('https://gdg.community.dev/events/') ||
+    !sourceTitle ||
+    Number.isNaN(Date.parse(sourceStartDate))
+  ) {
     return null
   }
 
@@ -62,7 +67,9 @@ function normalizeEvent(raw: RawEvent, status: 'live' | 'completed'): CommunityE
     sourceTitle,
     sourceStartDate,
     sourceType: asString(raw.event_type_title) || undefined,
-    registrationURL: registrationURL.startsWith('https://gdg.community.dev/') ? registrationURL : upstreamURL,
+    registrationURL: registrationURL.startsWith('https://gdg.community.dev/')
+      ? registrationURL
+      : upstreamURL,
     imageURL: imageURL.startsWith('https://res.cloudinary.com/') ? imageURL : undefined,
     excerpt: decodeEntities(asString(raw.description_short)) || undefined,
     upstreamStatus: status,
@@ -80,12 +87,18 @@ export function parseChapterEvents(html: string): CommunityEventSource[] {
     throw new Error('The GDG chapter event payload was not valid JSON.')
   }
 
-  const prerenderData = (data as {
-    props?: { pageProps?: { prerenderData?: {
-      upcomingEvents?: { results?: RawEvent[] }
-      pastEvents?: { results?: RawEvent[] }
-    } } }
-  }).props?.pageProps?.prerenderData
+  const prerenderData = (
+    data as {
+      props?: {
+        pageProps?: {
+          prerenderData?: {
+            upcomingEvents?: { results?: RawEvent[] }
+            pastEvents?: { results?: RawEvent[] }
+          }
+        }
+      }
+    }
+  ).props?.pageProps?.prerenderData
 
   if (!prerenderData) throw new Error('The GDG chapter event payload changed shape.')
 
@@ -127,21 +140,50 @@ export async function syncChapterEvents(payload: Payload): Promise<SyncResult> {
     let stale = 0
 
     for (const event of incoming) {
+      const editionYear = /devfest/i.test(event.sourceTitle)
+        ? Number(event.sourceTitle.match(/20\d{2}/)?.[0])
+        : undefined
       const existing = await payload.find({
         collection: 'community-events',
         limit: 1,
         overrideAccess: true,
-        where: { upstreamURL: { equals: event.upstreamURL } },
+        where: editionYear
+          ? {
+              or: [
+                { upstreamURL: { equals: event.upstreamURL } },
+                {
+                  and: [
+                    { eventKind: { equals: 'devfest' } },
+                    { editionYear: { equals: editionYear } },
+                  ],
+                },
+              ],
+            }
+          : { upstreamURL: { equals: event.upstreamURL } },
       })
       const data = { ...event, lastSyncedAt: timestamp, source: 'bevy' as const }
 
       if (existing.docs[0]) {
-        await payload.update({ collection: 'community-events', id: existing.docs[0].id, data, overrideAccess: true })
+        await payload.update({
+          collection: 'community-events',
+          id: existing.docs[0].id,
+          data,
+          overrideAccess: true,
+        })
         updated += 1
       } else {
         await payload.create({
           collection: 'community-events',
-          data: { ...data, eventDestination: 'community', eventKind: 'community', showOnSite: true, featured: false, displayOrder: 0 },
+          data: {
+            ...data,
+            localTitle: event.sourceTitle,
+            editionYear: editionYear || new Date(event.sourceStartDate).getUTCFullYear(),
+            eventKind: editionYear ? 'devfest' : 'community',
+            showOnSite: true,
+            featured: false,
+            displayOrder: 0,
+            _status: 'published',
+          },
           overrideAccess: true,
         })
         imported += 1

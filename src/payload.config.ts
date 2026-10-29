@@ -10,7 +10,6 @@ import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Announcements } from './collections/Announcements'
 import { CommunityEvents } from './collections/CommunityEvents'
-import { DevFestEditions } from './collections/DevFestEditions'
 import { Partners } from './collections/Partners'
 import { Sessions } from './collections/Sessions'
 import { Speakers } from './collections/Speakers'
@@ -22,9 +21,9 @@ const dirname = path.dirname(filename)
 const databaseURL = process.env.DATABASE_URL || process.env.POSTGRES_URL || ''
 const storageEnabled = Boolean(
   process.env.AWS_ENDPOINT_URL &&
-    process.env.AWS_ACCESS_KEY_ID &&
-    process.env.AWS_SECRET_ACCESS_KEY &&
-    process.env.AWS_S3_BUCKET_NAME,
+  process.env.AWS_ACCESS_KEY_ID &&
+  process.env.AWS_SECRET_ACCESS_KEY &&
+  process.env.AWS_S3_BUCKET_NAME,
 )
 
 export default buildConfig({
@@ -41,7 +40,6 @@ export default buildConfig({
   collections: [
     Users,
     Media,
-    DevFestEditions,
     Speakers,
     Sessions,
     Partners,
