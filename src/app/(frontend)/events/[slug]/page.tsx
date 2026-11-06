@@ -95,15 +95,17 @@ export default async function EventPage({ params }: PageProps<'/events/[slug]'>)
           />
         </div>
       )}
-      <section className="schedule-live-bar" aria-label="Event status">
-        <strong>{status}</strong>
-        <p>
-          {event.scheduleNotice ||
-            (offsetMinutes
-              ? `Programme times adjusted by ${offsetMinutes} minutes.`
-              : 'Times shown in East Africa Time.')}
-        </p>
-      </section>
+      {event.eventKind !== 'devfest' && (
+        <section className="schedule-live-bar" aria-label="Event status">
+          <strong>{status}</strong>
+          <p>
+            {event.scheduleNotice ||
+              (offsetMinutes
+                ? `Programme times adjusted by ${offsetMinutes} minutes.`
+                : 'Times shown in East Africa Time.')}
+          </p>
+        </section>
+      )}
       <section id="venue" className="event-days" aria-labelledby="event-days-heading">
         <p className="section-kicker">Your event, day by day</p>
         <h2 id="event-days-heading">Days & venues</h2>
