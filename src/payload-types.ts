@@ -287,7 +287,10 @@ export interface Session {
   event: number | CommunityEvent;
   speakers?: (number | Speaker)[] | null;
   startsAt: string;
-  endsAt: string;
+  /**
+   * Leave blank for an open-ended activity such as networking afterwards.
+   */
+  endsAt?: string | null;
   room: string;
   /**
    * For multi-track events, use any organizer-friendly label such as “Main Stage” or “Workshop Room”.

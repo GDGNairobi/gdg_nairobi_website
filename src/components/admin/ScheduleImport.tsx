@@ -76,7 +76,8 @@ export function ScheduleImport() {
       <h3>Import your programme</h3>
       <p>
         Upload CSV or Excel (.xlsx, first sheet). Preview the rows and match columns before saving.
-        Times without an offset use East Africa Time.
+        You can also upload the DevFest agenda layout directly: Time, Activity, Details, Speakers,
+        Duration, Content Track/Theme and Where?. Times without an offset use East Africa Time.
       </p>
       {!id && <p>Save this event first to enable imports.</p>}
       {modified && <p role="status">Save your event changes before importing.</p>}
@@ -94,6 +95,11 @@ export function ScheduleImport() {
       <p>
         Keep session IDs stable when updating a programme. Imports add or update sessions; removing
         a row does not delete an existing session. Separate multiple speakers with a pipe (|).
+      </p>
+      <p>
+        From Google Sheets, use File → Download → Comma-separated values (.csv) on the agenda tab,
+        then upload it here. Parallel codelab rows can leave Time and Activity blank. Use “onwards”
+        for activities without a fixed finish time. Preview again whenever the sheet changes.
       </p>
       <label>
         Schedule file{' '}
@@ -131,50 +137,52 @@ export function ScheduleImport() {
       </Button>
       {preview && (
         <>
-          <details open={preview.errors.some((error) => error.row === 1)}>
-            <summary>Match your columns</summary>
-            <p>
-              Recognised headers are selected automatically. Map different export headers below,
-              then refresh the preview.
-            </p>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))',
-                gap: 12,
-              }}
-            >
-              {columns.map((key) => (
-                <label key={key}>
-                  {key.replaceAll('_', ' ')}
-                  <select
-                    style={{ display: 'block', width: '100%' }}
-                    value={mapping[key] || ''}
-                    disabled={busy}
-                    onChange={(e) => {
-                      setMapping({ ...mapping, [key]: e.target.value })
-                      setPreview({
-                        ...preview,
-                        errors: [
-                          {
-                            row: 1,
-                            message: 'Refresh the preview after changing column mappings.',
-                          },
-                        ],
-                      })
-                    }}
-                  >
-                    <option value="">Ignore / not supplied</option>
-                    {preview.headers.filter(Boolean).map((h) => (
-                      <option key={h} value={h}>
-                        {h}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ))}
-            </div>
-          </details>
+          {preview.layout !== 'agenda' && (
+            <details open={preview.errors.some((error) => error.row === 1)}>
+              <summary>Match your columns</summary>
+              <p>
+                Recognised headers are selected automatically. Map different export headers below,
+                then refresh the preview.
+              </p>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))',
+                  gap: 12,
+                }}
+              >
+                {columns.map((key) => (
+                  <label key={key}>
+                    {key.replaceAll('_', ' ')}
+                    <select
+                      style={{ display: 'block', width: '100%' }}
+                      value={mapping[key] || ''}
+                      disabled={busy}
+                      onChange={(e) => {
+                        setMapping({ ...mapping, [key]: e.target.value })
+                        setPreview({
+                          ...preview,
+                          errors: [
+                            {
+                              row: 1,
+                              message: 'Refresh the preview after changing column mappings.',
+                            },
+                          ],
+                        })
+                      }}
+                    >
+                      <option value="">Ignore / not supplied</option>
+                      {preview.headers.filter(Boolean).map((h) => (
+                        <option key={h} value={h}>
+                          {h}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ))}
+              </div>
+            </details>
+          )}
           <p>
             {preview.rows.length} sessions · {preview.days.length} event days ·{' '}
             {preview.errors.length} errors
@@ -197,13 +205,13 @@ export function ScheduleImport() {
                 <tr>
                   <th>Row</th>
                   <th>Title</th>
-                  <th>Date / start (EAT)</th>
+                  <th>Date / time (EAT)</th>
                   <th>Room</th>
                   <th>Speakers</th>
                 </tr>
               </thead>
               <tbody>
-                {preview.rows.slice(0, 20).map((row) => (
+                {preview.rows.map((row) => (
                   <tr key={row.row}>
                     <td>{row.row}</td>
                     <td>{row.title}</td>
@@ -211,6 +219,9 @@ export function ScheduleImport() {
                       {new Date(row.startsAt).toLocaleString('en-KE', {
                         timeZone: 'Africa/Nairobi',
                       })}
+                      {row.endsAt
+                        ? ` – ${new Date(row.endsAt).toLocaleTimeString('en-KE', { timeZone: 'Africa/Nairobi', hour: '2-digit', minute: '2-digit' })}`
+                        : ' onwards'}
                     </td>
                     <td>{row.room}</td>
                     <td>{row.speakerNames.join(', ')}</td>

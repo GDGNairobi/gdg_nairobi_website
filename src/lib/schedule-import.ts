@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto'
 import { Readable } from 'node:stream'
 import ExcelJS from 'exceljs'
 import { eventDayKey } from '@/lib/event-dates'
+import { prepareAgenda } from '@/lib/agenda-import'
 import type { CommunityEvent, Session } from '@/payload-types'
 
 export const scheduleColumns = [
@@ -29,7 +30,7 @@ export type ImportRow = {
   importKey: string
   title: string
   startsAt: string
-  endsAt: string
+  endsAt: string | null
   room: string
   scheduleTrack: string
   format: Session['format']
@@ -39,6 +40,7 @@ export type ImportRow = {
   supplied: ScheduleColumn[]
 }
 export type SchedulePreview = {
+  layout: 'agenda' | 'sessions'
   headers: string[]
   mapping: ColumnMapping
   rows: ImportRow[]
@@ -141,33 +143,46 @@ export async function previewSchedule(
   if (buffer.length > 10 * 1024 * 1024) throw new Error('Files must be 10 MB or smaller.')
   if (!/\.(csv|xlsx)$/i.test(filename)) throw new Error('Choose a CSV or Excel .xlsx file.')
   const workbook = new ExcelJS.Workbook()
-  const sheet = /\.csv$/i.test(filename)
+  let sheet = /\.csv$/i.test(filename)
     ? await workbook.csv.read(Readable.from([buffer]), { map: (v: string) => v })
     : (await workbook.xlsx.load(buffer as unknown as ExcelJS.Buffer)).worksheets[0]
   if (!sheet || sheet.rowCount < 2) throw new Error('Add a header row and at least one session.')
   if (sheet.rowCount > 2001) throw new Error('Import up to 2,000 sessions at a time.')
-  const headers = Array.from({ length: sheet.columnCount }, (_, i) =>
+  let headers = Array.from({ length: sheet.columnCount }, (_, i) =>
     cellValue(sheet.getRow(1).getCell(i + 1).value),
   )
   const nonempty = headers.filter(Boolean)
   if (new Set(nonempty.map(normalized)).size !== nonempty.length)
     throw new Error('Each column must have a unique header.')
+  const agenda = prepareAgenda(sheet, headers, cellValue)
+  const layout = agenda ? 'agenda' : 'sessions'
+  if (agenda) {
+    sheet = agenda.sheet
+    headers = agenda.headers
+  }
   const mapping: ColumnMapping = {}
   for (const key of scheduleColumns) {
-    const selected = requestedMapping[key]
+    const selected = agenda ? undefined : requestedMapping[key]
     if (selected !== undefined) {
       if (selected && !headers.includes(selected)) throw new Error(`Column not found: ${selected}`)
       mapping[key] = selected
     } else mapping[key] = headers.find((h) => aliases[key].includes(normalized(h))) || ''
   }
-  const errors: SchedulePreview['errors'] = [],
+  const errors: SchedulePreview['errors'] = [...(agenda?.errors || [])],
     rows: ImportRow[] = [],
     days = structuredClone(event.days || []),
-    warnings: string[] = []
+    warnings: string[] = [...(agenda?.warnings || [])]
+  if (agenda && !agenda.hasDateColumn && days.length !== 1)
+    errors.push({
+      row: 1,
+      message:
+        'This agenda has no dates. Save one event day first, or add a Date column to the file.',
+    })
   for (const key of ['title', 'start_time', 'end_time'] as const)
     if (!mapping[key])
       errors.push({ row: 1, message: `Map a column for ${key.replaceAll('_', ' ')}.` })
-  if (errors.length) return { headers, mapping, rows, days, errors, warnings }
+  if (errors.some((error) => error.row === 1))
+    return { layout, headers, mapping, rows, days, errors, warnings }
   const keys = new Set<string>()
   for (let n = 2; n <= sheet.rowCount; n++) {
     const row = sheet.getRow(n)
@@ -191,18 +206,22 @@ export async function previewSchedule(
         dateFormat,
       )
       const startsAt = timestamp(date, start),
-        endsAt = timestamp(date, end)
-      if (new Date(endsAt) <= new Date(startsAt))
+        endsAt = end.toLowerCase() === 'onwards' ? null : timestamp(date, end)
+      if (endsAt && new Date(endsAt) <= new Date(startsAt))
         throw new Error(
           'End must be after start. Use a full datetime for a session ending the next day.',
         )
-      if (new Date(endsAt).getTime() - new Date(startsAt).getTime() > 24 * 60 * 60 * 1000)
+      if (endsAt && new Date(endsAt).getTime() - new Date(startsAt).getTime() > 24 * 60 * 60 * 1000)
         throw new Error('A session cannot exceed 24 hours.')
       const sessionDate = eventDayKey(startsAt)
       const importKey =
         get('session_id') ||
         createHash('sha256')
-          .update(`${sessionDate}|${startsAt}|${title}`)
+          .update(
+            agenda && get('format') !== 'break'
+              ? `agenda|${sessionDate}|${get('room')}|${title}`
+              : `${sessionDate}|${startsAt}|${title}${agenda ? `|${get('room')}` : ''}`,
+          )
           .digest('hex')
           .slice(0, 24)
       if (keys.has(importKey)) throw new Error('Duplicate session ID in this file.')
@@ -282,8 +301,8 @@ export async function previewSchedule(
         b = rows[j]
       if (
         a.room.toLowerCase() === b.room.toLowerCase() &&
-        a.startsAt < b.endsAt &&
-        b.startsAt < a.endsAt
+        a.startsAt < (b.endsAt || `${eventDayKey(b.startsAt)}T20:59:59.999Z`) &&
+        b.startsAt < (a.endsAt || `${eventDayKey(a.startsAt)}T20:59:59.999Z`)
       )
         errors.push({
           row: b.row,
@@ -292,6 +311,7 @@ export async function previewSchedule(
     }
   if (!rows.length && !errors.length) errors.push({ row: 1, message: 'No sessions found.' })
   return {
+    layout,
     headers,
     mapping,
     rows,

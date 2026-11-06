@@ -2,23 +2,15 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { mediaURL } from '@/lib/media-url'
-import { RichText } from '@payloadcms/richtext-lexical/react'
 import { EditorialPage } from '@/components/EditorialPage'
 import { EventMedia } from '@/components/EventMedia'
+import { EventProgramme } from '@/components/EventProgramme'
+import { toProgrammeSession } from '@/lib/programme'
 import { JsonLd } from '@/components/JsonLd'
-import { getScheduledEvent, getSessionSpeakers } from '@/lib/community-events'
+import { getScheduledEvent } from '@/lib/community-events'
 import { eventDayKey, formatEventDay } from '@/lib/event-dates'
 import { absoluteSiteURL, buildPageMetadata } from '@/lib/metadata'
-import type { Session } from '@/payload-types'
 
-const time = (value: string, offset: number) =>
-  new Intl.DateTimeFormat('en-KE', {
-    timeZone: 'Africa/Nairobi',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(new Date(value).getTime() + offset * 60000))
-const shifted = (value: string, offset: number) =>
-  new Date(new Date(value).getTime() + offset * 60000).toISOString()
 export async function generateMetadata({ params }: PageProps<'/events/[slug]'>): Promise<Metadata> {
   const { slug } = await params,
     detail = await getScheduledEvent(slug)
@@ -28,39 +20,6 @@ export async function generateMetadata({ params }: PageProps<'/events/[slug]'>):
       detail?.event.localDescription || detail?.event.excerpt || 'Join the GDG Nairobi community.',
     path: `/events/${slug}`,
   })
-}
-function SessionCard({ session, offset }: { session: Session; offset: number }) {
-  const speakers = getSessionSpeakers(session)
-  return (
-    <article
-      className={`schedule-session-card schedule-session-${session.sessionStatus || 'scheduled'}`}
-    >
-      <div className="schedule-session-time">
-        <time dateTime={shifted(session.startsAt, offset)}>{time(session.startsAt, offset)}</time>
-        <span>—</span>
-        <time dateTime={shifted(session.endsAt, offset)}>{time(session.endsAt, offset)}</time>
-      </div>
-      <small>
-        {session.scheduleTrack || session.room} · {session.format}
-      </small>
-      <h3>{session.title}</h3>
-      {session.sessionStatus && session.sessionStatus !== 'scheduled' && (
-        <p>{session.sessionStatus}</p>
-      )}
-      {session.publicNote && <p>{session.publicNote}</p>}
-      {session.description && <RichText data={session.description} />}
-      {speakers.length > 0 && (
-        <div className="schedule-speakers">
-          {speakers.map((s) => (
-            <div key={s.id}>
-              <strong>{s.name}</strong>
-              <span>{[s.jobTitle, s.company].filter(Boolean).join(' · ')}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </article>
-  )
 }
 export default async function EventPage({ params }: PageProps<'/events/[slug]'>) {
   const { slug } = await params,
@@ -197,20 +156,13 @@ export default async function EventPage({ params }: PageProps<'/events/[slug]'>)
               : 'The date and venue are confirmed where listed above. We’ll publish session times and speakers as they are ready.'}
           </p>
         )}
-        {[...new Set(sessions.map((s) => eventDayKey(s.startsAt)))].map((date) => (
-          <div className="schedule-day" key={date}>
-            <h3>{formatEventDay(`${date}T00:00:00Z`)}</h3>
-            <div
-              className={`event-session-grid${event.scheduleMode === 'single' ? ' single-track' : ''}`}
-            >
-              {sessions
-                .filter((s) => eventDayKey(s.startsAt) === date)
-                .map((s) => (
-                  <SessionCard session={s} offset={offsetMinutes} key={s.id} />
-                ))}
-            </div>
-          </div>
-        ))}
+        {sessions.length > 0 && (
+          <EventProgramme
+            eventID={event.id}
+            singleTrack={event.scheduleMode === 'single'}
+            sessions={sessions.map((session) => toProgrammeSession(session, offsetMinutes))}
+          />
+        )}
       </section>
       {(videos.length > 0 || albums.length > 0) && (
         <section id="highlights" className="event-programme">

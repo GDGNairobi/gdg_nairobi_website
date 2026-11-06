@@ -36,7 +36,13 @@ export const Sessions: CollectionConfig = {
     },
     { name: 'speakers', type: 'relationship', relationTo: 'speakers', hasMany: true },
     { name: 'startsAt', type: 'date', required: true },
-    { name: 'endsAt', type: 'date', required: true },
+    {
+      name: 'endsAt',
+      type: 'date',
+      admin: {
+        description: 'Leave blank for an open-ended activity such as networking afterwards.',
+      },
+    },
     { name: 'room', type: 'text', required: true },
     {
       name: 'scheduleTrack',

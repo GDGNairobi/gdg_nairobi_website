@@ -2,8 +2,165 @@ import { test, expect } from '@playwright/test'
 import { getPayload } from 'payload'
 import config from '../../src/payload.config'
 import { randomUUID } from 'node:crypto'
+import path from 'node:path'
+import ExcelJS from 'exceljs'
 
 const origin = 'http://localhost:3000'
+
+test('imports a Google Sheets agenda with parallel rooms, speaker portraits and networking onwards', async ({
+  page,
+}) => {
+  test.setTimeout(120_000)
+  const payload = await getPayload({ config }),
+    key = randomUUID(),
+    slug = `agenda-test-${key}`
+  const names = [`Web Speaker ${key}`, `AI Speaker ${key}`]
+  const user = await payload.create({
+    collection: 'users',
+    data: {
+      email: `agenda-${key}@example.test`,
+      password: 'test-password',
+      role: 'editor',
+      name: 'Agenda test editor',
+    },
+  })
+  let eventID: number | undefined, mediaID: number | undefined
+  try {
+    await page.context().setExtraHTTPHeaders({ Origin: origin })
+    expect(
+      (
+        await page.request.post(`${origin}/api/users/login`, {
+          data: { email: user.email, password: 'test-password' },
+        })
+      ).ok(),
+    ).toBe(true)
+    const event = await payload.create({
+      collection: 'community-events',
+      data: {
+        localTitle: 'Agenda test',
+        slug,
+        source: 'manual',
+        eventKind: 'community',
+        days: [{ title: 'Conference', date: '2027-02-01T00:00:00Z' }],
+        _status: 'published',
+      },
+    })
+    eventID = event.id
+    const workbook = new ExcelJS.Workbook(),
+      sheet = workbook.addWorksheet('Agenda')
+    sheet.addRow([
+      'Time',
+      'Activity',
+      'Details',
+      'Speakers',
+      'Duration',
+      'Content Track/Theme',
+      'Where?',
+      'session_id',
+    ])
+    sheet.addRow([
+      '11:15 - 12:00 pm',
+      'Hands-On Codelab',
+      'Web codelab',
+      names[0],
+      '45 mins',
+      'Web',
+      'Room A',
+      'web',
+    ])
+    sheet.addRow(['', '', 'AI codelab', names[1], '', 'AI', 'Room B', 'ai'])
+    sheet.addRow([
+      '5:35 PM onwards',
+      'Networking',
+      'Connect afterwards',
+      '-',
+      'Open',
+      'Networking',
+      'Room A',
+      'networking',
+    ])
+    const endpoint = `${origin}/api/community-events/${eventID}/schedule-import`
+    const upload = async (confirm: boolean) =>
+      page.request.post(endpoint, {
+        multipart: {
+          file: {
+            name: 'agenda.csv',
+            mimeType: 'text/csv',
+            buffer: Buffer.from(await workbook.csv.writeBuffer()),
+          },
+          confirm: String(confirm),
+          publish: 'true',
+        },
+      })
+    const preview = await upload(false)
+    expect(preview.ok(), await preview.text()).toBe(true)
+    expect(await preview.json()).toMatchObject({
+      layout: 'agenda',
+      errors: [],
+      rows: expect.any(Array),
+    })
+    expect(
+      (await payload.find({ collection: 'sessions', where: { event: { equals: eventID } } }))
+        .totalDocs,
+    ).toBe(0)
+    const imported = await upload(true)
+    expect(imported.ok(), await imported.text()).toBe(true)
+    expect(await imported.json()).toMatchObject({ created: 3, updated: 0 })
+    sheet.getCell('A2').value = '11:20 am - 12:05 pm'
+    sheet.getCell('C2').value = 'Updated web codelab'
+    const updated = await upload(true)
+    expect(updated.ok(), await updated.text()).toBe(true)
+    expect(await updated.json()).toMatchObject({ created: 0, updated: 3 })
+    const speaker = (
+      await payload.find({
+        collection: 'speakers',
+        where: { name: { equals: names[0] } },
+        limit: 1,
+      })
+    ).docs[0]
+    const media = await payload.create({
+      collection: 'media',
+      data: { alt: 'Example speaker portrait' },
+      filePath: path.resolve('public/images/community-speaker.jpg'),
+    })
+    mediaID = media.id
+    await payload.update({
+      collection: 'speakers',
+      id: speaker.id,
+      data: { portrait: media.id, _status: 'published' },
+    })
+    await page.goto(`${origin}/events/${slug}`)
+    await expect(page.getByRole('heading', { name: 'Updated web codelab' })).toBeVisible()
+    await expect(page.locator('[data-programme-layout="single"]')).toHaveCount(1)
+    await expect(page.getByText('Room A · Web · workshop', { exact: true })).toBeVisible()
+    await expect(page.getByText('Room B · AI · workshop', { exact: true })).toBeVisible()
+    const portrait = page.getByRole('img', { name: 'Example speaker portrait' })
+    await expect(portrait).toBeVisible()
+    await expect
+      .poll(() => portrait.evaluate((img: HTMLImageElement) => img.naturalWidth))
+      .toBeGreaterThan(0)
+    const networking = page
+      .locator('article')
+      .filter({ has: page.getByRole('heading', { name: 'Networking', exact: true }) })
+    await expect(networking.getByText('onwards', { exact: true })).toBeVisible()
+    await expect(networking.locator('time')).toHaveCount(1)
+    for (const width of [320, 390, 768, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 1000 })
+      await expect
+        .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth))
+        .toBe(true)
+    }
+    await page.screenshot({ path: '/private/tmp/gdg-agenda-portraits.png', fullPage: true })
+  } finally {
+    if (eventID) {
+      await payload.delete({ collection: 'sessions', where: { event: { equals: eventID } } })
+      await payload.delete({ collection: 'community-events', id: eventID })
+    }
+    await payload.delete({ collection: 'speakers', where: { name: { in: names } } })
+    if (mediaID) await payload.delete({ collection: 'media', id: mediaID })
+    await payload.delete({ collection: 'users', id: user.id })
+  }
+})
 
 test('organiser uploads, previews, publishes and updates a schedule without duplicates', async ({
   page,
