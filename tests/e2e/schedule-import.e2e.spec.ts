@@ -131,6 +131,9 @@ test('imports a Google Sheets agenda with parallel rooms, speaker portraits and 
     })
     await page.goto(`${origin}/events/${slug}`)
     await expect(page.getByRole('heading', { name: 'Updated web codelab' })).toBeVisible()
+    await expect(
+      page.getByRole('link', { name: 'Register for Agenda test' }),
+    ).toBeVisible()
     await expect(page.locator('[data-programme-layout="single"]')).toHaveCount(1)
     await expect(page.getByText('Room A · Web · workshop', { exact: true })).toBeVisible()
     await expect(page.getByText('Room B · AI · workshop', { exact: true })).toBeVisible()
@@ -299,9 +302,7 @@ test('seeded event pages show confirmed details and the archive groups past edit
   await page.goto(`${origin}/devfest`)
   await expect(page).toHaveURL(`${origin}/events/devfest-nairobi-2026`)
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('DevFest Nairobi 2026')
-  await expect(
-    page.getByRole('link', { name: 'Register for DevFest Nairobi 2026' }),
-  ).toHaveAttribute('href', 'https://gdg.community.dev/gdg-nairobi/')
+  await expect(page.getByRole('link', { name: 'Register for DevFest Nairobi 2026' })).toHaveCount(0)
   await expect(
     page.getByText('Sarit Expo Centre, Westlands, Nairobi', { exact: true }),
   ).toBeVisible()

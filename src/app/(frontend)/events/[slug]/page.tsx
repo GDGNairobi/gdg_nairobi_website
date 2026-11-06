@@ -70,7 +70,7 @@ export default async function EventPage({ params }: PageProps<'/events/[slug]'>)
         }}
       />
       <div className="event-detail-actions">
-        {!past && event.registrationStatus !== 'closed' && (
+        {event.eventKind !== 'devfest' && !past && event.registrationStatus !== 'closed' && (
           <a
             className="button button-primary"
             href={event.registrationLink}

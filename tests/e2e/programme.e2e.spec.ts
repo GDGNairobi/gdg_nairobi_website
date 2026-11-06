@@ -164,3 +164,57 @@ test('includes the complete programme in the server response before client JavaS
     'Networking afterwards',
   ])
 })
+
+test.describe('Mobile programme', () => {
+  test.use({ isMobile: true, hasTouch: true })
+  for (const width of [320, 390, 768]) {
+    test(`readable cards, reachable filters and favourites at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: width === 320 ? 568 : 844 })
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await page.goto(url)
+      const filter = page.getByRole('combobox', { name: 'Filter programme by track' })
+      await expect(filter).toBeVisible()
+      expect(
+        await filter.evaluate((element) => parseFloat(getComputedStyle(element).fontSize)),
+      ).toBeGreaterThanOrEqual(16)
+      await filter.selectOption('web')
+      await expect(page.locator('.schedule-session-card')).toHaveCount(3)
+      await expect(page.getByRole('heading', { name: 'AI workshop' })).toHaveCount(0)
+      const star = page.getByRole('button', {
+        name: 'Save Web workshop to favourites',
+        exact: true,
+      })
+      await star.tap()
+      await page.locator('.schedule-session-card').last().scrollIntoViewIfNeeded()
+      const controls = page.locator('[data-programme-controls]')
+      const box = await controls.boundingBox()
+      expect(box!.height).toBeLessThanOrEqual(80)
+      expect(box!.y).toBeGreaterThanOrEqual(78)
+      expect(box!.y).toBeLessThanOrEqual(82)
+      for (const control of [
+        filter,
+        page.getByRole('button', { name: 'My favourites 1', exact: true }),
+      ]) {
+        await expect(control).toBeInViewport({ ratio: 1 })
+        const bounds = await control.boundingBox()
+        expect(bounds!.height).toBeGreaterThanOrEqual(44)
+        expect(bounds!.x).toBeGreaterThanOrEqual(0)
+        expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width)
+      }
+      const fonts = await page
+        .locator(
+          '.schedule-session-card small,.schedule-session-card time,.schedule-speakers strong',
+        )
+        .evaluateAll((elements) =>
+          elements.map((element) => parseFloat(getComputedStyle(element).fontSize)),
+        )
+      expect(Math.min(...fonts)).toBeGreaterThanOrEqual(12)
+      await page.getByRole('button', { name: 'My favourites 1', exact: true }).tap()
+      await expect(page.locator('.schedule-session-card')).toHaveCount(1)
+      await page.reload()
+      await expect(
+        page.getByRole('button', { name: 'Remove Web workshop from favourites' }),
+      ).toHaveAttribute('aria-pressed', 'true')
+    })
+  }
+})

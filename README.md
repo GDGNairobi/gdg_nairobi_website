@@ -122,7 +122,9 @@ Preview, resolve errors, then import as drafts or publish. This is an organiser-
 
 `/events/[slug]` is the single public detail page. Schedule, speaker and venue aliases follow the featured event with temporary redirects because that destination changes each edition. `/devfest` follows the featured DevFest event. Only published, visible events and sessions appear publicly; the archive uses Nairobi dates and groups past events by year.
 
-The public programme groups sessions by their adjusted start time in Nairobi, aligning parallel content tracks on desktop and stacking each time slot on smaller screens. Events set to single track in the CMS keep one column. Track filters retain shared keynotes, breaks and activities. Attendees can star sessions and open **My favourites**, with their selections saved in local storage for that event on that browser. Favourites sync between tabs; when storage is blocked, they work for the current visit with an explanation. No account, database or cross-device synchronisation is used. The full programme is rendered on the server before interactive filtering loads.
+The public programme groups sessions by their adjusted start time in Nairobi, aligning parallel content tracks on desktop and stacking each time slot on smaller screens. Events set to single track in the CMS keep one column. Track filters retain shared keynotes, breaks and activities. On phones and smaller tablets, a compact track selector and **My favourites** stay visible while scrolling. Attendees can star sessions and open **My favourites**, with their selections saved in local storage for that event on that browser. Favourites sync between tabs; when storage is blocked, they work for the current visit with an explanation. No account, database or cross-device synchronisation is used. The full programme is rendered on the server before interactive filtering loads.
+
+DevFest event pages do not show registration buttons. Registration settings remain in the CMS, and eligible community events continue to show their registration links.
 
 ### Seed and migration
 

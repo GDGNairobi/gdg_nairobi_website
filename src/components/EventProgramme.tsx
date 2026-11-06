@@ -149,7 +149,18 @@ export function EventProgramme({
           <Star filled /> A day worth starring
         </span>
       </div>
-      <div className={styles.controls}>
+      <div className={styles.controls} data-programme-controls>
+        <label className={styles.mobileFilter}>
+          <span className="sr-only">Filter programme by track</span>
+          <select value={activeTrack} onChange={(event) => setSelectedTrack(event.target.value)}>
+            <option value="all">All tracks</option>
+            {tracks.map((track) => (
+              <option key={track} value={trackKey(track)}>
+                {track}
+              </option>
+            ))}
+          </select>
+        </label>
         <div className={styles.filters} role="group" aria-label="Filter programme by track">
           <button
             type="button"

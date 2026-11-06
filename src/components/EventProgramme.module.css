@@ -46,6 +46,9 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+.mobileFilter {
+  display: none;
+}
 .filters button,
 .favouritesView {
   min-height: 44px;
@@ -444,14 +447,6 @@
     --rail: 82px;
     --gap: 10px;
   }
-  .controls {
-    position: static;
-    flex-direction: column;
-    gap: 16px;
-  }
-  .favouritesView {
-    align-self: flex-start;
-  }
   .summary {
     flex-direction: column;
     gap: 6px;
@@ -495,6 +490,75 @@
   }
   .empty {
     padding: 24px;
+  }
+}
+@media (max-width: 900px) {
+  .controls {
+    top: 80px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    padding-block: 10px;
+  }
+  .filters {
+    display: none;
+  }
+  .mobileFilter {
+    display: block;
+    min-width: 0;
+  }
+  .mobileFilter select {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 9px 12px;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    color: var(--ink);
+    background: white;
+    font: inherit;
+    font-size: 1rem;
+  }
+  .mobileFilter select:focus-visible {
+    outline: 3px solid var(--blue);
+    outline-offset: 4px;
+  }
+  .favouritesView {
+    padding-inline: 10px;
+    gap: 6px;
+    font-size: 0.75rem;
+    line-height: 1.25;
+  }
+  .favouritesView > svg {
+    width: 20px;
+    height: 20px;
+  }
+  .favouritesView > span {
+    min-width: 20px;
+    font-size: 0.75rem;
+  }
+  .summary p,
+  .sharedHint {
+    font-size: 0.8125rem;
+  }
+  .timeRail time,
+  .session :global(.schedule-speakers strong) {
+    font-size: 0.8125rem;
+  }
+  .trackLabel,
+  .duration,
+  .session > .room,
+  .session :global(.schedule-session-time),
+  .session :global(.schedule-speakers span) {
+    font-size: 0.75rem;
+  }
+  .session :global(.schedule-speaker-portrait) {
+    width: 48px;
+    height: 48px;
+  }
+  .starButton {
+    scroll-margin-top: 170px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
