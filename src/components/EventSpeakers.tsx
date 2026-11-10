@@ -17,9 +17,9 @@ function SpeakerCard({ speaker }: { speaker: ProgrammeSpeaker }) {
           <Image
             src={speaker.portrait.url}
             alt={speaker.portrait.alt || speaker.name}
-            width={160}
-            height={160}
-            sizes="160px"
+            width={80}
+            height={80}
+            sizes="(max-width: 600px) 56px, 80px"
           />
         ) : (
           <span aria-hidden="true">{initials(speaker.name)}</span>
@@ -35,12 +35,6 @@ function SpeakerCard({ speaker }: { speaker: ProgrammeSpeaker }) {
         <ul className={styles.tracks} aria-label={`${speaker.name} tracks`}>
           {speaker.tracks.map((track) => <li key={track}>{track}</li>)}
         </ul>
-        <div className={styles.sessions}>
-          <p>In the programme</p>
-          <ul>
-            {speaker.sessions.map((session) => <li key={session.id}>{session.title}</li>)}
-          </ul>
-        </div>
       </div>
     </article>
   )
@@ -55,9 +49,9 @@ export function EventSpeakers({ speakers }: { speakers: ProgrammeSpeaker[] }) {
         <div>
           <p className="section-kicker">Speakers</p>
           <h2 id="event-speakers-heading">Meet the speakers.</h2>
-          <p>Speakers, hosts and partner teams from the programme.</p>
+          <p>The speakers and hosts sharing what they know.</p>
         </div>
-        <a href="#programme">View programme <span aria-hidden="true">↓</span></a>
+        <a href="#programme">View programme <span aria-hidden="true">↑</span></a>
       </header>
       <div className={styles.grid}>
         {preview.map((speaker) => <SpeakerCard key={speaker.id} speaker={speaker} />)}
@@ -65,7 +59,7 @@ export function EventSpeakers({ speakers }: { speakers: ProgrammeSpeaker[] }) {
       {remaining.length > 0 && (
         <details className={styles.more}>
           <summary>
-            <span className={styles.whenClosed}>Show all {speakers.length} speakers & contributors</span>
+            <span className={styles.whenClosed}>Show all {speakers.length} speakers</span>
             <span className={styles.whenOpen}>Show fewer speakers</span>
             <span className={styles.plus} aria-hidden="true">＋</span>
           </summary>

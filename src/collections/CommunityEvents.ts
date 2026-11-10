@@ -258,6 +258,19 @@ export const CommunityEvents: CollectionConfig = {
           ],
         },
         {
+          label: 'Sponsors & partners',
+          fields: [
+            {
+              name: 'partners',
+              label: 'Event sponsors and partners',
+              type: 'relationship',
+              relationTo: 'partners',
+              hasMany: true,
+              admin: { description: 'Select the published partners supporting this event. Their uploaded logos appear on the event page.' },
+            },
+          ],
+        },
+        {
           label: 'Media',
           fields: [
             {

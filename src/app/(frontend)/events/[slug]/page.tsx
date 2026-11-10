@@ -6,9 +6,10 @@ import { EditorialPage } from '@/components/EditorialPage'
 import { EventMedia } from '@/components/EventMedia'
 import { EventProgramme } from '@/components/EventProgramme'
 import { EventSpeakers } from '@/components/EventSpeakers'
+import { EventPartners } from '@/components/EventPartners'
 import { getProgrammeSpeakers, toProgrammeSession } from '@/lib/programme'
 import { JsonLd } from '@/components/JsonLd'
-import { getScheduledEvent } from '@/lib/community-events'
+import { getEventPartners, getScheduledEvent } from '@/lib/community-events'
 import { eventDayKey, formatEventDay } from '@/lib/event-dates'
 import { absoluteSiteURL, buildPageMetadata } from '@/lib/metadata'
 
@@ -27,6 +28,7 @@ export default async function EventPage({ params }: PageProps<'/events/[slug]'>)
     detail = await getScheduledEvent(slug)
   if (!detail) notFound()
   const { event, sessions, offsetMinutes } = detail
+  const partners = await getEventPartners(event)
   const programme = sessions.map((session) => toProgrammeSession(session, offsetMinutes))
   const speakers = event.eventKind === 'devfest' ? getProgrammeSpeakers(programme) : []
   const past =
@@ -150,7 +152,6 @@ export default async function EventPage({ params }: PageProps<'/events/[slug]'>)
           </p>
         )}
       </section>
-      <EventSpeakers speakers={speakers} />
       <section id="programme" className="event-programme" aria-labelledby="programme-heading">
         <p className="section-kicker">Programme</p>
         <h2 id="programme-heading">
@@ -175,6 +176,8 @@ export default async function EventPage({ params }: PageProps<'/events/[slug]'>)
           />
         )}
       </section>
+      <EventSpeakers speakers={speakers} />
+      <EventPartners partners={partners} />
       {(videos.length > 0 || albums.length > 0) && (
         <section id="highlights" className="event-programme">
           <p className="section-kicker">From the community</p>

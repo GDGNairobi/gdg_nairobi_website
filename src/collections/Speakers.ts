@@ -24,7 +24,23 @@ export const Speakers: CollectionConfig = {
   },
   fields: [
     { name: 'name', type: 'text', required: true },
+    {
+      name: 'isOrganization',
+      label: 'This profile represents an organization',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: { description: 'Keep partner attribution in the programme without listing this profile as a person in the speakers section.' },
+    },
     { name: 'slug', type: 'text', required: true, unique: true, index: true },
+    {
+      name: 'importAliases',
+      label: 'Other names used in imports',
+      type: 'text',
+      hasMany: true,
+      admin: {
+        description: 'Schedule imports recognise these names and link to this profile. The main name remains public.',
+      },
+    },
     { name: 'portrait', type: 'upload', relationTo: 'media' },
     { name: 'jobTitle', type: 'text' },
     { name: 'company', type: 'text' },

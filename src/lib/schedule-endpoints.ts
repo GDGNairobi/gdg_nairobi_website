@@ -97,15 +97,26 @@ export const scheduleEndpoints: Endpoint[] = [
           for (const name of row.speakerNames) {
             const matches = await req.payload.find({
               collection: 'speakers',
-              where: { name: { like: name } },
-              limit: 100,
+              where: {
+                or: [{ name: { like: name } }, { importAliases: { contains: name } }],
+              },
+              pagination: false,
+              depth: 0,
               draft: true,
               overrideAccess: false,
               req,
             })
-            let speaker = matches.docs.find(
+            const aliasMatches = matches.docs.filter((s) =>
+              s.importAliases?.some((alias) => alias.trim().toLowerCase() === name.trim().toLowerCase()),
+            )
+            const exactMatches = matches.docs.filter(
               (s) => s.name.trim().toLowerCase() === name.trim().toLowerCase(),
             )
+            // An explicit alias keeps a retired duplicate from being revived by a later import.
+            const candidates = aliasMatches.length ? aliasMatches : exactMatches
+            if (candidates.length > 1)
+              throw new Error(`Multiple speaker profiles match “${name}”. Resolve their import names before importing.`)
+            let speaker = candidates[0]
             if (!speaker)
               speaker = await req.payload.create({
                 collection: 'speakers',
@@ -126,7 +137,7 @@ export const scheduleEndpoints: Endpoint[] = [
                 overrideAccess: false,
                 req,
               })
-            speakers.push(speaker.id)
+            if (!speakers.includes(speaker.id)) speakers.push(speaker.id)
           }
           const data = {
             event: id,

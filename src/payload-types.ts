@@ -223,7 +223,15 @@ export interface Media {
 export interface Speaker {
   id: number;
   name: string;
+  /**
+   * Keep partner attribution in the programme without listing this profile as a person in the speakers section.
+   */
+  isOrganization?: boolean | null;
   slug: string;
+  /**
+   * Schedule imports recognise these names and link to this profile. The main name remains public.
+   */
+  importAliases?: string[] | null;
   portrait?: (number | null) | Media;
   jobTitle?: string | null;
   company?: string | null;
@@ -377,6 +385,10 @@ export interface CommunityEvent {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  /**
+   * Select the published partners supporting this event. Their uploaded logos appear on the event page.
+   */
+  partners?: (number | Partner)[] | null;
   videos?:
     | {
         title: string;
@@ -729,7 +741,9 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface SpeakersSelect<T extends boolean = true> {
   name?: T;
+  isOrganization?: T;
   slug?: T;
+  importAliases?: T;
   portrait?: T;
   jobTitle?: T;
   company?: T;
@@ -862,6 +876,7 @@ export interface CommunityEventsSelect<T extends boolean = true> {
   scheduleOffsetMinutes?: T;
   scheduleNotice?: T;
   sessions?: T;
+  partners?: T;
   videos?:
     | T
     | {

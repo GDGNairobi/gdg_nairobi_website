@@ -4,7 +4,7 @@ import { cache } from 'react'
 
 import { eventDayKey, formatEventDate } from '@/lib/event-dates'
 import { GDG_NAIROBI_CHAPTER_URL } from '@/lib/gdg-events'
-import type { CommunityEvent, Session, Speaker } from '@/payload-types'
+import type { CommunityEvent, Partner, Session, Speaker } from '@/payload-types'
 
 export type EventCard = CommunityEvent & {
   title: string
@@ -147,5 +147,26 @@ export async function getScheduledEvent(slug: string) {
     return { event, sessions: result.docs, offsetMinutes }
   } catch {
     return { event, sessions: [] as Session[], offsetMinutes: 0 }
+  }
+}
+
+export async function getEventPartners(event: EventCard): Promise<Partner[]> {
+  const partnerIDs = (event.partners || []).flatMap((partner) =>
+    typeof partner === 'number' ? [partner] : partner?.id ? [partner.id] : [],
+  )
+  if (!partnerIDs.length) return []
+  try {
+    const payload = await getPayload({ config })
+    return (await payload.find({
+      collection: 'partners',
+      where: { id: { in: partnerIDs } },
+      depth: 1,
+      pagination: false,
+      overrideAccess: false,
+      draft: false,
+      sort: ['order', 'name'],
+    })).docs
+  } catch {
+    return []
   }
 }

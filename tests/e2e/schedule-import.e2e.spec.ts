@@ -175,6 +175,8 @@ test('organiser uploads, previews, publishes and updates a schedule without dupl
   const key = randomUUID()
   const slug = `import-test-${key}`
   const speakerName = `Import Speaker ${key}`
+  const speakerAlias = `Alternate Speaker ${key}`
+  const conflictingName = `Conflicting Speaker ${key}`
   const user = await payload.create({
     collection: 'users',
     data: {
@@ -232,7 +234,18 @@ test('organiser uploads, previews, publishes and updates a schedule without dupl
     await expect(importer.getByRole('status')).toContainText('1 added, 0 updated', {
       timeout: 30_000,
     })
+    const profile = (await payload.find({
+      collection: 'speakers', where: { name: { equals: speakerName } }, limit: 1,
+    })).docs[0]
+    await payload.update({
+      collection: 'speakers', id: profile.id, data: { importAliases: [speakerAlias] },
+    })
+    const retired = await payload.create({
+      collection: 'speakers', draft: true,
+      data: { name: speakerAlias.toLowerCase(), slug: `retired-speaker-${key}`, _status: 'draft' },
+    })
     const updatedCSV = csv.replace(',Opening,', ',Updated opening,')
+      .replace(speakerName, `${speakerAlias.toLowerCase()}|${speakerName}`)
     const update = await page.request.post(endpoint, {
       multipart: {
         file: { name: 'schedule.csv', mimeType: 'text/csv', buffer: Buffer.from(updatedCSV) },
@@ -251,6 +264,11 @@ test('organiser uploads, previews, publishes and updates a schedule without dupl
     expect(sessions.docs[0].title).toBe('Updated opening')
     expect(sessions.docs[0].startsAt).toBe('2027-02-01T06:00:00.000Z')
     expect(sessions.docs[0].speakers).toHaveLength(1)
+    expect((sessions.docs[0].speakers![0] as { id: number }).id).toBe(profile.id)
+    expect((await payload.count({
+      collection: 'speakers', where: { name: { equals: speakerAlias.toLowerCase() } },
+    })).totalDocs).toBe(1)
+    expect((await payload.findByID({ collection: 'speakers', id: retired.id, draft: true }))._status).toBe('draft')
     const invalid = await page.request.post(endpoint, {
       multipart: {
         file: {
@@ -286,12 +304,29 @@ test('organiser uploads, previews, publishes and updates a schedule without dupl
     await page.reload()
     await expect(page.getByRole('heading', { name: 'Updated opening' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Draft opening' })).toHaveCount(0)
+    await payload.create({
+      collection: 'speakers',
+      data: { name: conflictingName, slug: `conflicting-speaker-${key}`, importAliases: [speakerAlias], _status: 'published' },
+    })
+    const ambiguous = await page.request.post(endpoint, {
+      multipart: {
+        file: { name: 'schedule.csv', mimeType: 'text/csv', buffer: Buffer.from(updatedCSV) },
+        confirm: 'true', publish: 'true',
+      },
+    })
+    expect(ambiguous.status()).toBe(400)
+    expect((await ambiguous.json()).error).toContain('Multiple speaker profiles')
+    await page.reload()
+    await expect(page.getByRole('heading', { name: 'Updated opening' })).toBeVisible()
   } finally {
     if (eventID) {
       await payload.delete({ collection: 'sessions', where: { event: { equals: eventID } } })
       await payload.delete({ collection: 'community-events', id: eventID })
     }
-    await payload.delete({ collection: 'speakers', where: { name: { equals: speakerName } } })
+    await payload.delete({ collection: 'speakers', where: { or: [
+      { name: { equals: speakerName } }, { name: { equals: speakerAlias.toLowerCase() } },
+      { name: { equals: conflictingName } },
+    ] } })
     await payload.delete({ collection: 'users', id: user.id })
   }
 })

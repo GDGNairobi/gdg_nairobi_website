@@ -11,6 +11,7 @@ import * as migration_20260918_065620_add_homepage_highlights from './20260918_0
 import * as migration_20260918_070008_unify_devfest_event from './20260918_070008_unify_devfest_event'
 import * as migration_20261028_233750_add_community_hero_photos from './20261028_233750_add_community_hero_photos'
 import * as migration_20261029_001331_unify_events_and_community_content from './20261029_001331_unify_events_and_community_content'
+import * as migration_20261110_172429_add_speaker_flags_and_event_partners from './20261110_172429_add_speaker_flags_and_event_partners'
 
 export const migrations = [
   {
@@ -77,5 +78,10 @@ export const migrations = [
     up: migration_20261029_001331_unify_events_and_community_content.up,
     down: migration_20261029_001331_unify_events_and_community_content.down,
     name: '20261029_001331_unify_events_and_community_content',
+  },
+  {
+    up: migration_20261110_172429_add_speaker_flags_and_event_partners.up,
+    down: migration_20261110_172429_add_speaker_flags_and_event_partners.down,
+    name: '20261110_172429_add_speaker_flags_and_event_partners',
   },
 ]

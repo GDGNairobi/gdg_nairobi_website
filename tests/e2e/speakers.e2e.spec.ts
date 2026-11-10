@@ -7,6 +7,7 @@ import config from '../../src/payload.config'
 const origin = 'http://localhost:3000'
 let payload: Payload, eventID: number, url: string, mediaID: number
 const speakerIDs: number[] = []
+const partnerIDs: number[] = []
 const key = randomUUID()
 
 test.beforeAll(async () => {
@@ -30,12 +31,24 @@ test.beforeAll(async () => {
     filePath: path.resolve('public/images/community-speaker.jpg'),
   })
   mediaID = media.id
-  for (let i = 0; i < 11; i++) {
+  for (const [name, published] of [
+    ['Published event partner', true], ['Draft event partner', false], ['Unrelated event partner', true],
+  ] as const) {
+    const partner = await payload.create({
+      collection: 'partners',
+      draft: !published,
+      data: { name, logo: mediaID, scope: 'devfest', tier: 'community', order: 0, _status: published ? 'published' : 'draft' },
+    })
+    partnerIDs.push(partner.id)
+  }
+  await payload.update({ collection: 'community-events', id: eventID, data: { partners: partnerIDs.slice(0, 2) } })
+  for (let i = 0; i < 12; i++) {
     const speaker = await payload.create({
       collection: 'speakers',
       draft: i === 9,
       data: {
-        name: i === 9 ? 'Unpublished speaker' : i === 10 ? 'Unrelated speaker' : `Speaker ${i + 1}`,
+        name: i === 9 ? 'Unpublished speaker' : i === 10 ? 'Unrelated speaker' : i === 11 ? 'Partner organization' : `Speaker ${i + 1}`,
+        isOrganization: i === 11,
         slug: `speaker-test-${key}-${i}`,
         ...(i === 0 ? { portrait: mediaID, jobTitle: 'Engineer', company: 'Community team' } : {}),
         _status: i === 9 ? 'draft' : 'published',
@@ -44,7 +57,7 @@ test.beforeAll(async () => {
     speakerIDs.push(speaker.id)
   }
   for (const [track, title, speakers] of [
-    ['Web', 'A codelab from the agenda', speakerIDs.slice(0, 10)],
+    ['Web', 'A codelab from the agenda', [...speakerIDs.slice(0, 10), speakerIDs[11]]],
     ['AI', 'A second session from the agenda', [speakerIDs[0]]],
   ] as const) {
     await payload.create({
@@ -73,10 +86,12 @@ test.afterAll(async () => {
   }
   if (speakerIDs.length)
     await payload.delete({ collection: 'speakers', where: { id: { in: speakerIDs } } })
+  if (partnerIDs.length)
+    await payload.delete({ collection: 'partners', where: { id: { in: partnerIDs } } })
   if (mediaID) await payload.delete({ collection: 'media', id: mediaID })
 })
 
-test('shows event-linked speakers once, protects drafts and expands a responsive directory', async ({
+test('shows a compact people directory and event partners while protecting unrelated and draft records', async ({
   page,
 }) => {
   await page.goto(url)
@@ -87,13 +102,26 @@ test('shows event-linked speakers once, protects drafts and expands a responsive
   await expect(section.locator('article')).toHaveCount(9)
   await expect(section.getByText('Unpublished speaker', { exact: true })).toHaveCount(0)
   await expect(section.getByText('Unrelated speaker', { exact: true })).toHaveCount(0)
+  await expect(section.getByText('Partner organization', { exact: true })).toHaveCount(0)
+  const partners = page.getByRole('region', { name: 'With support from.' })
+  await expect(partners.getByRole('heading', { name: 'Published event partner' })).toBeVisible()
+  await expect(partners.getByText('Draft event partner', { exact: true })).toHaveCount(0)
+  await expect(partners.getByText('Unrelated event partner', { exact: true })).toHaveCount(0)
+  await expect(partners.getByRole('img', { name: 'Published event partner logo' })).toBeVisible()
+  await partners.locator('img').evaluate((img: HTMLImageElement) => { img.loading = 'eager' })
+  await expect.poll(() => partners.locator('img').evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0)
+  expect(await page.locator('#programme').evaluate((programme) =>
+    !!(programme.compareDocumentPosition(document.getElementById('speakers')!) & Node.DOCUMENT_POSITION_FOLLOWING),
+  )).toBe(true)
   const first = section.getByRole('article').filter({
     has: page.getByRole('heading', { name: 'Speaker 1', exact: true }),
   })
   await expect(first).toHaveCount(1)
   await expect(first.getByText('Engineer · Community team', { exact: true })).toBeVisible()
-  for (const text of ['Web', 'AI', 'A codelab from the agenda', 'A second session from the agenda'])
+  for (const text of ['Web', 'AI'])
     await expect(first.getByText(text, { exact: true })).toBeVisible()
+  for (const title of ['A codelab from the agenda', 'A second session from the agenda'])
+    await expect(section.getByText(title, { exact: true })).toHaveCount(0)
   const portrait = first.getByRole('img', { name: 'Published speaker portrait' })
   await expect.poll(() => portrait.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0)
   const last = section.getByRole('heading', { name: 'Speaker 9', exact: true })
@@ -114,6 +142,19 @@ test('shows event-linked speakers once, protects drafts and expands a responsive
     }))
     expect(geometry, `Speaker directory at ${width}px`).toEqual({ overflow: false, clipped: false })
     expect((await summary.boundingBox())!.height).toBeGreaterThanOrEqual(44)
+    expect((await first.boundingBox())!.height).toBeLessThan(220)
+    if (width <= 390) {
+      const cards = section.getByRole('article')
+      const [left, right] = await Promise.all([cards.nth(0).boundingBox(), cards.nth(1).boundingBox()])
+      expect(Math.abs(left!.y - right!.y)).toBeLessThan(2)
+      expect(right!.x).toBeGreaterThanOrEqual(left!.x + left!.width)
+    }
+    const partnerBox = await partners.locator('article').boundingBox()
+    expect(partnerBox!.x).toBeGreaterThanOrEqual(0)
+    expect(partnerBox!.x + partnerBox!.width).toBeLessThanOrEqual(width)
+    expect(await partners.locator('article').evaluate((article) =>
+      article.querySelector('img')!.getBoundingClientRect().bottom <= article.querySelector('h3')!.getBoundingClientRect().top,
+    )).toBe(true)
   }
   await summary.click()
   await expect(last).toBeHidden()

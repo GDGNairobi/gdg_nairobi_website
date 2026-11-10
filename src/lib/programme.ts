@@ -18,6 +18,7 @@ export type ProgrammeSession = {
     name: string
     jobTitle: string
     company: string
+    isOrganization?: boolean
     portrait: { url: string; alt: string } | null
   }>
 }
@@ -64,6 +65,7 @@ export function toProgrammeSession(session: Session, offsetMinutes = 0): Program
           name: speaker.name,
           jobTitle: speaker.jobTitle || '',
           company: speaker.company || '',
+          isOrganization: Boolean(speaker.isOrganization),
           portrait: portrait?.url
             ? { url: mediaURL(portrait.url), alt: portrait.alt || speaker.name }
             : null,
@@ -86,20 +88,18 @@ export function getProgrammeTracks(sessions: ProgrammeSession[]) {
 
 export type ProgrammeSpeaker = NonNullable<ProgrammeSession['speakers']>[number] & {
   tracks: string[]
-  sessions: Array<{ id: number; title: string }>
 }
 
 export function getProgrammeSpeakers(sessions: ProgrammeSession[]): ProgrammeSpeaker[] {
   const speakers = new Map<number, ProgrammeSpeaker>()
   for (const session of sessions) {
     for (const speaker of session.speakers || []) {
+      if (speaker.isOrganization) continue
       if (!speakers.has(speaker.id))
-        speakers.set(speaker.id, { ...speaker, tracks: [], sessions: [] })
+        speakers.set(speaker.id, { ...speaker, tracks: [] })
       const profile = speakers.get(speaker.id)!
       if (!profile.tracks.some((track) => trackKey(track) === trackKey(session.track)))
         profile.tracks.push(session.track)
-      if (!profile.sessions.some((entry) => entry.id === session.id))
-        profile.sessions.push({ id: session.id, title: session.title })
     }
   }
   return [...speakers.values()].sort((a, b) => a.name.localeCompare(b.name))
