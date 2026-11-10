@@ -1,9 +1,9 @@
 'use client'
 
-import { useCallback, useSyncExternalStore } from 'react'
+import { useCountdownClock } from '@/lib/use-countdown-clock'
+import { CountdownDigits } from '@/components/CountdownDigits'
 import styles from './EventCountdown.module.css'
 
-const currentSecond = () => Math.floor(Date.now() / 1000)
 const dateFormat = new Intl.DateTimeFormat('en-KE', {
   timeZone: 'Africa/Nairobi',
   weekday: 'long',
@@ -20,30 +20,11 @@ const timeFormat = new Intl.DateTimeFormat('en-KE', {
 
 export function EventCountdown({ startsAt, live = false }: { startsAt: string; live?: boolean }) {
   const deadline = Date.parse(startsAt)
-  const subscribe = useCallback(
-    (notify: () => void) => {
-      if (live || !Number.isFinite(deadline) || Date.now() >= deadline) return () => {}
-      const timer = window.setInterval(() => {
-        notify()
-        if (Date.now() >= deadline) window.clearInterval(timer)
-      }, 1000)
-      return () => window.clearInterval(timer)
-    },
-    [deadline, live],
-  )
-  // A stable server placeholder avoids hydrating a stale or different server clock.
-  const now = useSyncExternalStore(subscribe, currentSecond, () => null)
+  const now = useCountdownClock(deadline, !live)
   if (!Number.isFinite(deadline)) return null
 
   const seconds = live ? 0 : now === null ? null : Math.max(0, Math.ceil(deadline / 1000 - now))
   const countingDown = seconds === null || seconds > 0
-  const remaining = seconds ?? 0
-  const units = [
-    { label: 'Days', value: Math.floor(remaining / 86400) },
-    { label: 'Hours', value: Math.floor(remaining / 3600) % 24 },
-    { label: 'Minutes', value: Math.floor(remaining / 60) % 60 },
-    { label: 'Seconds', value: remaining % 60 },
-  ]
 
   return (
     <section className={styles.countdown} aria-label="DevFest countdown">
@@ -58,18 +39,8 @@ export function EventCountdown({ startsAt, live = false }: { startsAt: string; l
         </p>
       </div>
       {countingDown ? (
-        <div
-          className={styles.timer}
-          role="timer"
-          aria-label="Time until DevFest doors open"
-          aria-live="off"
-        >
-          {units.map(({ label, value }) => (
-            <span className={styles.unit} key={label}>
-              <strong>{seconds === null ? '–' : String(value).padStart(2, '0')}</strong>
-              <span>{label}</span>
-            </span>
-          ))}
+        <div className={styles.timer}>
+          <CountdownDigits seconds={seconds} label="Time until DevFest doors open" />
         </div>
       ) : (
         <a className={styles.programme} href="#programme">

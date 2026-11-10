@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 import { cache } from 'react'
 
 import { eventDayKey, formatEventDate } from '@/lib/event-dates'
+import { buildCountdownEvents } from '@/lib/event-countdown'
 import { GDG_NAIROBI_CHAPTER_URL } from '@/lib/gdg-events'
 import type { CommunityEvent, Partner, Session, Speaker } from '@/payload-types'
 
@@ -105,6 +106,35 @@ export const getPublicEvents = cache(async (): Promise<EventCard[]> => {
 export async function getEventIndex() {
   return partitionEvents(await getPublicEvents())
 }
+
+export const getEventCountdowns = cache(async () => {
+  const { upcoming, undated } = await getEventIndex()
+  const events = [...upcoming, ...undated].filter((event) =>
+    event.liveStatus !== 'live' && event.liveStatus !== 'complete',
+  )
+  if (!events.length) return []
+  const firstSessions = new Map<number, string>()
+  try {
+    const payload = await getPayload({ config })
+    const result = await payload.find({
+      collection: 'sessions',
+      where: { event: { in: events.map((event) => event.id) } },
+      select: { event: true, startsAt: true },
+      depth: 0,
+      pagination: false,
+      overrideAccess: false,
+      draft: false,
+      sort: 'startsAt',
+    })
+    for (const session of result.docs) {
+      const id = typeof session.event === 'number' ? session.event : session.event?.id
+      if (id && session.startsAt && !firstSessions.has(id)) firstSessions.set(id, session.startsAt)
+    }
+  } catch {
+    // Confirmed event dates remain useful while programme data is unavailable.
+  }
+  return buildCountdownEvents(events, firstSessions)
+})
 export async function getCommunityEventCards(limit = 3) {
   return (await getEventIndex()).upcoming.slice(0, limit)
 }

@@ -2,6 +2,12 @@ import { describe, expect, it, vi } from 'vitest'
 vi.mock('@payload-config', () => ({ default: {} }))
 vi.mock('payload', () => ({ getPayload: vi.fn() }))
 import { partitionEvents, toEventCard } from '@/lib/community-events'
+import {
+  buildCountdownEvents,
+  calendarDaysUntil,
+  getImminentEvent,
+  type CountdownEvent,
+} from '@/lib/event-countdown'
 import type { CommunityEvent } from '@/payload-types'
 const event = (changes: Partial<CommunityEvent>) =>
   toEventCard({
@@ -61,5 +67,64 @@ describe('Unified event listing', () => {
       new Date('2026-10-29T18:00:00Z'),
     )
     expect(groups.upcoming).toHaveLength(1)
+  })
+})
+
+describe('Upcoming event countdown', () => {
+  it('uses editorial and programme times before imported times, and preserves date-only precision', () => {
+    const base = event({
+      days: [{ title: 'Conference', date: '2026-11-14T00:00:00Z' }],
+      sourceStartDate: '2026-11-14T09:00:00Z',
+      scheduleOffsetMinutes: 15,
+    })
+    const first = new Map([[base.id, '2026-11-14T05:00:00Z']])
+    expect(buildCountdownEvents([base], first)[0]).toMatchObject({
+      startsAt: '2026-11-14T05:15:00.000Z',
+      precision: 'time',
+    })
+    expect(
+      buildCountdownEvents([{ ...base, scheduleStartOverride: '2026-11-14T06:00:20Z' }], first)[0]
+        .startsAt,
+    ).toBe('2026-11-14T06:00:00.000Z')
+    expect(buildCountdownEvents([base], new Map())[0].startsAt).toBe('2026-11-14T09:00:00Z')
+    expect(
+      buildCountdownEvents(
+        [{ ...base, days: [{ title: 'Moved day', date: '2026-11-15T00:00:00Z' }] }],
+        new Map(),
+      )[0],
+    ).toMatchObject({ startsAt: '2026-11-15T00:00:00+03:00', precision: 'date' })
+    expect(
+      buildCountdownEvents(
+        [event({ id: 99 }), { ...base, liveStatus: 'live' }, { ...base, liveStatus: 'complete' }],
+        first,
+      ),
+    ).toEqual([])
+  })
+
+  it('opens at exactly seven days, chooses the nearest event, and moves on after its start', () => {
+    const first: CountdownEvent = {
+      id: 1,
+      title: 'First event',
+      href: '/events/first',
+      startsAt: '2026-11-14T05:00:00Z',
+      precision: 'time',
+    }
+    const second: CountdownEvent = { ...first, id: 2, startsAt: '2026-11-15T05:00:00Z' }
+    expect(getImminentEvent([second, first], Date.parse('2026-11-07T04:59:59Z'))).toBeNull()
+    expect(getImminentEvent([second, first], Date.parse('2026-11-07T05:00:00Z'))?.id).toBe(1)
+    expect(getImminentEvent([second, first], Date.parse('2026-11-14T05:00:00Z'))?.id).toBe(2)
+    expect(getImminentEvent([second, first], Date.parse('2026-11-15T05:00:00Z'))).toBeNull()
+  })
+
+  it('uses Nairobi calendar days for date-only events, including today and the end of the event day', () => {
+    const dates = buildCountdownEvents(
+      [event({ days: [{ title: 'Day', date: '2026-11-14T00:00:00Z' }] })],
+      new Map(),
+    )
+    expect(getImminentEvent(dates, Date.parse('2026-11-06T20:59:59Z'))).toBeNull()
+    expect(getImminentEvent(dates, Date.parse('2026-11-06T21:00:00Z'))?.precision).toBe('date')
+    expect(calendarDaysUntil(dates[0].startsAt, Date.parse('2026-11-13T21:30:00Z'))).toBe(0)
+    expect(getImminentEvent(dates, Date.parse('2026-11-14T20:59:59Z'))?.id).toBe(1)
+    expect(getImminentEvent(dates, Date.parse('2026-11-14T21:00:00Z'))).toBeNull()
   })
 })

@@ -24,39 +24,8 @@
   font-size: 0.875rem;
 }
 .timer {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
   width: 380px;
   flex-shrink: 0;
-}
-.unit {
-  display: grid;
-  justify-items: center;
-  gap: 2px;
-  padding: 12px 6px;
-  border: 1px solid var(--ink);
-  border-radius: 16px;
-  background: #e8f0fe;
-}
-.unit:nth-child(2) {
-  background: #fce8e6;
-}
-.unit:nth-child(3) {
-  background: #fef7e0;
-}
-.unit:nth-child(4) {
-  background: #e6f4ea;
-}
-.unit strong {
-  font-size: 2rem;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.2;
-  letter-spacing: -0.04em;
-}
-.unit > span {
-  font-size: 0.75rem;
-  font-weight: 700;
 }
 .programme {
   display: inline-flex;
@@ -85,15 +54,5 @@
   .countdown {
     padding: 18px;
     border-radius: 20px;
-  }
-  .timer {
-    gap: 6px;
-  }
-  .unit {
-    padding: 10px 2px;
-    border-radius: 12px;
-  }
-  .unit strong {
-    font-size: 1.65rem;
   }
 }

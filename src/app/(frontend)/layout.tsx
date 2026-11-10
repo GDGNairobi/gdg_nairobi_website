@@ -5,6 +5,8 @@ import '@fontsource-variable/manrope'
 
 import { JsonLd } from '@/components/JsonLd'
 import { SiteEasterEggs } from '@/components/SiteEasterEggs'
+import { FloatingEventCountdown } from '@/components/FloatingEventCountdown'
+import { getEventCountdowns } from '@/lib/community-events'
 import { getSiteURL } from '@/lib/metadata'
 import { getSiteChromeContent } from '@/lib/site-content'
 
@@ -82,7 +84,7 @@ export const viewport: Viewport = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const chrome = await getSiteChromeContent()
+  const [chrome, countdowns] = await Promise.all([getSiteChromeContent(), getEventCountdowns()])
   const origin = getSiteURL().toString().replace(/\/$/, '')
   const sameAs = chrome.socialLinks
     .map(({ url }) => url)
@@ -123,6 +125,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <JsonLd data={structuredData} />
         <SiteEasterEggs />
         {children}
+        <FloatingEventCountdown events={countdowns} />
       </body>
     </html>
   )

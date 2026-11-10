@@ -1,0 +1,122 @@
+.notice {
+  position: fixed;
+  z-index: 80;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column-reverse;
+  width: min(260px, calc(100vw - 32px));
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.notice[data-expanded='true'] {
+  width: min(360px, calc(100vw - 32px));
+  border-radius: 20px;
+}
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--ink);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.notice[data-expanded='true'] .trigger {
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 20px 20px;
+}
+.pillTitle {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+.compact {
+  flex-shrink: 0;
+  padding: 3px 6px;
+  border-radius: 999px;
+  color: var(--deep-blue);
+  background: #e8f0fe;
+  font-size: 0.75rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.chevron {
+  flex-shrink: 0;
+}
+.notice[data-expanded='true'] .chevron {
+  transform: rotate(180deg);
+}
+.panel {
+  position: relative;
+}
+.link {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 20px 20px 0 0;
+}
+.link:hover .title {
+  color: var(--deep-blue);
+}
+.title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  padding-right: 36px;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  font-weight: 800;
+}
+.date {
+  color: #51555a;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+.days {
+  color: var(--deep-blue);
+  font-weight: 800;
+}
+.dismiss {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--ink);
+  background: transparent;
+  font-size: 1.75rem;
+  cursor: pointer;
+}
+.dismiss:hover {
+  background: #e8f0fe;
+}
+.spacer {
+  height: 88px;
+}
+.spacer[data-expanded='true'] {
+  height: 280px;
+}
+:global(html):has(.notice) {
+  scroll-padding-bottom: 88px;
+}
+:global(html):has(.notice[data-expanded='true']) {
+  scroll-padding-bottom: 280px;
+}
