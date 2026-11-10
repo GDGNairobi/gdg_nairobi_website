@@ -161,12 +161,9 @@ test('shows a compact people directory and event partners while protecting unrel
   const portrait = first.getByRole('img', { name: 'Published speaker portrait' })
   await expect.poll(() => portrait.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0)
   const last = section.getByRole('heading', { name: 'Speaker 9', exact: true })
-  await expect(last).toBeHidden()
-  const summary = section.locator('summary')
-  await summary.focus()
-  await page.keyboard.press('Space')
   await expect(last).toBeVisible()
-  await expect(summary).toHaveText(/Show fewer speakers/)
+  await expect(section.locator('details,summary')).toHaveCount(0)
+  const directory = section.getByRole('group', { name: 'All speakers' })
   for (const width of [320, 390, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: 900 })
     const countdown = page.getByRole('region', { name: 'DevFest countdown' })
@@ -174,21 +171,40 @@ test('shows a compact people directory and event partners while protecting unrel
       const tiles = [...element.children].map((tile) => tile.getBoundingClientRect())
       return tiles.every((tile) => tile.left >= 0 && tile.right <= innerWidth && Math.abs(tile.top - tiles[0].top) < 1)
     }), `Countdown tiles at ${width}px`).toBe(true)
-    const geometry = await section.evaluate((element) => ({
+    const geometry = await directory.evaluate((element) => ({
       overflow: document.documentElement.scrollWidth > innerWidth + 1,
-      clipped: [...element.querySelectorAll('article,h3,li,summary')].some((node) => {
+      clipped: (innerWidth <= 900 ? [element] : [...element.querySelectorAll('article,h3,li')]).some((node) => {
         const bounds = node.getBoundingClientRect()
         return bounds.width > 0 && (bounds.left < -1 || bounds.right > innerWidth + 1)
       }),
     }))
     expect(geometry, `Speaker directory at ${width}px`).toEqual({ overflow: false, clipped: false })
-    expect((await summary.boundingBox())!.height).toBeGreaterThanOrEqual(44)
     expect((await first.boundingBox())!.height).toBeLessThan(220)
-    if (width <= 390) {
+    if (width <= 900) {
+      await directory.evaluate((element) => element.scrollIntoView({ block: 'center', behavior: 'instant' }))
+      await directory.evaluate((element) => { element.scrollLeft = 0 })
+      await expect(first).toBeInViewport({ ratio: 1 })
       const cards = section.getByRole('article')
       const [left, right] = await Promise.all([cards.nth(0).boundingBox(), cards.nth(1).boundingBox()])
       expect(Math.abs(left!.y - right!.y)).toBeLessThan(2)
       expect(right!.x).toBeGreaterThanOrEqual(left!.x + left!.width)
+      expect(right!.x + right!.width).toBeLessThanOrEqual(width)
+      await directory.focus()
+      const keyboardScrollEnd = directory.evaluate((element) => new Promise<void>((resolve) => {
+        element.addEventListener('scrollend', () => resolve(), { once: true })
+      }))
+      await page.keyboard.press('ArrowRight')
+      await keyboardScrollEnd
+      expect(await directory.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0)
+      await directory.hover()
+      const wheelScrollEnd = directory.evaluate((element) => new Promise<void>((resolve) => {
+        element.addEventListener('scrollend', () => resolve(), { once: true })
+      }))
+      await page.mouse.wheel(10000, 0)
+      await wheelScrollEnd
+      await expect(last, `Last speaker at ${width}px`).toBeInViewport({ ratio: 1 })
+    } else {
+      expect(await directory.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(true)
     }
     const partnerBox = await partners.locator('article').boundingBox()
     expect(partnerBox!.x).toBeGreaterThanOrEqual(0)
@@ -197,8 +213,15 @@ test('shows a compact people directory and event partners while protecting unrel
       article.querySelector('img')!.getBoundingClientRect().bottom <= article.querySelector('h3')!.getBoundingClientRect().top,
     )).toBe(true)
   }
-  await summary.click()
-  await expect(last).toBeHidden()
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.setViewportSize({ width: 390, height: 900 })
+  expect(await directory.evaluate((element) => getComputedStyle(element).scrollSnapType)).toBe('none')
+  await directory.evaluate((element) => element.scrollIntoView({ block: 'center', behavior: 'instant' }))
+  await directory.hover()
+  const pageY = await page.evaluate(() => scrollY)
+  // Scroll up because this short fixture can already be at the page bottom.
+  await page.mouse.wheel(0, -200)
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeLessThan(pageY)
   await section.getByRole('link', { name: 'View programme' }).click()
   await expect(page).toHaveURL(`${url}#programme`)
   await expect(page.getByRole('heading', { name: 'Plan your day.' })).toBeInViewport()

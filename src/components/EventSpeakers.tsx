@@ -42,7 +42,6 @@ function SpeakerCard({ speaker }: { speaker: ProgrammeSpeaker }) {
 
 export function EventSpeakers({ speakers }: { speakers: ProgrammeSpeaker[] }) {
   if (!speakers.length) return null
-  const preview = speakers.slice(0, 8), remaining = speakers.slice(8)
   return (
     <section id="speakers" className={styles.section} aria-labelledby="event-speakers-heading">
       <header className={styles.header}>
@@ -53,21 +52,9 @@ export function EventSpeakers({ speakers }: { speakers: ProgrammeSpeaker[] }) {
         </div>
         <a href="#programme">View programme <span aria-hidden="true">↑</span></a>
       </header>
-      <div className={styles.grid}>
-        {preview.map((speaker) => <SpeakerCard key={speaker.id} speaker={speaker} />)}
+      <div className={styles.grid} role="group" aria-label="All speakers" tabIndex={0}>
+        {speakers.map((speaker) => <SpeakerCard key={speaker.id} speaker={speaker} />)}
       </div>
-      {remaining.length > 0 && (
-        <details className={styles.more}>
-          <summary>
-            <span className={styles.whenClosed}>Show all {speakers.length} speakers</span>
-            <span className={styles.whenOpen}>Show fewer speakers</span>
-            <span className={styles.plus} aria-hidden="true">＋</span>
-          </summary>
-          <div className={styles.grid}>
-            {remaining.map((speaker) => <SpeakerCard key={speaker.id} speaker={speaker} />)}
-          </div>
-        </details>
-      )}
     </section>
   )
 }
