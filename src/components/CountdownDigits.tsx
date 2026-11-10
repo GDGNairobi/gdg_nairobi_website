@@ -1,4 +1,5 @@
 import styles from './CountdownDigits.module.css'
+import { MatatuMark } from '@/components/MatatuMark'
 
 export function CountdownDigits({
   seconds,
@@ -17,20 +18,23 @@ export function CountdownDigits({
     { label: 'Seconds', value: remaining % 60 },
   ]
   return (
-    <div
-      className={`${styles.clock} ${compact ? styles.compact : ''}`}
-      role="timer"
-      aria-label={label}
-      aria-live="off"
-    >
-      {units.map(({ label, value }) => (
-        <span className={styles.unit} key={label}>
-          <span className={styles.tile}>
-            <strong key={value}>{seconds === null ? '–' : String(value).padStart(2, '0')}</strong>
-          </span>
-          <span className={styles.label}>{label}</span>
+    <div className={`${styles.board} ${compact ? styles.compact : ''}`}>
+      <div className={styles.destination} aria-hidden="true">
+        <span>
+          <MatatuMark /> Next stop
         </span>
-      ))}
+        <span className={styles.sticker}>Tuko rada</span>
+      </div>
+      <div className={styles.clock} role="timer" aria-label={label} aria-live="off">
+        {units.map(({ label, value }) => (
+          <span className={styles.unit} key={label}>
+            <span className={styles.tile}>
+              <strong key={value}>{seconds === null ? '–' : String(value).padStart(2, '0')}</strong>
+            </span>
+            <span className={styles.label}>{label}</span>
+          </span>
+        ))}
+      </div>
     </div>
   )
 }

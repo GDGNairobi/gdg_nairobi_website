@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useId, useRef, useState, useSyncExternalStore } from 'react'
 import { CountdownDigits } from '@/components/CountdownDigits'
+import { MatatuMark } from '@/components/MatatuMark'
 import {
   calendarDaysUntil,
   countdownExpiresAt,
@@ -106,6 +107,7 @@ export function FloatingEventCountdown({ events }: { events: CountdownEvent[] })
             setHovered(false)
           }}
         >
+          <MatatuMark />
           <span className={styles.pillTitle}>{event.title}</span>
           <span className={styles.compact} id={`${panelID}-remaining`}>
             {compact}

@@ -8,8 +8,8 @@
   width: min(260px, calc(100vw - 32px));
   border: 1.5px solid var(--ink);
   border-radius: 999px;
-  background: var(--surface);
-  box-shadow: 3px 3px 0 var(--ink);
+  background: var(--ink);
+  box-shadow: 3px 3px 0 var(--yellow);
 }
 .notice[data-expanded='true'] {
   width: min(360px, calc(100vw - 32px));
@@ -24,14 +24,17 @@
   padding: 10px 12px;
   border: 0;
   border-radius: 999px;
-  color: var(--ink);
+  color: white;
   background: transparent;
   text-align: left;
   cursor: pointer;
 }
 .notice[data-expanded='true'] .trigger {
-  border-top: 1px solid var(--line);
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 0 0 20px 20px;
+}
+.trigger > svg:first-child {
+  flex-shrink: 0;
 }
 .pillTitle {
   min-width: 0;
@@ -45,9 +48,9 @@
 .compact {
   flex-shrink: 0;
   padding: 3px 6px;
-  border-radius: 999px;
-  color: var(--deep-blue);
-  background: #e8f0fe;
+  border-radius: 4px;
+  color: var(--ink);
+  background: var(--yellow);
   font-size: 0.75rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
@@ -60,6 +63,8 @@
 }
 .panel {
   position: relative;
+  border-radius: 18px 18px 0 0;
+  background: #fef7e0;
 }
 .link {
   display: grid;
@@ -76,9 +81,11 @@
   -webkit-line-clamp: 2;
   overflow: hidden;
   padding-right: 36px;
+  color: var(--ink);
   font-size: 0.875rem;
   line-height: 1.4;
   font-weight: 800;
+  text-transform: uppercase;
 }
 .date {
   color: #51555a;
@@ -112,11 +119,11 @@
   height: 88px;
 }
 .spacer[data-expanded='true'] {
-  height: 280px;
+  height: 336px;
 }
 :global(html):has(.notice) {
   scroll-padding-bottom: 88px;
 }
 :global(html):has(.notice[data-expanded='true']) {
-  scroll-padding-bottom: 280px;
+  scroll-padding-bottom: 336px;
 }
