@@ -5,6 +5,7 @@ import { getPayload, type Payload } from 'payload'
 import config from '../../src/payload.config'
 
 const origin = 'http://localhost:3000'
+test.use({ timezoneId: 'America/Los_Angeles' })
 let payload: Payload, eventID: number, url: string, mediaID: number
 const speakerIDs: number[] = []
 const partnerIDs: number[] = []
@@ -91,6 +92,41 @@ test.afterAll(async () => {
   if (mediaID) await payload.delete({ collection: 'media', id: mediaID })
 })
 
+test('counts down to the adjusted programme in EAT and transitions at zero without hydration errors', async ({ page }) => {
+  // An editorial delay must move the countdown along with the published timetable.
+  await payload.update({ collection: 'community-events', id: eventID, data: { scheduleOffsetMinutes: 10 } })
+  const errors: string[] = []
+  page.on('pageerror', (error) => errors.push(error.message))
+  page.on('console', (message) => {
+    if (message.type() === 'error') errors.push(message.text())
+  })
+  await page.clock.install({ time: new Date('2027-02-01T08:24:00Z') })
+  try {
+    await page.goto(url)
+    const section = page.getByRole('region', { name: 'DevFest countdown' })
+    const timer = section.getByRole('timer')
+    await expect(section.locator('time')).toHaveAttribute('datetime', '2027-02-01T08:25:00.000Z')
+    await expect(section.locator('time')).toContainText('11:25 am EAT')
+    await expect(timer).toHaveAttribute('aria-live', 'off')
+    // Let the streamed page hydrate before pausing its browser timers.
+    await expect(timer.locator('strong').last()).toHaveText(/\d{2}/)
+    await page.clock.pauseAt(new Date('2027-02-01T08:24:55Z'))
+    await expect(timer).toHaveText('00Days00Hours00Minutes05Seconds')
+    await page.clock.runFor(2000)
+    await expect(timer).toHaveText('00Days00Hours00Minutes03Seconds')
+    await page.clock.runFor(3000)
+    await expect(timer).toHaveCount(0)
+    await expect(section.getByRole('status')).toHaveText('DevFest is here.')
+    await page.clock.runFor(2000)
+    await expect(timer).toHaveCount(0)
+    await section.getByRole('link', { name: 'Explore the programme' }).click()
+    await expect(page).toHaveURL(`${url}#programme`)
+    expect(errors).toEqual([])
+  } finally {
+    await payload.update({ collection: 'community-events', id: eventID, data: { scheduleOffsetMinutes: 0 } })
+  }
+})
+
 test('shows a compact people directory and event partners while protecting unrelated and draft records', async ({
   page,
 }) => {
@@ -133,6 +169,11 @@ test('shows a compact people directory and event partners while protecting unrel
   await expect(summary).toHaveText(/Show fewer speakers/)
   for (const width of [320, 390, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: 900 })
+    const countdown = page.getByRole('region', { name: 'DevFest countdown' })
+    expect(await countdown.getByRole('timer').evaluate((element) => {
+      const tiles = [...element.children].map((tile) => tile.getBoundingClientRect())
+      return tiles.every((tile) => tile.left >= 0 && tile.right <= innerWidth && Math.abs(tile.top - tiles[0].top) < 1)
+    }), `Countdown tiles at ${width}px`).toBe(true)
     const geometry = await section.evaluate((element) => ({
       overflow: document.documentElement.scrollWidth > innerWidth + 1,
       clipped: [...element.querySelectorAll('article,h3,li,summary')].some((node) => {

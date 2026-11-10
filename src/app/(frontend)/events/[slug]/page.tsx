@@ -7,6 +7,7 @@ import { EventMedia } from '@/components/EventMedia'
 import { EventProgramme } from '@/components/EventProgramme'
 import { EventSpeakers } from '@/components/EventSpeakers'
 import { EventPartners } from '@/components/EventPartners'
+import { EventCountdown } from '@/components/EventCountdown'
 import { getProgrammeSpeakers, toProgrammeSession } from '@/lib/programme'
 import { JsonLd } from '@/components/JsonLd'
 import { getEventPartners, getScheduledEvent } from '@/lib/community-events'
@@ -94,6 +95,12 @@ export default async function EventPage({ params }: PageProps<'/events/[slug]'>)
           </a>
         )}
       </div>
+      {event.eventKind === 'devfest' && !past && programme[0]?.startsAt && (
+        <EventCountdown
+          startsAt={programme[0].startsAt}
+          live={event.liveStatus === 'live'}
+        />
+      )}
       {event.tagline && <p className="event-tagline">{event.tagline}</p>}
       {cover?.url && (
         <div className="event-cover">
