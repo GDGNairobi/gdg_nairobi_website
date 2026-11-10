@@ -5,7 +5,8 @@ import { mediaURL } from '@/lib/media-url'
 import { EditorialPage } from '@/components/EditorialPage'
 import { EventMedia } from '@/components/EventMedia'
 import { EventProgramme } from '@/components/EventProgramme'
-import { toProgrammeSession } from '@/lib/programme'
+import { EventSpeakers } from '@/components/EventSpeakers'
+import { getProgrammeSpeakers, toProgrammeSession } from '@/lib/programme'
 import { JsonLd } from '@/components/JsonLd'
 import { getScheduledEvent } from '@/lib/community-events'
 import { eventDayKey, formatEventDay } from '@/lib/event-dates'
@@ -26,6 +27,8 @@ export default async function EventPage({ params }: PageProps<'/events/[slug]'>)
     detail = await getScheduledEvent(slug)
   if (!detail) notFound()
   const { event, sessions, offsetMinutes } = detail
+  const programme = sessions.map((session) => toProgrammeSession(session, offsetMinutes))
+  const speakers = event.eventKind === 'devfest' ? getProgrammeSpeakers(programme) : []
   const past =
     event.liveStatus === 'complete' ||
     (event.days?.at(-1)?.date
@@ -83,6 +86,11 @@ export default async function EventPage({ params }: PageProps<'/events/[slug]'>)
         <a className="button button-ghost" href="#programme">
           View programme ↓
         </a>
+        {speakers.length > 0 && (
+          <a className="button button-ghost" href="#speakers">
+            Meet the speakers ↓
+          </a>
+        )}
       </div>
       {event.tagline && <p className="event-tagline">{event.tagline}</p>}
       {cover?.url && (
@@ -142,6 +150,7 @@ export default async function EventPage({ params }: PageProps<'/events/[slug]'>)
           </p>
         )}
       </section>
+      <EventSpeakers speakers={speakers} />
       <section id="programme" className="event-programme" aria-labelledby="programme-heading">
         <p className="section-kicker">Programme</p>
         <h2 id="programme-heading">
@@ -162,7 +171,7 @@ export default async function EventPage({ params }: PageProps<'/events/[slug]'>)
           <EventProgramme
             eventID={event.id}
             singleTrack={event.scheduleMode === 'single'}
-            sessions={sessions.map((session) => toProgrammeSession(session, offsetMinutes))}
+            sessions={programme}
           />
         )}
       </section>

@@ -84,6 +84,27 @@ export function getProgrammeTracks(sessions: ProgrammeSession[]) {
   return [...unique.values()].sort((a, b) => order(a) - order(b) || a.localeCompare(b))
 }
 
+export type ProgrammeSpeaker = NonNullable<ProgrammeSession['speakers']>[number] & {
+  tracks: string[]
+  sessions: Array<{ id: number; title: string }>
+}
+
+export function getProgrammeSpeakers(sessions: ProgrammeSession[]): ProgrammeSpeaker[] {
+  const speakers = new Map<number, ProgrammeSpeaker>()
+  for (const session of sessions) {
+    for (const speaker of session.speakers || []) {
+      if (!speakers.has(speaker.id))
+        speakers.set(speaker.id, { ...speaker, tracks: [], sessions: [] })
+      const profile = speakers.get(speaker.id)!
+      if (!profile.tracks.some((track) => trackKey(track) === trackKey(session.track)))
+        profile.tracks.push(session.track)
+      if (!profile.sessions.some((entry) => entry.id === session.id))
+        profile.sessions.push({ id: session.id, title: session.title })
+    }
+  }
+  return [...speakers.values()].sort((a, b) => a.name.localeCompare(b.name))
+}
+
 export function groupProgrammeSessions(sessions: ProgrammeSession[]) {
   const tracks = getProgrammeTracks(sessions).map(trackKey)
   const sorted = [...sessions].sort(

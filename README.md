@@ -126,6 +126,8 @@ The public programme groups sessions by their adjusted start time in Nairobi, al
 
 DevFest event pages do not show registration buttons. Registration settings remain in the CMS, and eligible community events continue to show their registration links.
 
+DevFest pages include a speakers section built from their published programme, with one card per linked speaker profile, available portraits, tracks and session titles. Hosts and partner teams listed as speakers in the agenda appear too. The first eight profiles are shown initially; attendees can expand the rest. Missing portraits use initials. Reimporting a programme updates this section through the existing session relationships; edit job titles, companies and portraits in **Speakers**. The `/speakers` alias opens the featured DevFest’s speakers section, falling back to its programme while no speakers are published.
+
 ### Seed and migration
 
 `pnpm migrate` applies the unified model and seeds the supplied community content, original photos, confirmed 14 November 2026 DevFest date, Sarit venue links and historical highlights. `pnpm seed` reruns the idempotent seed; records already marked with its revision retain organiser edits. No administrator credentials are seeded.
