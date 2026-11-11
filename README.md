@@ -134,6 +134,10 @@ DevFest pages include a compact speakers section after the programme, with one c
 
 Upload sponsor logos to **Media**, add or update their **Partners** records, then select the supporting partners on the event’s **Sponsors & partners** tab. Only published partners selected for that event appear in its logo grid. Sponsor levels are not inferred from a logo file.
 
+DevFest Nairobi 2026 replaces the large cover photo with a compact **2025 rewind** film strip focused on sessions, speakers and attentive audiences. It drifts slowly while visible, pauses on hover, touch, keyboard interaction or an open photo preview, and respects reduced-motion preferences. Visitors can pause it, use the arrows or swipe, and click a photo to enlarge it. The preview supports next/previous photos, arrow keys, Escape and clicking outside to close.
+
+Edit **Events → Media → Photo rewind** to replace the selected archive with uploaded photos, captions, day labels, year, copy and album links, or hide it. The bundled 2025 selection is a fallback only for the 2026 DevFest page; other events keep their cover unless a DevFest rewind is explicitly configured. The gallery uses responsive image sizes and larger images only when the photo preview opens.
+
 ### Seed and migration
 
 `pnpm migrate` applies the unified model and seeds the supplied community content, original photos, confirmed 14 November 2026 DevFest date, Sarit venue links and historical highlights. `pnpm seed` reruns the idempotent seed; records already marked with its revision retain organiser edits. No administrator credentials are seeded.

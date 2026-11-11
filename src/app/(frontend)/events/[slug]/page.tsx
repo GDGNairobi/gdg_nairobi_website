@@ -8,6 +8,8 @@ import { EventProgramme } from '@/components/EventProgramme'
 import { EventSpeakers } from '@/components/EventSpeakers'
 import { EventPartners } from '@/components/EventPartners'
 import { EventCountdown } from '@/components/EventCountdown'
+import { EventPhotoRewind } from '@/components/EventPhotoRewind'
+import { getEventRewind } from '@/lib/event-rewind'
 import { getProgrammeSpeakers, toProgrammeSession } from '@/lib/programme'
 import { JsonLd } from '@/components/JsonLd'
 import { getEventPartners, getScheduledEvent } from '@/lib/community-events'
@@ -38,6 +40,7 @@ export default async function EventPage({ params }: PageProps<'/events/[slug]'>)
       ? eventDayKey(event.days.at(-1)!.date) < eventDayKey(new Date().toISOString())
       : Boolean(event.year && event.year < new Date().getFullYear()))
   const cover = typeof event.coverImage === 'object' ? event.coverImage : null
+  const rewind = getEventRewind(event)
   const videos = (event.videos || []).map((v) => ({ title: v.title, url: v.url })),
     albums = (event.albums || []).filter((a) => a.url).map((a) => ({ title: a.title, url: a.url! }))
   const status = past
@@ -102,15 +105,19 @@ export default async function EventPage({ params }: PageProps<'/events/[slug]'>)
         />
       )}
       {event.tagline && <p className="event-tagline">{event.tagline}</p>}
-      {cover?.url && (
-        <div className="event-cover">
-          <Image
-            src={mediaURL(cover.url)}
-            alt={cover.alt}
-            fill
-            sizes="(max-width: 380px) calc(100vw - 36px), (max-width: 900px) calc(100vw - 44px), 86vw"
-          />
-        </div>
+      {rewind ? (
+        <EventPhotoRewind {...rewind} />
+      ) : (
+        cover?.url && (
+          <div className="event-cover">
+            <Image
+              src={mediaURL(cover.url)}
+              alt={cover.alt}
+              fill
+              sizes="(max-width: 380px) calc(100vw - 36px), (max-width: 900px) calc(100vw - 44px), 86vw"
+            />
+          </div>
+        )
       )}
       {event.eventKind !== 'devfest' && (
         <section className="schedule-live-bar" aria-label="Event status">

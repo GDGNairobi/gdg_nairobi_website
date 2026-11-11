@@ -274,6 +274,51 @@ export const CommunityEvents: CollectionConfig = {
           label: 'Media',
           fields: [
             {
+              name: 'photoRewind',
+              label: 'Photo rewind',
+              type: 'group',
+              admin: {
+                description:
+                  'A compact film strip above the venues. DevFest Nairobi 2026 uses the selected 2025 archive when these fields are empty. Add photos to replace that selection.',
+              },
+              fields: [
+                {
+                  name: 'hidden',
+                  label: 'Hide the photo rewind',
+                  type: 'checkbox',
+                  defaultValue: false,
+                },
+                {
+                  name: 'year',
+                  label: 'Year shown in the photos',
+                  type: 'number',
+                  min: 2000,
+                  max: 2200,
+                },
+                { name: 'heading', type: 'text' },
+                { name: 'description', type: 'textarea' },
+                {
+                  name: 'photos',
+                  type: 'array',
+                  dbName: 'event_rewind_photos',
+                  maxRows: 12,
+                  admin: { initCollapsed: true },
+                  fields: [
+                    { name: 'image', type: 'upload', relationTo: 'media', required: true },
+                    { name: 'caption', type: 'text', required: true },
+                    {
+                      name: 'day',
+                      label: 'Day label',
+                      type: 'text',
+                      admin: { placeholder: 'Day 1' },
+                    },
+                  ],
+                },
+                urlField('dayOneAlbumURL', 'Day 1 album link'),
+                urlField('dayTwoAlbumURL', 'Day 2 album link'),
+              ],
+            },
+            {
               name: 'videos',
               type: 'array',
               dbName: 'event_videos',

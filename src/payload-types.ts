@@ -389,6 +389,25 @@ export interface CommunityEvent {
    * Select the published partners supporting this event. Their uploaded logos appear on the event page.
    */
   partners?: (number | Partner)[] | null;
+  /**
+   * A compact film strip above the venues. DevFest Nairobi 2026 uses the selected 2025 archive when these fields are empty. Add photos to replace that selection.
+   */
+  photoRewind?: {
+    hidden?: boolean | null;
+    year?: number | null;
+    heading?: string | null;
+    description?: string | null;
+    photos?:
+      | {
+          image: number | Media;
+          caption: string;
+          day?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    dayOneAlbumURL?: string | null;
+    dayTwoAlbumURL?: string | null;
+  };
   videos?:
     | {
         title: string;
@@ -877,6 +896,24 @@ export interface CommunityEventsSelect<T extends boolean = true> {
   scheduleNotice?: T;
   sessions?: T;
   partners?: T;
+  photoRewind?:
+    | T
+    | {
+        hidden?: T;
+        year?: T;
+        heading?: T;
+        description?: T;
+        photos?:
+          | T
+          | {
+              image?: T;
+              caption?: T;
+              day?: T;
+              id?: T;
+            };
+        dayOneAlbumURL?: T;
+        dayTwoAlbumURL?: T;
+      };
   videos?:
     | T
     | {
