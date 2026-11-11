@@ -159,7 +159,8 @@ export function EventPhotoRewind({
     const first = track.firstElementChild as HTMLElement
     const repeat = track.querySelector<HTMLElement>('[data-repeat]')
     const cycle = repeat ? repeat.offsetLeft - first.offsetLeft : 0
-    const distance = first.getBoundingClientRect().width + 12
+    const next = first.nextElementSibling as HTMLElement | null
+    const distance = next ? next.offsetLeft - first.offsetLeft : first.offsetWidth + 12
     if (cycle > 0) {
       const normalized = track.scrollLeft % cycle
       track.scrollLeft = step < 0 && normalized < distance ? normalized + cycle : normalized
@@ -228,6 +229,7 @@ export function EventPhotoRewind({
                 >
                   <Image
                     src={photo.src}
+                    quality={85}
                     alt={repeat ? '' : photo.alt}
                     fill
                     sizes="(max-width: 700px) 78vw, (max-width: 928px) 260px, (max-width: 1357px) 28vw, 380px"
@@ -316,6 +318,7 @@ export function EventPhotoRewind({
             </div>
             <Image
               src={selectedPhoto.src}
+              quality={85}
               alt={selectedPhoto.alt}
               width={selectedPhoto.width || 1800}
               height={selectedPhoto.height || 1200}

@@ -138,6 +138,8 @@ DevFest Nairobi 2026 replaces the large cover photo with a compact **2025 rewind
 
 Edit **Events → Media → Photo rewind** to replace the selected archive with uploaded photos, captions, day labels, year, copy and album links, or hide it. The bundled 2025 selection is a fallback only for the 2026 DevFest page; other events keep their cover unless a DevFest rewind is explicitly configured. The gallery uses responsive image sizes and larger images only when the photo preview opens.
 
+The film strip has a slight static tilt, with extra edge clearance to keep its perforations visible. Use full-resolution album downloads for source photos, rather than Google Photos' resized previews. The bundled photos are exported at up to 2400 pixels as high-quality WebP; responsive delivery uses quality 85, and content-hashed filenames prevent older cached versions from masking a photo replacement.
+
 ### Seed and migration
 
 `pnpm migrate` applies the unified model and seeds the supplied community content, original photos, confirmed 14 November 2026 DevFest date, Sarit venue links and historical highlights. `pnpm seed` reruns the idempotent seed; records already marked with its revision retain organiser edits. No administrator credentials are seeded.
