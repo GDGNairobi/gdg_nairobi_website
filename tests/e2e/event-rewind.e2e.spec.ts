@@ -28,7 +28,12 @@ test('the rewind drifts, pauses on hover and in its photo popup, then resumes', 
     name: 'Enlarge photo: Ideas on the main stage',
     exact: true,
   })
-  await photo.hover()
+  // Move the pointer directly so the hover check cannot trigger smooth page scrolling.
+  const photoCenter = await photo.evaluate((el) => {
+    const bounds = el.getBoundingClientRect()
+    return { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
+  })
+  await page.mouse.move(photoCenter.x, photoCenter.y)
   expect(await track.evaluate((el) => el.matches(':hover'))).toBe(true)
   const hovered = await track.evaluate((el) => el.scrollLeft)
   await page.waitForTimeout(350)
