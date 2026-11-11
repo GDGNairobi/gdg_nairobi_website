@@ -7,6 +7,9 @@ import type { EventRewindContent } from '@/lib/event-rewind'
 import styles from './EventPhotoRewind.module.css'
 
 const motionQuery = '(prefers-reduced-motion: reduce)'
+// Supersample the tilted thumbnails at twice their CSS width to preserve fine detail.
+const filmImageSizes =
+  '(max-width: 700px) 156vw, (max-width: 928px) 520px, (max-width: 1357px) 56vw, 760px'
 const subscribeToMotion = (notify: () => void) => {
   const query = window.matchMedia(motionQuery)
   query.addEventListener('change', notify)
@@ -229,10 +232,10 @@ export function EventPhotoRewind({
                 >
                   <Image
                     src={photo.src}
-                    quality={85}
+                    quality={100}
                     alt={repeat ? '' : photo.alt}
                     fill
-                    sizes="(max-width: 700px) 78vw, (max-width: 928px) 260px, (max-width: 1357px) 28vw, 380px"
+                    sizes={filmImageSizes}
                     style={{ objectPosition: photo.position || 'center' }}
                   />
                 </button>

@@ -136,9 +136,9 @@ Upload sponsor logos to **Media**, add or update their **Partners** records, the
 
 DevFest Nairobi 2026 replaces the large cover photo with a compact **2025 rewind** film strip focused on sessions, speakers and attentive audiences. It drifts slowly while visible, pauses on hover, touch, keyboard interaction or an open photo preview, and respects reduced-motion preferences. Visitors can pause it, use the arrows or swipe, and click a photo to enlarge it. The preview supports next/previous photos, arrow keys, Escape and clicking outside to close.
 
-Edit **Events → Media → Photo rewind** to replace the selected archive with uploaded photos, captions, day labels, year, copy and album links, or hide it. The bundled 2025 selection is a fallback only for the 2026 DevFest page; other events keep their cover unless a DevFest rewind is explicitly configured. The gallery uses responsive image sizes and larger images only when the photo preview opens.
+Edit **Events → Media → Photo rewind** to replace the selected archive with uploaded photos, captions, day labels, year, copy and album links, or hide it. The bundled 2025 selection is a fallback only for the 2026 DevFest page; other events keep their cover unless a DevFest rewind is explicitly configured. The gallery uses responsive optimized images for both the film strip and the photo preview.
 
-The film strip has a slight static tilt, with extra edge clearance to keep its perforations visible. Use full-resolution album downloads for source photos, rather than Google Photos' resized previews. The bundled photos are exported at up to 2400 pixels as high-quality WebP; responsive delivery uses quality 85, and content-hashed filenames prevent older cached versions from masking a photo replacement.
+The film strip has a slight static tilt, with extra edge clearance to keep its perforations visible. Use full-resolution album downloads for source photos, rather than Google Photos' resized previews. The bundled photos are exported at up to 2400 pixels as high-quality WebP. Film thumbnails deliberately request twice their CSS width at quality 100 to preserve fine detail when downsampled and rotated; browser pixel density still determines the responsive source, and popups use quality 85. Content-hashed filenames prevent older cached versions from masking a photo replacement.
 
 ### Seed and migration
 

@@ -47,7 +47,7 @@ const nextConfig: NextConfig = {
       },
     ],
     minimumCacheTTL: 86400,
-    qualities: [60, 75, 85],
+    qualities: [60, 75, 85, 100],
   },
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
