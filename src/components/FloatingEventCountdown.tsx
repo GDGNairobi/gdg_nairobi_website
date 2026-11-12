@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useId, useRef, useState, useSyncExternalStore } from 'react'
 import { CountdownDigits } from '@/components/CountdownDigits'
 import { MatatuMark } from '@/components/MatatuMark'
@@ -37,7 +38,9 @@ export function FloatingEventCountdown({ events }: { events: CountdownEvent[] })
   const trigger = useRef<HTMLButtonElement>(null)
   const panelID = useId()
   const savedDismissal = useSyncExternalStore(subscribe, readDismissed, () => false)
-  const hidden = dismissed || savedDismissal
+  const pathname = usePathname()
+  const hidden =
+    dismissed || savedDismissal || pathname === '/events/devfest-nairobi-2026/attending'
   const now = useCountdownClock(Math.max(...events.map(countdownExpiresAt)), !hidden)
   const event = now === null ? null : getImminentEvent(events, now * 1000)
   if (!event || hidden || now === null) return null

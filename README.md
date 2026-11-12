@@ -157,6 +157,12 @@ The local Compose database is `gdg_nairobi_events` on port `55439`; an older dat
 
 The importer validates source URLs, upserts records idempotently, preserves editorial overrides, and marks disappeared entries as stale instead of deleting them. The public site retains the last good CMS data if a refresh fails.
 
+## Attendee poster draft
+
+The direct route `/events/devfest-nairobi-2026/attending` creates a personal 1080×1350 PNG. It is intentionally absent from navigation and the sitemap and has `noindex` metadata while being tried out. No other edition exposes the editor.
+
+Attendees enter an optional name, choose a photo or use the front-facing camera, preview and download. On phones, adding a photo brings the preview into view and keeps download within reach. Framing supports dragging the photo (or using arrow keys) and a zoom control. Photo decoding, cropping and export happen in browser memory; photos and names are not sent to Payload or persisted in browser storage or on the server. Camera tracks stop on capture, cancellation or leaving the page. Event title, date and venue come from the published 2026 CMS record.
+
 ## SEO and discovery
 
 The frontend provides:
