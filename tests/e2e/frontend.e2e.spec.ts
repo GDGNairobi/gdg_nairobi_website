@@ -45,6 +45,33 @@ test.describe('Frontend', () => {
       'http://localhost:3000/social-card',
     )
     await expect(page.locator('script[type="application/ld+json"]')).not.toHaveCount(0)
+
+    const origin = new URL(page.url()).origin
+    const robots = await page.request.get(`${origin}/robots.txt`)
+    expect(robots.ok()).toBe(true)
+    const rules = await robots.text()
+    expect(rules).toContain(`Host: ${origin}`)
+    expect(rules).toContain(`Sitemap: ${origin}/sitemap.xml`)
+    expect(rules).toContain('Disallow: /admin/')
+    expect(rules).toContain('Disallow: /api/')
+  })
+
+  test('publishes the DevFest edition card for Open Graph and Twitter', async ({ page }) => {
+    await page.goto('http://localhost:3000/events/devfest-nairobi-2026')
+    const image = await page.locator('meta[property="og:image"]').getAttribute('content')
+    expect(image).toMatch(/^http:\/\/localhost:3000\/social-card\/devfest-nairobi-2026\?v=/)
+    await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', image!)
+    await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute(
+      'content',
+      /DevFest Nairobi 2026/,
+    )
+    const response = await page.request.get(image!)
+    expect(response.status()).toBe(200)
+    expect(response.headers()['content-type']).toContain('image/png')
+    const png = await response.body()
+    expect(png.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))).toBe(true)
+    expect(png.readUInt32BE(16)).toBe(1200)
+    expect(png.readUInt32BE(20)).toBe(630)
   })
 
   test('hides a useful Jenga command palette and Nairobi greeting', async ({ page }) => {

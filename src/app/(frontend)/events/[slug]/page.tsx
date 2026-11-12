@@ -13,7 +13,7 @@ import { getEventRewind } from '@/lib/event-rewind'
 import { getProgrammeSpeakers, toProgrammeSession } from '@/lib/programme'
 import { JsonLd } from '@/components/JsonLd'
 import { getEventPartners, getScheduledEvent } from '@/lib/community-events'
-import { eventDayKey, formatEventDay } from '@/lib/event-dates'
+import { eventDayKey, formatEventDate, formatEventDay } from '@/lib/event-dates'
 import { absoluteSiteURL, buildPageMetadata } from '@/lib/metadata'
 
 export async function generateMetadata({ params }: PageProps<'/events/[slug]'>): Promise<Metadata> {
@@ -24,6 +24,13 @@ export async function generateMetadata({ params }: PageProps<'/events/[slug]'>):
     description:
       detail?.event.localDescription || detail?.event.excerpt || 'Join the GDG Nairobi community.',
     path: `/events/${slug}`,
+    image:
+      slug === 'devfest-nairobi-2026' && detail
+        ? {
+            url: `/social-card/devfest-nairobi-2026?v=${encodeURIComponent(detail.event.updatedAt)}`,
+            alt: `${detail.event.title} — ${formatEventDate(detail.event.startsAt, detail.event.year)} — ${detail.event.days?.[0]?.venueName || 'Venue details to follow'}`,
+          }
+        : undefined,
   })
 }
 export default async function EventPage({ params }: PageProps<'/events/[slug]'>) {
@@ -99,10 +106,7 @@ export default async function EventPage({ params }: PageProps<'/events/[slug]'>)
         )}
       </div>
       {event.eventKind === 'devfest' && !past && programme[0]?.startsAt && (
-        <EventCountdown
-          startsAt={programme[0].startsAt}
-          live={event.liveStatus === 'live'}
-        />
+        <EventCountdown startsAt={programme[0].startsAt} live={event.liveStatus === 'live'} />
       )}
       {event.tagline && <p className="event-tagline">{event.tagline}</p>}
       {rewind ? (

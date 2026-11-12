@@ -15,6 +15,7 @@ import { Sessions } from './collections/Sessions'
 import { Speakers } from './collections/Speakers'
 import { TeamMembers } from './collections/TeamMembers'
 import { SiteSettings } from './globals/SiteSettings'
+import { getSiteURL } from './lib/metadata'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -27,7 +28,7 @@ const storageEnabled = Boolean(
 )
 
 export default buildConfig({
-  serverURL: process.env.NEXT_PUBLIC_SITE_URL,
+  serverURL: getSiteURL().origin,
   admin: {
     user: Users.slug,
     meta: {

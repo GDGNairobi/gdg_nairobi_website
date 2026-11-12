@@ -163,13 +163,14 @@ The frontend provides:
 
 - Distinct titles, descriptions, keywords, and canonical URLs for each public page
 - A generated 1200×630 GDG Nairobi social card at `/social-card`
+- A dedicated DevFest Nairobi 2026 card at `/social-card/devfest-nairobi-2026`, using the page’s Manrope typography, blue grid/orbit artwork and published CMS date, venue and tagline. Both Open Graph and Twitter metadata use this card, with a revision URL that changes when the event is edited.
 - Open Graph and Twitter card metadata
 - `Organization`, `WebSite`, `ItemList`, and confirmed-event JSON-LD where appropriate
 - `/sitemap.xml`, `/robots.txt`, and `/manifest.webmanifest`
 - `noindex` headers for `/admin/*` and `/api/*`
 - `en-KE` document language and Nairobi-specific search copy
 
-Set `NEXT_PUBLIC_SITE_URL` to the canonical deployed origin. Local development defaults to `http://localhost:3000`; the production fallback is `https://beta.gdgnairobi.com`.
+Set `NEXT_PUBLIC_SITE_URL` to the canonical deployed origin. Local development defaults to `http://localhost:3000`; the production fallback is `https://gdgnairobi.com`. Robots rules resolve this origin at request time, so the sitemap reference is not frozen to a build-time preview domain.
 
 ## Validation
 
