@@ -47,7 +47,8 @@ a.card:hover {
   font-weight: 800;
   overflow-wrap: anywhere;
 }
-.card h3 {
+.card h3,
+.card h4 {
   margin: 0;
   text-align: center;
   font-size: 0.875rem;
@@ -55,10 +56,19 @@ a.card:hover {
   overflow-wrap: anywhere;
 }
 @media (max-width: 1100px) {
-  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 @media (max-width: 700px) {
-  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-  .card { padding: 14px; }
-  .logo { height: 90px; }
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .card {
+    padding: 14px;
+  }
+  .logo {
+    height: 90px;
+  }
 }

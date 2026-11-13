@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 
 import { CommunityIntroduction, CommunityProgrammes } from '@/components/CommunityIntroduction'
 import { EditorialPage } from '@/components/EditorialPage'
+import { PartnerGrid } from '@/components/EventPartners'
 import { getPartners, getTeamMembers } from '@/lib/cms-content'
 import { buildPageMetadata } from '@/lib/metadata'
 import { getHomeContent } from '@/lib/site-content'
+import styles from './AboutPartners.module.css'
 
 export const metadata: Metadata = buildPageMetadata({
   title: 'About GDG Nairobi',
@@ -20,11 +21,13 @@ export const metadata: Metadata = buildPageMetadata({
 })
 
 export default async function AboutPage() {
-  const [{ community }, team, chapterPartners] = await Promise.all([
+  const [{ community }, team, partners] = await Promise.all([
     getHomeContent(),
     getTeamMembers(),
-    getPartners('chapter'),
+    getPartners('all'),
   ])
+  const eventPartners = partners.filter((partner) => partner.scope === 'devfest')
+  const chapterPartners = partners.filter((partner) => partner.scope === 'chapter')
   const localSponsors = chapterPartners.filter((partner) => partner.tier === 'host')
   const communityPartners = chapterPartners.filter((partner) => partner.tier !== 'host')
 
@@ -72,52 +75,34 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      {chapterPartners.length > 0 && (
+      {partners.length > 0 && (
         <section className="about-partners" id="partners">
           <header>
             <p className="section-kicker">Sponsors & partners</p>
             <h2>The people and organisations we build with.</h2>
             <p>
-              This directory reflects the official GDG Nairobi chapter page and does not imply
-              support for every current event.
+              Meet our chapter supporters and event partners. Visit each event page for its
+              confirmed sponsors.
             </p>
           </header>
-          <div className="chapter-sponsor-grid">
-            {localSponsors.map((partner) => (
-              <a
-                href={partner.url || '#'}
-                key={partner.id}
-                rel={partner.url ? 'noreferrer' : undefined}
-                target={partner.url ? '_blank' : undefined}
-              >
-                {partner.sourceLogoURL && (
-                  <Image alt="" height={72} src={partner.sourceLogoURL} width={150} />
-                )}
-                <strong>{partner.name}</strong>
-                <span>Local sponsor</span>
-              </a>
-            ))}
-          </div>
+          {eventPartners.length > 0 && (
+            <div className={styles.group}>
+              <h3>DevFest partners</h3>
+              <PartnerGrid partners={eventPartners} headingLevel="h4" />
+            </div>
+          )}
+          {localSponsors.length > 0 && (
+            <div className={styles.group}>
+              <h3>Chapter sponsors</h3>
+              <PartnerGrid partners={localSponsors} headingLevel="h4" />
+            </div>
+          )}
           {communityPartners.length > 0 && (
-            <details className="partner-directory">
+            <details className={styles.directory}>
               <summary>
-                View {communityPartners.length} chapter partners <span>＋</span>
+                View {communityPartners.length} chapter partners <span aria-hidden="true">＋</span>
               </summary>
-              <div>
-                {communityPartners.map((partner) => (
-                  <a
-                    href={partner.url || '#'}
-                    key={partner.id}
-                    rel={partner.url ? 'noreferrer' : undefined}
-                    target={partner.url ? '_blank' : undefined}
-                  >
-                    {partner.sourceLogoURL && (
-                      <Image alt="" height={56} src={partner.sourceLogoURL} width={120} />
-                    )}
-                    <strong>{partner.name}</strong>
-                  </a>
-                ))}
-              </div>
+              <PartnerGrid partners={communityPartners} />
             </details>
           )}
         </section>

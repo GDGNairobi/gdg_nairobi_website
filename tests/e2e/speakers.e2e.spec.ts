@@ -43,6 +43,19 @@ test.beforeAll(async () => {
     partnerIDs.push(partner.id)
   }
   await payload.update({ collection: 'community-events', id: eventID, data: { partners: partnerIDs.slice(0, 2) } })
+  const chapterSponsor = await payload.create({
+    collection: 'partners',
+    data: {
+      name: 'Published chapter sponsor',
+      scope: 'chapter',
+      tier: 'host',
+      logo: mediaID,
+      sourceLogoURL: 'https://res.cloudinary.com/example/unused-fallback.png',
+      order: 0,
+      _status: 'published',
+    },
+  })
+  partnerIDs.push(chapterSponsor.id)
   for (let i = 0; i < 12; i++) {
     const speaker = await payload.create({
       collection: 'speakers',
@@ -225,4 +238,48 @@ test('shows a compact people directory and event partners while protecting unrel
   await section.getByRole('link', { name: 'View programme' }).click()
   await expect(page).toHaveURL(`${url}#programme`)
   await expect(page.getByRole('heading', { name: 'Plan your day.' })).toBeInViewport()
+})
+
+test('About lists published Payload partners across scopes and prefers uploaded logos', async ({
+  page,
+}) => {
+  await page.goto(`${origin}/about`)
+  const partners = page.locator('#partners')
+  for (const name of [
+    'Published event partner',
+    'Unrelated event partner',
+    'Published chapter sponsor',
+  ]) {
+    await expect(partners.getByRole('heading', { name, exact: true })).toBeVisible()
+  }
+  await expect(partners.getByText('Draft event partner', { exact: true })).toHaveCount(0)
+  await expect(partners.locator('a[href="#"]')).toHaveCount(0)
+  const sponsor = partners.getByRole('article').filter({
+    has: page.getByRole('heading', { name: 'Published chapter sponsor', exact: true }),
+  })
+  const logo = sponsor.getByRole('img', { name: 'Published chapter sponsor logo' })
+  await logo.scrollIntoViewIfNeeded()
+  await expect
+    .poll(() => logo.evaluate((img: HTMLImageElement) => img.naturalWidth))
+    .toBeGreaterThan(0)
+  expect(await logo.getAttribute('src')).not.toContain('unused-fallback')
+  for (const width of [320, 390, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 })
+    expect(
+      await partners.evaluate((section) => ({
+        overflow: document.documentElement.scrollWidth > innerWidth + 1,
+        clipped: [...section.querySelectorAll('article')].some((card) => {
+          const bounds = card.getBoundingClientRect()
+          const image = card.querySelector('img')?.getBoundingClientRect()
+          const heading = card.querySelector('h4')?.getBoundingClientRect()
+          return (
+            bounds.left < 0 ||
+            bounds.right > innerWidth ||
+            !!(image && heading && image.bottom > heading.top)
+          )
+        }),
+      })),
+      `About partners at ${width}px`,
+    ).toEqual({ overflow: false, clipped: false })
+  }
 })

@@ -135,7 +135,9 @@ export async function getSessions(eventID?: number): Promise<Session[]> {
   }
 }
 
-export async function getPartners(scope: 'chapter' | 'devfest' = 'devfest'): Promise<Partner[]> {
+export async function getPartners(
+  scope: 'chapter' | 'devfest' | 'all' = 'devfest',
+): Promise<Partner[]> {
   const payload = await payloadClient()
   if (!payload) return []
   try {
@@ -143,10 +145,10 @@ export async function getPartners(scope: 'chapter' | 'devfest' = 'devfest'): Pro
       await payload.find({
         collection: 'partners',
         depth: 1,
-        limit: 100,
+        pagination: false,
         overrideAccess: false,
         sort: ['tier', 'order'],
-        where: { scope: { equals: scope } },
+        where: scope === 'all' ? undefined : { scope: { equals: scope } },
       })
     ).docs
   } catch {

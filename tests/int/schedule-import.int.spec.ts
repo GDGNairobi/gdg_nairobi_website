@@ -163,6 +163,20 @@ describe('Schedule spreadsheet import', () => {
       speakerNames: [],
     })
   })
+  it('imports a noon codelab in the afternoon and names a generic session from its details', async () => {
+    const input = await agenda([
+      ['12:55 - 1:40 pm', 'Hands-On Codelab', 'Multimodal pipelines', 'Alice', '45 mins', 'AI', 'A'],
+      ['4:15 - 4:25 pm', 'Session', 'Real-time notifications', 'Bob', '10 mins', 'Web', 'B'],
+    ])
+    const p = await previewSchedule(input, 'agenda.csv', event)
+    expect(p.errors).toEqual([])
+    expect(p.warnings.join(' ')).not.toContain('Duration says')
+    expect(p.rows[0]).toMatchObject({
+      startsAt: '2026-11-14T09:55:00.000Z',
+      endsAt: '2026-11-14T10:40:00.000Z',
+    })
+    expect(p.rows[1]).toMatchObject({ title: 'Real-time notifications', format: 'talk' })
+  })
   it('rejects ambiguous agenda times without silently correcting the source, and warns about durations', async () => {
     const input = await agenda([
       ['11:05 - 1:20 am', 'Hands-On Codelab', 'Ambiguous time', 'Alice', '45 mins', 'Web', 'A'],

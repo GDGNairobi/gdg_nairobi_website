@@ -16,7 +16,11 @@ export function agendaTimeRange(value: string): [string, string] {
   if (!startPeriod && endPeriod) {
     startPeriod = endPeriod
     // A range such as 11:15–12:00 pm crosses noon.
-    if (endPeriod === 'pm' && Number(match[1].split(':')[0]) > Number(match[3].split(':')[0]))
+    if (
+      endPeriod === 'pm' &&
+      !match[1].startsWith('12:') &&
+      Number(match[1].split(':')[0]) > Number(match[3].split(':')[0])
+    )
       startPeriod = 'am'
     if (endPeriod === 'pm' && match[3].startsWith('12:') && !match[1].startsWith('12:'))
       startPeriod = 'am'
@@ -102,7 +106,7 @@ export function prepareAgenda(
       const title =
         /partner session/i.test(current.activity) && details
           ? `${current.activity.trim()}: ${details}`
-          : ['workshop', 'keynote', 'panel'].includes(format) &&
+          : (['workshop', 'keynote', 'panel'].includes(format) || /^session$/i.test(current.activity)) &&
               details &&
               !/^panel\s*$/i.test(details) &&
               !/welcome/i.test(current.activity)

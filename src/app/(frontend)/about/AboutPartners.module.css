@@ -1,0 +1,28 @@
+.group {
+  margin-top: 32px;
+}
+
+.group > h3 {
+  margin: 0 0 16px;
+  font-size: 1.25rem;
+}
+
+.directory {
+  margin-top: 32px;
+  border-top: 1px solid var(--ink);
+}
+
+.directory > summary {
+  min-height: 52px;
+  padding: 16px 0;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.directory > summary span {
+  float: right;
+}
+
+.directory[open] > summary span {
+  transform: rotate(45deg);
+}
