@@ -27,6 +27,7 @@ export type ScheduleColumn = (typeof scheduleColumns)[number]
 export type ColumnMapping = Partial<Record<ScheduleColumn, string>>
 export type ImportRow = {
   row: number
+  existingSessionID?: number
   importKey: string
   title: string
   startsAt: string
@@ -295,20 +296,7 @@ export async function previewSchedule(
       errors.push({ row: n, message: error instanceof Error ? error.message : 'Invalid session.' })
     }
   }
-  for (let i = 0; i < rows.length; i++)
-    for (let j = i + 1; j < rows.length; j++) {
-      const a = rows[i],
-        b = rows[j]
-      if (
-        a.room.toLowerCase() === b.room.toLowerCase() &&
-        a.startsAt < (b.endsAt || `${eventDayKey(b.startsAt)}T20:59:59.999Z`) &&
-        b.startsAt < (a.endsAt || `${eventDayKey(a.startsAt)}T20:59:59.999Z`)
-      )
-        errors.push({
-          row: b.row,
-          message: `Overlaps row ${a.row} in ${a.room}. Use separate rooms for parallel sessions.`,
-        })
-    }
+  errors.push(...scheduleOverlapErrors(rows))
   if (!rows.length && !errors.length) errors.push({ row: 1, message: 'No sessions found.' })
   return {
     layout,
@@ -332,4 +320,23 @@ export async function scheduleTemplate(format: 'csv' | 'xlsx') {
   return Buffer.from(
     format === 'xlsx' ? await workbook.xlsx.writeBuffer() : await workbook.csv.writeBuffer(),
   )
+}
+
+export function scheduleOverlapErrors(rows: ImportRow[]): SchedulePreview['errors'] {
+  const errors: SchedulePreview['errors'] = []
+  for (let i = 0; i < rows.length; i++)
+    for (let j = i + 1; j < rows.length; j++) {
+      const a = rows[i],
+        b = rows[j]
+      if (
+        a.room.toLowerCase() === b.room.toLowerCase() &&
+        a.startsAt < (b.endsAt || `${eventDayKey(b.startsAt)}T20:59:59.999Z`) &&
+        b.startsAt < (a.endsAt || `${eventDayKey(a.startsAt)}T20:59:59.999Z`)
+      )
+        errors.push({
+          row: b.row,
+          message: `Overlaps row ${a.row} in ${a.room}. Use separate rooms for parallel sessions.`,
+        })
+    }
+  return errors
 }

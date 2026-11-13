@@ -369,6 +369,10 @@ export interface CommunityEvent {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Save the sheet URL once, including its gid. Use Preview from Google Sheets below whenever the agenda changes. The source is read-only.
+   */
+  scheduleSheetURL?: string | null;
   scheduleMode?: ('single' | 'multi') | null;
   liveStatus?: ('scheduled' | 'delayed' | 'live' | 'complete') | null;
   /**
@@ -889,6 +893,7 @@ export interface CommunityEventsSelect<T extends boolean = true> {
         mapURL?: T;
         id?: T;
       };
+  scheduleSheetURL?: T;
   scheduleMode?: T;
   liveStatus?: T;
   scheduleStartOverride?: T;

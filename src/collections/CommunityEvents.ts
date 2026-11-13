@@ -1,10 +1,13 @@
-import type { CollectionConfig, Field } from 'payload'
+import type { CollectionConfig, Field, FieldAccess } from 'payload'
 
 import { isAdmin, isEditor, sourceFieldsReadOnly } from '@/access'
 import { eventDayKey, youtubeVideoID } from '@/lib/event-dates'
 import { scheduleEndpoints } from '@/lib/schedule-endpoints'
+import { googleSheetLocation } from '@/lib/google-sheet-url'
 
 const sourceAccess = { update: sourceFieldsReadOnly }
+const readEditorSettings: FieldAccess = ({ req }) =>
+  Boolean(req.user && ['admin', 'editor'].includes(req.user.role))
 const urlField = (name: string, label: string): Field => ({
   name,
   label,
@@ -197,6 +200,25 @@ export const CommunityEvents: CollectionConfig = {
           label: 'Programme',
           fields: [
             {
+              name: 'scheduleSheetURL',
+              label: 'Google Sheets agenda URL',
+              type: 'text',
+              access: { read: readEditorSettings },
+              validate: (value: string | null | undefined) => {
+                if (!value) return true
+                try {
+                  googleSheetLocation(value)
+                  return true
+                } catch {
+                  return 'Use a Google Sheets URL including the agenda tab’s gid.'
+                }
+              },
+              admin: {
+                description:
+                  'Save the sheet URL once, including its gid. Use Preview from Google Sheets below whenever the agenda changes. The source is read-only.',
+              },
+            },
+            {
               name: 'scheduleImport',
               type: 'ui',
               admin: { components: { Field: '@/components/admin/ScheduleImport#ScheduleImport' } },
@@ -266,7 +288,10 @@ export const CommunityEvents: CollectionConfig = {
               type: 'relationship',
               relationTo: 'partners',
               hasMany: true,
-              admin: { description: 'Select the published partners supporting this event. Their uploaded logos appear on the event page.' },
+              admin: {
+                description:
+                  'Select the published partners supporting this event. Their uploaded logos appear on the event page.',
+              },
             },
           ],
         },

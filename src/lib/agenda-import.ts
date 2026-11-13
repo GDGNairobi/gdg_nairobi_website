@@ -6,6 +6,24 @@ const headerKey = (value: string) =>
     .trim()
     .replace(/[\s_-]+/g, ' ')
 
+function speakerNames(value: string) {
+  return (
+    value
+      .split(/\r?\n|[|;]|\s+&\s+|\s+and\s+/i)
+      // Split full names separated by commas, while retaining credentials such as RPh, PhD.
+      .flatMap((name) => name.split(/,\s*(?=\p{Lu}[\p{L}’'-]+\s+\p{Lu})/u))
+      .map((name) =>
+        name
+          .replace(/^(?:co-)?host:\s*/i, '')
+          .replace(/^.+?\s+-\s+(?=\p{Lu}[\p{L}’'-]+\s+\p{Lu})/u, '')
+          .replace(/\s*\([^)]*\)\s*$/, '')
+          .replace(/,+$/, '')
+          .trim(),
+      )
+      .filter((name) => name && name !== '-')
+  )
+}
+
 export function agendaTimeRange(value: string): [string, string] {
   const ongoing = value.match(/^(\d{1,2}:\d{2})\s*(am|pm)?\s+onwards$/i)
   if (ongoing) return [`${ongoing[1]}${ongoing[2]?.toLowerCase() || ''}`, 'onwards']
@@ -86,6 +104,62 @@ export function prepareAgenda(
         room = get(roomColumn),
         track = get(columns.track),
         duration = get(columns.duration)
+      if (/^lunch batches$/i.test(time) && !activity && !details) {
+        const batches: Array<{
+          label: string
+          range: string
+          start: string
+          end: string
+          from: number
+          to: number
+        }> = []
+        const minutes = (clock: string) => {
+          const match = clock.match(/^(\d+):(\d+)(am|pm)?$/i)!
+          return (
+            (match[3] ? (Number(match[1]) % 12) + (match[3] === 'pm' ? 12 : 0) : Number(match[1])) *
+              60 +
+            Number(match[2])
+          )
+        }
+        for (let index = n + 1; index <= source.rowCount; index++) {
+          const batch = source.getRow(index)
+          if (!batch.hasValues) continue
+          const label = text(batch.getCell(timeColumn).value),
+            range = text(batch.getCell(activityColumn).value)
+          const extra = headers.some(
+            (_, column) =>
+              ![timeColumn, activityColumn].includes(column + 1) &&
+              text(batch.getCell(column + 1).value),
+          )
+          if (!label || !range || extra)
+            throw new Error(`Lunch batch row ${index} must contain only a label and a time range.`)
+          const [start, end] = agendaTimeRange(range)
+          if (end === 'onwards' || minutes(end) <= minutes(start))
+            throw new Error(`Lunch batch row ${index} needs a valid start and end.`)
+          batches.push({ label, range, start, end, from: minutes(start), to: minutes(end) })
+        }
+        if (!batches.length) throw new Error('Add the lunch batch times below Lunch Batches.')
+        const first = batches.reduce((a, b) => (a.from < b.from ? a : b)),
+          last = batches.reduce((a, b) => (a.to > b.to ? a : b))
+        sheet.getRow(n).values = [
+          get(columns.session_id),
+          'Lunch · staggered batches',
+          get(columns.date),
+          first.start,
+          last.end,
+          '',
+          'Break',
+          'break',
+          '',
+          batches
+            .map((b) => `${b.label}: ${b.range.toLowerCase().replace(/\s*[-–—]\s*/g, '–')}`)
+            .join('; ') + '. All times EAT.',
+        ]
+        warnings.push(
+          'Lunch batches are combined into one lunch entry, with each batch’s time in its description.',
+        )
+        break
+      }
       if (time) block = { time, activity, duration, date: get(columns.date) }
       else if (!block || !/codelab/i.test(block.activity) || activity || !details || !room)
         throw new Error(
@@ -106,22 +180,14 @@ export function prepareAgenda(
       const title =
         /partner session/i.test(current.activity) && details
           ? `${current.activity.trim()}: ${details}`
-          : (['workshop', 'keynote', 'panel'].includes(format) || /^session$/i.test(current.activity)) &&
+          : (['workshop', 'keynote', 'panel'].includes(format) ||
+                /^session$/i.test(current.activity)) &&
               details &&
               !/^panel\s*$/i.test(details) &&
               !/welcome/i.test(current.activity)
             ? details
             : current.activity
-      const speakers = get(columns.speakers)
-        .split(/\r?\n|[|;]|\s+&\s+|\s+and\s+/i)
-        .map((name) =>
-          name
-            .replace(/^(?:co-)?host:\s*/i, '')
-            .replace(/\s*\([^)]*\)\s*$/, '')
-            .replace(/,+$/, '')
-            .trim(),
-        )
-        .filter((name) => name && name !== '-')
+      const speakers = speakerNames(get(columns.speakers))
       sheet.getRow(n).values = [
         get(columns.session_id),
         title,

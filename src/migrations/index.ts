@@ -13,6 +13,7 @@ import * as migration_20261028_233750_add_community_hero_photos from './20261028
 import * as migration_20261029_001331_unify_events_and_community_content from './20261029_001331_unify_events_and_community_content'
 import * as migration_20261110_172429_add_speaker_flags_and_event_partners from './20261110_172429_add_speaker_flags_and_event_partners'
 import * as migration_20261111_150051_add_event_photo_rewind from './20261111_150051_add_event_photo_rewind'
+import * as migration_20261113_192334_connect_google_sheet_schedule from './20261113_192334_connect_google_sheet_schedule'
 
 export const migrations = [
   {
@@ -89,5 +90,10 @@ export const migrations = [
     up: migration_20261111_150051_add_event_photo_rewind.up,
     down: migration_20261111_150051_add_event_photo_rewind.down,
     name: '20261111_150051_add_event_photo_rewind',
+  },
+  {
+    up: migration_20261113_192334_connect_google_sheet_schedule.up,
+    down: migration_20261113_192334_connect_google_sheet_schedule.down,
+    name: '20261113_192334_connect_google_sheet_schedule',
   },
 ]

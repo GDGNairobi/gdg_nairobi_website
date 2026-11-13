@@ -108,11 +108,28 @@ Empty CMS fields fall back to the designed Nairobi defaults. This lets the team 
 
 Uploads support up to 2,000 sessions and 10 MB. Keep `session_id` values stable for repeat uploads: matching IDs update sessions within that event. Without IDs, the standard importer derives a key from title and start time; changing those values creates a new session. Missing rows never delete sessions. Optional blank fields preserve existing editorial values. Separate speaker names with `|`; imported speakers can be enriched in **Speakers**, including portraits uploaded to **Media**. Formula cells must be replaced with values before uploading. CSV and Excel are the programme import options. Column mapping accommodates differing exports; no documented Bevy agenda schema was available to verify a native format.
 
+#### Connect a Google Sheet for manual session updates
+
+In **Events → Programme**, save the agenda tab’s URL in **Google Sheets agenda URL**, including its `gid`. Select **Preview from Google Sheets**, review the source tab and session rows, then choose **Import as drafts** or enable **Publish session and linked speaker updates now** and import. Nothing runs on a schedule.
+
+Sheet sync changes sessions and their speaker links only. It never saves or republishes the parent event: event dates, venues, sponsors, registration, layout, notices and publishing status stay unchanged. Sessions outside the saved event days are rejected. Venue columns in the sheet are ignored. A source or CMS change after preview requires a fresh preview before importing.
+
+For the private agenda, configure access once:
+
+1. In Google Cloud, enable the **Google Sheets API** and create a service account. It does not need a broad project Editor role to read a shared spreadsheet.
+2. Create a JSON key for that account. Put the complete JSON in the Railway **web** service’s `GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON` variable. Keep the key out of Git, the agenda and chat. Redeploy after configuring the variable.
+3. Share the spreadsheet with the key’s `client_email` as a **Viewer**. The website requests only `spreadsheets.readonly`; the sheet can remain private. See [Google’s service account guide](https://developers.google.com/identity/protocols/oauth2/service-account) and [Sheets API scopes](https://developers.google.com/workspace/sheets/api/scopes).
+4. Save the tab URL in Payload and preview. A missing setup, sharing error or unavailable source stops the import and keeps the current programme.
+
+On the first preview, open **Keep session IDs stable in Google Sheets**, copy the generated **Session ID** column and paste it into a new, empty column at row 1 of the agenda. Keep IDs attached to their sessions when moving rows. Preview again after pasting. Existing sessions are initially matched by title and room/time; ambiguous renames are blocked instead of creating duplicates. IDs preserve favourites across later title, room and time changes. Profiles and portraits are reused through existing speaker aliases. Organisation-prefixed credits such as `Loop - Jeffrey Muiru` resolve to the person; comma-separated full names are split while credentials such as `RPh, PhD` are retained.
+
+Missing rows do not delete existing sessions. The preview lists unmatched existing sessions so an organiser can review and archive obsolete entries separately in Payload. Importing drafts preserves the live programme until sessions are published. The sheet URL is restricted to organisers and is excluded from the public event API.
+
 #### Import the DevFest Google Sheets agenda
 
 Open the agenda tab in Google Sheets and choose **File → Download → Comma-separated values (.csv)**, then upload it in the event’s **Programme** tab. Excel downloads also work when the agenda is the first sheet. The importer recognises **Time, Activity, Details, Speakers, Duration, Content Track/Theme, Where?** directly. It uses the saved event day; for a multi-day event, add a **Date** column.
 
-Remove notes and separate tables below the agenda before uploading. For staggered lunch service, use a lunch entry in the standard template and list each batch’s time in **Description**. Reuse its `session_id` when updating it.
+Remove unrelated notes and tables below the agenda before uploading. A final **Lunch Batches** table with batch labels and time ranges is recognised automatically and combined into one lunch entry; each batch’s time appears in its description. The standard template also supports a lunch entry with the batch times in **Description**.
 
 - Time ranges such as `9:00 - 9:10 am`, `11:15 am - 12:00 pm` and `14:20 - 15:05` use Nairobi time. Use explicit am/pm on both ends when crossing noon.
 - Parallel codelabs inherit their block’s Time, Activity and Duration, including merged Excel cells. Each parallel row needs its own Details and Where?. Blank rows end a block.
