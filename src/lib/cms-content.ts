@@ -141,14 +141,32 @@ export async function getPartners(
   const payload = await payloadClient()
   if (!payload) return []
   try {
+    // Match the records managed in Payload's Partners list, excluding historical
+    // unversioned SQL seeds. Discover IDs here; public content comes from the
+    // access-controlled published query below, including when edits are drafts.
+    const managed = await payload.find({
+      collection: 'partners',
+      draft: true,
+      depth: 0,
+      pagination: false,
+      overrideAccess: true,
+      select: { createdAt: true },
+    })
+    if (!managed.docs.length) return []
     return (
       await payload.find({
         collection: 'partners',
+        draft: false,
         depth: 1,
         pagination: false,
         overrideAccess: false,
         sort: ['tier', 'order'],
-        where: scope === 'all' ? undefined : { scope: { equals: scope } },
+        where: {
+          and: [
+            { id: { in: managed.docs.map((partner) => partner.id) } },
+            ...(scope === 'all' ? [] : [{ scope: { equals: scope } }]),
+          ],
+        },
       })
     ).docs
   } catch {

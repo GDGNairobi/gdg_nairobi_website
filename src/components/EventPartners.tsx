@@ -14,14 +14,7 @@ export function EventPartners({ partners }: { partners: Partner[] }) {
   )
 }
 
-export function PartnerGrid({
-  partners,
-  headingLevel = 'h3',
-}: {
-  partners: Partner[]
-  headingLevel?: 'h3' | 'h4'
-}) {
-  const Heading = headingLevel
+function PartnerGrid({ partners }: { partners: Partner[] }) {
   return (
     <div className={styles.grid}>
       {partners.map((partner) => {
@@ -47,10 +40,10 @@ export function PartnerGrid({
                 <span className={styles.wordmark}>{partner.name}</span>
               )}
             </div>
-            <Heading>
+            <h3>
               {partner.name}
               {url && <span aria-hidden="true"> ↗</span>}
-            </Heading>
+            </h3>
           </>
         )
         return url ? (

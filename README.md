@@ -136,7 +136,7 @@ DevFest pages include a compact speakers section after the programme, with one c
 
 Upload sponsor logos to **Media**, add or update their **Partners** records, then select the supporting partners on the event’s **Sponsors & partners** tab. Only published partners selected for that event appear in its logo grid. Sponsor levels are not inferred from a logo file.
 
-The About page reads all published **Partners** records, grouped into DevFest partners, chapter sponsors and a chapter partner directory. Uploaded **Logo** media takes precedence over **Source logo URL**, with the partner name used when neither is available. Records without a website display as cards instead of empty links. Publishing a partner or changing its logo updates the About directory without a deployment.
+The About page shows one sponsor grid using published records from the Payload **Partners** admin list. Historical unversioned chapter seeds are excluded. Pending drafts keep the last published content visible. Uploaded **Logo** media takes precedence over **Source logo URL**, with the partner name used when neither is available. Records without a website display as cards instead of empty links. Publishing a partner or changing its logo updates the grid without a deployment.
 
 DevFest Nairobi 2026 replaces the large cover photo with a compact **2025 rewind** film strip focused on sessions, speakers and attentive audiences. It drifts slowly while visible, pauses on hover, touch, keyboard interaction or an open photo preview, and respects reduced-motion preferences. Visitors can pause it, use the arrows or swipe, and click a photo to enlarge it. The preview supports next/previous photos, arrow keys, Escape and clicking outside to close.
 

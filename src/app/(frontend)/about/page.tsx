@@ -2,11 +2,10 @@ import type { Metadata } from 'next'
 
 import { CommunityIntroduction, CommunityProgrammes } from '@/components/CommunityIntroduction'
 import { EditorialPage } from '@/components/EditorialPage'
-import { PartnerGrid } from '@/components/EventPartners'
+import { EventPartners } from '@/components/EventPartners'
 import { getPartners, getTeamMembers } from '@/lib/cms-content'
 import { buildPageMetadata } from '@/lib/metadata'
 import { getHomeContent } from '@/lib/site-content'
-import styles from './AboutPartners.module.css'
 
 export const metadata: Metadata = buildPageMetadata({
   title: 'About GDG Nairobi',
@@ -26,10 +25,6 @@ export default async function AboutPage() {
     getTeamMembers(),
     getPartners('all'),
   ])
-  const eventPartners = partners.filter((partner) => partner.scope === 'devfest')
-  const chapterPartners = partners.filter((partner) => partner.scope === 'chapter')
-  const localSponsors = chapterPartners.filter((partner) => partner.tier === 'host')
-  const communityPartners = chapterPartners.filter((partner) => partner.tier !== 'host')
 
   return (
     <EditorialPage
@@ -75,38 +70,7 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      {partners.length > 0 && (
-        <section className="about-partners" id="partners">
-          <header>
-            <p className="section-kicker">Sponsors & partners</p>
-            <h2>The people and organisations we build with.</h2>
-            <p>
-              Meet our chapter supporters and event partners. Visit each event page for its
-              confirmed sponsors.
-            </p>
-          </header>
-          {eventPartners.length > 0 && (
-            <div className={styles.group}>
-              <h3>DevFest partners</h3>
-              <PartnerGrid partners={eventPartners} headingLevel="h4" />
-            </div>
-          )}
-          {localSponsors.length > 0 && (
-            <div className={styles.group}>
-              <h3>Chapter sponsors</h3>
-              <PartnerGrid partners={localSponsors} headingLevel="h4" />
-            </div>
-          )}
-          {communityPartners.length > 0 && (
-            <details className={styles.directory}>
-              <summary>
-                View {communityPartners.length} chapter partners <span aria-hidden="true">＋</span>
-              </summary>
-              <PartnerGrid partners={communityPartners} />
-            </details>
-          )}
-        </section>
-      )}
+      <EventPartners partners={partners} />
 
       <a
         className="wide-cta"

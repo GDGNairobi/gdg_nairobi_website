@@ -56,6 +56,27 @@ test.beforeAll(async () => {
     },
   })
   partnerIDs.push(chapterSponsor.id)
+  await payload.update({
+    collection: 'partners',
+    id: chapterSponsor.id,
+    draft: true,
+    data: { name: 'Unpublished chapter sponsor edit' },
+  })
+  // The old chapter migration inserted rows without Payload versions. They are
+  // absent from the admin list and must not return as public sponsors.
+  const legacyPartner = await payload.db.create({
+    collection: 'partners',
+    data: {
+      name: 'Legacy seeded partner',
+      scope: 'chapter',
+      tier: 'community',
+      order: 0,
+      _status: 'published',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+  })
+  partnerIDs.push(Number(legacyPartner.id))
   for (let i = 0; i < 12; i++) {
     const speaker = await payload.create({
       collection: 'speakers',
@@ -254,6 +275,9 @@ test('About lists published Payload partners across scopes and prefers uploaded 
   }
   await expect(partners.getByText('Draft event partner', { exact: true })).toHaveCount(0)
   await expect(partners.locator('a[href="#"]')).toHaveCount(0)
+  await expect(partners.getByText('Unpublished chapter sponsor edit', { exact: true })).toHaveCount(0)
+  await expect(partners.getByText('Legacy seeded partner', { exact: true })).toHaveCount(0)
+  await expect(partners.locator('details,summary')).toHaveCount(0)
   const sponsor = partners.getByRole('article').filter({
     has: page.getByRole('heading', { name: 'Published chapter sponsor', exact: true }),
   })
@@ -271,7 +295,7 @@ test('About lists published Payload partners across scopes and prefers uploaded 
         clipped: [...section.querySelectorAll('article')].some((card) => {
           const bounds = card.getBoundingClientRect()
           const image = card.querySelector('img')?.getBoundingClientRect()
-          const heading = card.querySelector('h4')?.getBoundingClientRect()
+          const heading = card.querySelector('h3')?.getBoundingClientRect()
           return (
             bounds.left < 0 ||
             bounds.right > innerWidth ||
